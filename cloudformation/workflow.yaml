@@ -1,0 +1,70 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  workflow.yaml: Creates resources to build Amazon HealthOmics workflows
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: Amazon HealthOmics Drug Discovery Workflows
+  S3BucketName:
+    Description: Name of the S3 bucket to use for deployment and run storage
+    Type: String
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999
+
+Resources:
+  OmicsWorkflowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: "Required service policies to support Omics workflows"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - omics.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: S3RWPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Effect: Allow
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Action:
+                  - s3:ListBucket
+                Effect: Allow
+                Resource: !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+              - Action:
+                  - logs:DescribeLogStreams
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/omics/WorkflowLog:log-stream:*
+              - Action:
+                  - logs:CreateLogGroup
+                Effect: Allow
+                Resource:
+                  - !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/omics/WorkflowLog:*
+              - Action:
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchCheckLayerAvailability
+                Effect: Allow
+                Resource: !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref AWS::StackId

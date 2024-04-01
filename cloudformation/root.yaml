@@ -1,0 +1,44 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  omics-protein-folding-omics.yaml: Creates Omics resources.
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: Amazon HealthOmics Drug Discovery Workflows
+  S3BucketName:
+    Description: Name of the S3 bucket to use for deployment and run storage
+    Type: String
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999
+
+Resources:
+  ContainerBuiild:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: container.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        S3BucketName: !Ref S3BucketName
+        Timestamp: !Ref Timestamp
+
+  WorkflowBuild:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: workflow.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        S3BucketName: !Ref S3BucketName
+        Timestamp: !Ref Timestamp
+# Outputs:
+#   OmicsWorkflowRole:
+#     Description: IAM Role for Omics Workflow execution
+#     Value:
+#       Ref: OmicsWorkflowRole
