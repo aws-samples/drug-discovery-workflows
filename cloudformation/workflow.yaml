@@ -16,11 +16,16 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
+  StackPrefix:
+    Description: Stack-specific prefix for resource naming
+    Type: String
+    Default: abc-123
 
 Resources:
   OmicsWorkflowRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub "${StackPrefix}-OmicsWorkflowRole"
       Description: "Required service policies to support Omics workflows"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"

@@ -43,6 +43,6 @@ aws cloudformation package --template-file cloudformation/root.yaml \
   --output-template cloudformation/packaged.yaml --region $REGION \
   --s3-bucket $BUCKET_NAME --s3-prefix build/cloudformation
 aws cloudformation deploy --template-file cloudformation/packaged.yaml \
-  --capabilities CAPABILITY_IAM --stack-name $STACK_NAME --region $REGION \
+  --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP
 rm cloudformation/packaged.yaml

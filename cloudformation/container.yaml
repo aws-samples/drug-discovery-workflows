@@ -16,6 +16,10 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
+  StackPrefix:
+    Description: Stack-specific prefix for resource naming
+    Type: String
+    Default: abc-123
 
 Resources:
   EncryptionKey:
@@ -85,6 +89,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub "${StackPrefix}-CodeBuildRole"
       Description: "Required service policies to support building containers"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -108,7 +113,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/CodeBuild*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuild*"
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -133,164 +138,12 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/CodeBuildContainerProject-*"
+                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildContainerProject"
               - Effect: Allow
                 Action:
                   - ecr:CreateRepository
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/aho-ddw-*"
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  CodeBuildLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: StartCodeBuildLambdaPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - codebuild:StartBuild
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/*"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-
-  StartCodeBuildLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      ReservedConcurrentExecutions: 10
-      Code:
-        ZipFile: |
-          import logging          
-          import cfnresponse
-          import boto3
-          LOGGER = logging.getLogger()
-          LOGGER.setLevel(logging.INFO)
-          def lambda_handler(event, context):
-              try:
-                  LOGGER.info('REQUEST RECEIVED:\n %s', event)
-                  LOGGER.info('REQUEST RECEIVED:\n %s', context)
-                  if event['RequestType'] == 'Create':
-                      LOGGER.info('CREATE!')
-                      client = boto3.client('codebuild')
-                      project_name = event['ResourceProperties']['ProjectName']
-                      response = client.start_build(projectName=project_name)
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource creation successful!"})
-                  elif event['RequestType'] == 'Update':
-                      LOGGER.info('UPDATE!')
-                      client = boto3.client('codebuild')
-                      project_name = event['ResourceProperties']['ProjectName']
-                      response = client.start_build(projectName=project_name)                      
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
-                  elif event['RequestType'] == 'Delete':
-                      LOGGER.info('DELETE!')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource deletion successful!"})
-                  else:
-                      LOGGER.info('FAILED!')
-                      cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Unexpected event received from CloudFormation"})
-              except: 
-                  LOGGER.info('FAILED!')
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Exception during processing"})
-      Description: Start CodeBuildProject
-      Handler: index.lambda_handler
-      MemorySize: 512
-      Role:
-        Fn::GetAtt: CodeBuildLambdaExecutionRole.Arn
-      Runtime: python3.10
-      Timeout: 10
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
-
-  DeleteContainerRepoLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: DeleteContainerRepoLambdaPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecr:DeleteRepository
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-
-  DeleteContainerRepoLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      ReservedConcurrentExecutions: 10
-      Code:
-        ZipFile: |
-          import logging          
-          import cfnresponse
-          import boto3
-
-          LOGGER = logging.getLogger()
-          LOGGER.setLevel(logging.INFO)
-
-          def lambda_handler(event, context):
-              try:
-                  LOGGER.info('REQUEST RECEIVED:\n %s', event)
-                  LOGGER.info('REQUEST RECEIVED:\n %s', context)
-                  if event['RequestType'] == 'Create':
-                      LOGGER.info('CREATE!')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource creation successful!"})
-                  elif event['RequestType'] == 'Update':
-                      LOGGER.info('UPDATE!')
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource update successful!"})
-                  elif event['RequestType'] == 'Delete':
-                      LOGGER.info('DELETE!')
-                      ecr = boto3.client('ecr')
-                      repo_name = event['ResourceProperties']['ContainerRepo']
-                      repo_deletion_response = ecr.delete_repository(
-                        repositoryName=repo_name,
-                        force=True
-                        )
-                      LOGGER.info(f"Repo deletion response:\n{repo_deletion_response}")
-                      cfnresponse.send(event, context, cfnresponse.SUCCESS, {"response":"Resource deletion successful!"})
-                  else:
-                      LOGGER.info('FAILED!')
-                      cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Unexpected event received from CloudFormation"})
-              except: 
-                  LOGGER.info('FAILED!')
-                  cfnresponse.send(event, context, cfnresponse.FAILED, {"response":"Exception during processing"})
-
-      Description: Delete ECR repository
-      Handler: index.lambda_handler
-      MemorySize: 512
-      Role:
-        Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
-      Runtime: python3.10
-      Timeout: 10
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -300,6 +153,7 @@ Resources:
   CodeBuildContainerProject:
     Type: AWS::CodeBuild::Project
     Properties:
+      Name: !Sub "${StackPrefix}-CodeBuildContainerProject"
       Artifacts:
         Type: NO_ARTIFACTS
       Description: Build Docker container
@@ -330,6 +184,7 @@ Resources:
   CodeBuildHeadProject:
     Type: AWS::CodeBuild::Project
     Properties:
+      Name: !Sub "${StackPrefix}-CodeBuildHeadProject"
       Artifacts:
         Type: NO_ARTIFACTS
       Description: Start CodeBuild head project for building all containers
@@ -343,6 +198,8 @@ Resources:
             Value: "modules/containers"
           - Name: CONTAINER_PROJECT_NAME
             Value: !Ref "CodeBuildContainerProject"
+          - Name: STACK_PREFIX
+            Value: !Ref StackPrefix
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -359,11 +216,56 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
+  CodeBuildHeadLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-CodeBuildHeadLambdaExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: StartCodeBuildHeadLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource:
+                  - !GetAtt CodeBuildHeadProject.Arn
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  StartCodeBuildHeadLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildHeadLambda"
+      ReservedConcurrentExecutions: 10
+      Code: "src/StartCodeBuildHeadLambda"
+      Description: Start CodeBuildProject
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: CodeBuildHeadLambdaExecutionRole.Arn
+      Runtime: python3.10
+      Timeout: 10
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
   StartCodeBuildHeadProject:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
-        Fn::GetAtt: StartCodeBuildLambda.Arn
+        Fn::GetAtt: StartCodeBuildHeadLambda.Arn
       ProjectName:
         Ref: CodeBuildHeadProject
       Timestamp:
@@ -380,3 +282,61 @@ Resources:
   #     Handle: !Ref CodeBuildWaitHandle
   #     Timeout: 600
   #     Count: 1
+
+  DeleteContainerRepoLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-DeleteContainerRepoLambdaExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: DeleteContainerRepoLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:DescribeRepositories
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+              - Effect: Allow
+                Action:
+                  - ecr:DeleteRepository
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  DeleteContainerRepoLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackPrefix}-DeleteContainerRepoLambda"
+      ReservedConcurrentExecutions: 10
+      Code: "src/DeleteContainerRepoLambda"
+      Description: Delete ECR repositories
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
+      Runtime: python3.10
+      Timeout: 600
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  DeleteContainerRepositories:
+    Type: Custom::ResourceForDeletingContainerRepo
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: DeleteContainerRepoLambda.Arn
+      StackPrefix:
+        Ref: StackPrefix
