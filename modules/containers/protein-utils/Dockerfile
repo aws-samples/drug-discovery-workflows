@@ -15,6 +15,9 @@ RUN amazon-linux-extras install python3.8 \
   numpy==1.24.2 \
   biopython==1.81 \
   /tmp/putils \
+  && curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" \
+  && unzip awscliv2.zip \
+  && ./aws/install \
   && yum clean all \
   && rm -rf /var/cache/yum \
   && rm -rf /tmp/putils

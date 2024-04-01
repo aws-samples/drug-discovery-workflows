@@ -57,7 +57,7 @@ Resources:
           - Sid: Enable CodeBuild Encryption
             Effect: Allow
             Principal:
-              AWS: !GetAtt CodeBuildRole.Arn
+              AWS: !GetAtt CodeBuildContainerRole.Arn
             Action:
               [
                 "kms:Encrypt",
@@ -86,10 +86,10 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  CodeBuildRole:
+  CodeBuildContainerRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildContainerRole"
       Description: "Required service policies to support building containers"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -103,7 +103,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
       Policies:
-        - PolicyName: CodeBuildPolicy
+        - PolicyName: CodeBuildContainerPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -113,7 +113,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuild*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildContainer*"
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -169,10 +169,10 @@ Resources:
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
+      ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
+      ServiceRole: !GetAtt CodeBuildContainerRole.Arn
       Source:
-        BuildSpec: modules/buildspec_container.yaml
+        BuildSpec: modules/buildspecs/buildspec_container.yaml
         Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
       Tags:
@@ -181,33 +181,31 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  CodeBuildHeadProject:
+  CodeBuildContainerHeadProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub "${StackPrefix}-CodeBuildHeadProject"
+      Name: !Sub "${StackPrefix}-CodeBuildContainerHeadProject"
       Artifacts:
         Type: NO_ARTIFACTS
       Description: Start CodeBuild head project for building all containers
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_SMALL
         EnvironmentVariables:
-          - Name: ACCOUNT_ID
-            Value: !Ref "AWS::AccountId"
-          - Name: CONTAINERS_PATH
+          - Name: ARTIFACTS_PATH
             Value: "modules/containers"
-          - Name: CONTAINER_PROJECT_NAME
+          - Name: PROJECT_NAME
             Value: !Ref "CodeBuildContainerProject"
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
-        Image: aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildRole.Arn
-      ServiceRole: !GetAtt CodeBuildRole.Arn
+      ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
+      ServiceRole: !GetAtt CodeBuildContainerRole.Arn
       Source:
-        BuildSpec: modules/buildspec_head.yaml
+        BuildSpec: modules/buildspecs/buildspec_head.yaml
         Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
       Tags:
@@ -216,10 +214,10 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  CodeBuildHeadLambdaExecutionRole:
+  CodeBuildContainerHeadLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildHeadLambdaExecutionRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildContainerHeadLambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -230,7 +228,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: StartCodeBuildHeadLambdaPolicy
+        - PolicyName: StartCodeBuildContainerHeadLambdaPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -238,21 +236,21 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !GetAtt CodeBuildHeadProject.Arn
+                  - !GetAtt CodeBuildContainerHeadProject.Arn
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
-  StartCodeBuildHeadLambda:
+  StartCodeBuildContainerHeadLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${StackPrefix}-StartCodeBuildHeadLambda"
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildContainerHeadLambda"
       ReservedConcurrentExecutions: 10
       Code: "src/StartCodeBuildHeadLambda"
-      Description: Start CodeBuildProject
+      Description: Start CodeBuildContainerProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: CodeBuildHeadLambdaExecutionRole.Arn
+        Fn::GetAtt: CodeBuildContainerHeadLambdaExecutionRole.Arn
       Runtime: python3.10
       Timeout: 10
       Tags:
@@ -261,25 +259,25 @@ Resources:
         - Key: StackId
           Value: !Ref "AWS::StackId"
 
-  StartCodeBuildHeadProject:
+  StartCodeBuildContainerHeadProject:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
-        Fn::GetAtt: StartCodeBuildHeadLambda.Arn
+        Fn::GetAtt: StartCodeBuildContainerHeadLambda.Arn
       ProjectName:
-        Ref: CodeBuildHeadProject
+        Ref: CodeBuildContainerHeadProject
       Timestamp:
         Ref: Timestamp
 
-  # CodeBuildWaitHandle:
+  # CodeBuildContainerWaitHandle:
   #   Type: AWS::CloudFormation::WaitConditionHandle
 
-  # CodeBuildWaitCondition:
+  # CodeBuildContainerWaitCondition:
   #   Type: AWS::CloudFormation::WaitCondition
   #   DependsOn:
-  #     - CodeBuildHeadProject
+  #     - CodeBuildContainerHeadProject
   #   Properties:
-  #     Handle: !Ref CodeBuildWaitHandle
+  #     Handle: !Ref CodeBuildContainerWaitHandle
   #     Timeout: 600
   #     Count: 1
 

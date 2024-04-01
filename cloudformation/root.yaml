@@ -59,7 +59,3 @@ Resources:
         ]
 
 # Outputs:
-#   OmicsWorkflowRole:
-#     Description: IAM Role for Omics Workflow execution
-#     Value:
-#       Ref: OmicsWorkflowRole

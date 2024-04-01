@@ -22,6 +22,70 @@ Parameters:
     Default: abc-123
 
 Resources:
+  EncryptionKey:
+    Type: "AWS::KMS::Key"
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Sub "${ApplicationName}-workflow-build-key"
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action:
+              [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*",
+                "kms:Update*",
+                "kms:Revoke*",
+                "kms:Disable*",
+                "kms:Get*",
+                "kms:Delete*",
+                "kms:TagResource",
+                "kms:UntagResource",
+                "kms:ScheduleKeyDeletion",
+                "kms:CancelKeyDeletion",
+              ]
+            Resource: "*"
+          - Sid: Enable CodeBuild Encryption
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt CodeBuildWorkflowRole.Arn
+            Action:
+              [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey",
+              ]
+            Resource: "*"
+          - Sid: Enable CloudWatch Logs Encryption
+            Effect: Allow
+            Principal:
+              Service: "logs.amazonaws.com"
+            Action:
+              [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey",
+              ]
+            Resource: "*"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
   OmicsWorkflowRole:
     Type: AWS::IAM::Role
     Properties:
@@ -73,3 +137,186 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackId
           Value: !Ref AWS::StackId
+
+  CodeBuildWorkflowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-CodeBuildWorkflowRole"
+      Description: "Required service policies to support building workflows"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+      Policies:
+        - PolicyName: CodeBuildWorkflowPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildWorkflow*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
+              - Effect: Allow
+                Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                  - codebuild:BatchPutCodeCoverages
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::codebuild:${AWS::Region}:${AWS::AccountId}:report-group/*"
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildWorkflowProject"
+              - Effect: Allow
+                Action:
+                  - ecr:CreateRepository
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  CodeBuildWorkflowProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${StackPrefix}-CodeBuildWorkflowProject"
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Build Amazon HealthOmics workflow
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_MEDIUM
+        EnvironmentVariables:
+          - Name: IMAGE_TAG
+            Value: latest
+          - Name: ACCOUNT_ID
+            Value: !Ref "AWS::AccountId"
+        Image: aws/codebuild/standard:6.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
+      ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
+      Source:
+        BuildSpec: modules/buildspecs/buildspec_workflow.yaml
+        Location: !Sub "${S3BucketName}/build/code/code.zip"
+        Type: S3
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  CodeBuildWorkflowHeadProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub "${StackPrefix}-CodeBuildWorkflowHeadProject"
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Description: Start CodeBuild head project for building all workflows
+      EncryptionKey: !Ref EncryptionKey
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        EnvironmentVariables:
+          - Name: ARTIFACTS_PATH
+            Value: "modules/workflows"
+          - Name: PROJECT_NAME
+            Value: !Ref "CodeBuildWorkflowProject"
+          - Name: STACK_PREFIX
+            Value: !Ref StackPrefix
+        Image: aws/codebuild/standard:7.0
+        ImagePullCredentialsType: CODEBUILD
+        PrivilegedMode: false
+        Type: LINUX_CONTAINER
+      ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
+      ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
+      Source:
+        BuildSpec: modules/buildspecs/buildspec_head.yaml
+        Location: !Sub "${S3BucketName}/build/code/code.zip"
+        Type: S3
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  CodeBuildWorkflowHeadLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-CodeBuildWorkflowHeadLambdaExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: StartCodeBuildWorkflowHeadLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource:
+                  - !GetAtt CodeBuildWorkflowHeadProject.Arn
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  StartCodeBuildWorkflowHeadLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowHeadLambda"
+      ReservedConcurrentExecutions: 10
+      Code: "src/StartCodeBuildHeadLambda"
+      Description: Start CodeBuildWorkflowProject
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: CodeBuildWorkflowHeadLambdaExecutionRole.Arn
+      Runtime: python3.10
+      Timeout: 10
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackId
+          Value: !Ref "AWS::StackId"
+
+  StartCodeBuildWorkflowHeadProject:
+    Type: Custom::ResourceForBuildingWorkflow
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: StartCodeBuildWorkflowHeadLambda.Arn
+      ProjectName:
+        Ref: CodeBuildWorkflowHeadProject
+      Timestamp:
+        Ref: Timestamp

@@ -1,0 +1,21 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Build started on `date`
+  build:
+    commands:
+      - echo Creating workflow $NAME
+      - zip -r workflow.zip $BUILD_CONTEXT
+      - aws omics create-workflow 
+        --name $NAME 
+        --main main.wdl 
+        --parameter-template file://parameter-template.json 
+        --accelerators GPU 
+  post_build:
+    commands:      
+      - echo Build completed on `date`

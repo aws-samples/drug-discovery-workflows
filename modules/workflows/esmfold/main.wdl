@@ -5,7 +5,7 @@ workflow ESMFoldFlow {
         File fasta_path
         Int max_length = 800
 
-        # String ecr_registry
+        String ecr_registry
         String aws_region
 
     }
@@ -15,11 +15,11 @@ workflow ESMFoldFlow {
 
     File esmfold_model_parameters = "s3://" + src_bucket + src_prefix + "/ref_data/esmfold_parameters_221230.tar"
 
-    # String validate_inputs_container_image = ecr_registry + "/protein-utils:omics"
-    # String esmfold_predict_container_image = ecr_registry + "/esmfold:omics"
+    String validate_inputs_container_image = ecr_registry + "/protein-utils:latest"
+    String esmfold_predict_container_image = ecr_registry + "/esmfold:latest"
 
-    String validate_inputs_container_image = "protein-utils:latest"
-    String esmfold_predict_container_image = "esmfold:latest"
+    # String validate_inputs_container_image = "protein-utils:latest"
+    # String esmfold_predict_container_image = "esmfold:latest"
 
     call ValidateInputsTask{
         input:
@@ -55,6 +55,7 @@ task ValidateInputsTask {
     }
     command <<<
         set -euxo pipefail
+        printenv
         /opt/venv/bin/python /opt/venv/lib/python3.8/site-packages/putils/validate_inputs.py ~{fasta_path} --max_seq=~{max_seq} --max_length=~{max_length} --output_file=~{output_file}
     >>>
     runtime {
