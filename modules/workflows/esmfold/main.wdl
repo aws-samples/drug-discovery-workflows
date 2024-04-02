@@ -4,34 +4,22 @@ workflow ESMFoldFlow {
     input {
         File fasta_path
         Int max_length = 800
-
-        String ecr_registry
-        String aws_region
+        String aws_region = "us-east-1"
+        File esmfold_model_parameters = "s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_parameters_221230.tar"
 
     }
-
-    String src_bucket = "aws-genomics-static-" + aws_region
-    String src_prefix = "/omics-data/protein-folding"
-
-    File esmfold_model_parameters = "s3://" + src_bucket + src_prefix + "/ref_data/esmfold_parameters_221230.tar"
-
-    String validate_inputs_container_image = ecr_registry + "/protein-utils:latest"
-    String esmfold_predict_container_image = ecr_registry + "/esmfold:latest"
-
-    # String validate_inputs_container_image = "protein-utils:latest"
-    # String esmfold_predict_container_image = "esmfold:latest"
 
     call ValidateInputsTask{
         input:
             fasta_path = fasta_path,
-            docker_image = validate_inputs_container_image,
+            docker_image = "{{protein-utils:latest}}",
             max_length = max_length
     }
     call ESMFoldTask{
         input:
             fasta_path = ValidateInputsTask.fasta,
             model_parameters = esmfold_model_parameters,
-            docker_image = esmfold_predict_container_image
+            docker_image = "{{esmfold:latest}}"
     }
     output {
         File seq_info = write_map(ValidateInputsTask.seq_info)

@@ -9,13 +9,11 @@ phases:
       - echo Build started on `date`
   build:
     commands:
-      - echo Creating workflow $NAME
-      - zip -r workflow.zip $BUILD_CONTEXT
-      - aws omics create-workflow 
-        --name $NAME 
-        --main main.wdl 
-        --parameter-template file://parameter-template.json 
-        --accelerators GPU 
+      - echo Updating ECR URIs in WDL files
+      - sed -i'' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.wdl
+      - echo Creating workflow $NAME      
+      - zip -j -r workflow.zip $BUILD_CONTEXT
+      - aws omics create-workflow --cli-input-yaml file://$BUILD_CONTEXT/config.yaml --definition-zip fileb://workflow.zip --tags StackPrefix=$STACK_PREFIX
   post_build:
     commands:      
       - echo Build completed on `date`

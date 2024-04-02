@@ -1,7 +1,6 @@
 name: ESMFold
 description: "This workflow predicts the three-dimensional structure of a protein from its amino acid sequence using the ESM large language model from Facebook AI Research."
 engine: WDL
-definitionZip: fileb://workflows/esmfold/workflow.zip
 main: main.wdl
 parameterTemplate:
   fasta_path:
@@ -10,12 +9,12 @@ parameterTemplate:
   max_length:
     description: "maximum amino acid length of target (default: 800)"
     optional: true
-  ecr_registry:
-    description: "Ecr registry for container images (e.g. <account-id>.dkr.ecr.<region>.amazonaws.com"
-    optional: false
   aws_region:
     description: "AWS region (e.g. us-east-1). must match were source data is located and where workflow is executed"
-    optional: false
+    optional: true
+  esmfold_model_parameters:
+    description: "S3 path to esmfold model parameters"
+    optional: true
 storageCapacity: 1200
 tags:
   Name: 'ESMFold'

@@ -6,21 +6,19 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 
-def list_repositories_with_tags(tags, ecr_client=boto3.client("ecr")):
+def list_workflows_with_tags(tags, omics_client=boto3.client("omics")):
     output = []
-    paginator = ecr_client.get_paginator("describe_repositories")
+    paginator = omics_client.get_paginator("list_workflows")
     for page in paginator.paginate():
-        for repo in page["repositories"]:
-            repo_tags = {
-                record.get("Key"): record.get("Value")
-                for record in ecr_client.list_tags_for_resource(
-                    resourceArn=repo["repositoryArn"]
-                ).get("tags")
-            }
+        for workflow in page["items"]:
+            # print(workflow["arn"])
+            workflow_tags = omics_client.list_tags_for_resource(resourceArn=workflow["arn"]).get("tags")
+            # print(workflow_tags)
             # is query_dict a subset of tags?
-            if tags.items() <= repo_tags.items():
-                output.append(repo["repositoryName"])
+            if tags.items() <= workflow_tags.items():
+                output.append(workflow["id"])
     return output
+
 
 
 def lambda_handler(event, context):
@@ -45,15 +43,15 @@ def lambda_handler(event, context):
             )
         elif event["RequestType"] == "Delete":
             LOGGER.info("DELETE!")
-            ecr = boto3.client("ecr")
-            repo_list = list_repositories_with_tags(
+            omics = boto3.client("omics")
+            workflow_list = list_workflows_with_tags(
                 tags={"StackPrefix": event["ResourceProperties"]["StackPrefix"]},
-                ecr_client=ecr,
+                omics_client=omics,
             )
 
-            for repo_name in repo_list:
-                LOGGER.info(f"Deleting repo: {repo_name}")
-                response = ecr.delete_repository(repositoryName=repo_name, force=True)
+            for workflow in workflow_list:
+                LOGGER.info(f"Deleting workflow: {workflow}")
+                response = omics.delete_workflow(id=workflow, force=True)
                 LOGGER.info(f"Repo deletion response:\n{response}")
             cfnresponse.send(
                 event,
@@ -79,10 +77,9 @@ def lambda_handler(event, context):
         )
 
 
+
 # if __name__ == "__main__":
 #     print("Hello")
-#     dict = {
-#         "StackId": "arn:aws:cloudformation:us-east-1:167428594774:stack/my-aho-dd-stack-ContainerBuiild-91ZODJONLH81/608fd000-f11c-11ee-aec0-0affcf5561ef"
-#     }
+#     dict = {'Blurb': 'Blob', 'Name': 'ESMFold'}
 
-#     print(list_repositories_with_tags(dict))
+#     print(list_workflows_with_tags(dict))

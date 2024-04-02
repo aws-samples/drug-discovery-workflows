@@ -83,8 +83,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   OmicsWorkflowRole:
     Type: AWS::IAM::Role
@@ -135,7 +135,7 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
+        - Key: StackPrefix
           Value: !Ref AWS::StackId
 
   CodeBuildWorkflowRole:
@@ -193,14 +193,28 @@ Resources:
                   - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildWorkflowProject"
               - Effect: Allow
                 Action:
-                  - ecr:CreateRepository
+                  - omics:TagResource
+                  - omics:CreateRun
+                  - omics:DeleteRun
+                  - omics:GetRun
+                  - omics:ListRuns
+                  - omics:CreateRunGroup
+                  - omics:DeleteRunGroup
+                  - omics:GetRunGroup
+                  - omics:ListRunGroups
+                  - omics:GetRunTask
+                  - omics:ListRunTasks
+                  - omics:CreateWorkflow
+                  - omics:DeleteWorkflow
+                  - omics:GetWorkflow
+                  - omics:ListWorkflows
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
+                  - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildWorkflowProject:
     Type: AWS::CodeBuild::Project
@@ -213,10 +227,12 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
+          - Name: REGION
+            Value: !Ref "AWS::Region"
+          - Name: STACK_PREFIX
+            Value: !Ref StackPrefix            
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
@@ -230,8 +246,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildWorkflowHeadProject:
     Type: AWS::CodeBuild::Project
@@ -263,8 +279,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildWorkflowHeadLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -308,8 +324,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   StartCodeBuildWorkflowHeadProject:
     Type: Custom::ResourceForBuildingWorkflow
@@ -320,3 +336,58 @@ Resources:
         Ref: CodeBuildWorkflowHeadProject
       Timestamp:
         Ref: Timestamp
+
+  DeleteWorkflowLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-DeleteWorkflowLambdaExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: DeleteWorkflowLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - omics:DeleteWorkflow
+                  - omics:GetWorkflow
+                  - omics:ListWorkflows
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  DeleteWorkflowLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackPrefix}-DeleteWorkflowLambda"
+      ReservedConcurrentExecutions: 10
+      Code: "src/DeleteWorkflowLambda"
+      Description: Delete Amazon HealthOmics workflow
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: DeleteWorkflowLambdaExecutionRole.Arn
+      Runtime: python3.10
+      Timeout: 600
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
+
+  # DeleteWorkflows:
+  #   Type: Custom::ResourceForDeletingWorkflows
+  #   Properties:
+  #     ServiceToken:
+  #       Fn::GetAtt: DeleteWorkflowLambda.Arn
+  #     StackPrefix:
+  #       Ref: StackPrefix

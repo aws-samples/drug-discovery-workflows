@@ -83,8 +83,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildContainerRole:
     Type: AWS::IAM::Role
@@ -142,13 +142,15 @@ Resources:
               - Effect: Allow
                 Action:
                   - ecr:CreateRepository
+                  - ecr:TagResource
+                  - ecr:SetRepositoryPolicy
                 Resource:
                   - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildContainerProject:
     Type: AWS::CodeBuild::Project
@@ -161,10 +163,12 @@ Resources:
       Environment:
         ComputeType: BUILD_GENERAL1_MEDIUM
         EnvironmentVariables:
-          - Name: IMAGE_TAG
-            Value: latest
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
+          - Name: REGION
+            Value: !Ref "AWS::Region"
+          - Name: STACK_PREFIX
+            Value: !Ref StackPrefix
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -178,8 +182,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildContainerHeadProject:
     Type: AWS::CodeBuild::Project
@@ -211,8 +215,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   CodeBuildContainerHeadLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -256,8 +260,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   StartCodeBuildContainerHeadProject:
     Type: Custom::ResourceForBuildingContainer
@@ -328,8 +332,8 @@ Resources:
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
-        - Key: StackId
-          Value: !Ref "AWS::StackId"
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
 
   DeleteContainerRepositories:
     Type: Custom::ResourceForDeletingContainerRepo

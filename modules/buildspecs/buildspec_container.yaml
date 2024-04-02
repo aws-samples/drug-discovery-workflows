@@ -8,7 +8,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
   build:
     commands:
       - echo "Checking for repository ${NAME}"
@@ -17,16 +17,17 @@ phases:
         echo "Repository $NAME exists.";
         else
         echo "Repository $NAME does not exist, creating...";
-        aws ecr create-repository --repository-name $NAME > /dev/null;
+        aws ecr create-repository --repository-name $NAME --tags Key=StackPrefix,Value=$STACK_PREFIX > /dev/null;
+        aws ecr set-repository-policy --repository-name $NAME --policy-text '{"Version":"2012-10-17","Statement":[{"Sid":"omics workflow","Effect":"Allow","Principal":{"Service":"omics.amazonaws.com"},"Action":["ecr:GetDownloadUrlForLayer","ecr:BatchGetImage","ecr:BatchCheckLayerAvailability"]}]}' > /dev/null;
         fi
       - echo Building the image
-      - docker build --build-arg AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION -t $NAME:$IMAGE_TAG $BUILD_CONTEXT
-      - echo tagging the $NAME:$IMAGE_TAG image
-      - docker tag $NAME $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME:$IMAGE_TAG
+      - docker build --build-arg AWS_DEFAULT_REGION=$REGION -t $NAME:latest $BUILD_CONTEXT
+      - echo tagging the $NAME:latest image
+      - docker tag $NAME $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest
   post_build:
-    commands:      
+    commands:
       - echo Pushing the $NAME image
-      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$NAME:$IMAGE_TAG
+      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest
       # - JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
       # - curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
       - echo Build completed on `date`
