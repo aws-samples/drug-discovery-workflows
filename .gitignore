@@ -2,3 +2,4 @@
 .scratch
 .venv
 __pycache__
+delete_all_*.py
