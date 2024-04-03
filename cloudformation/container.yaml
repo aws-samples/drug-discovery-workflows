@@ -145,7 +145,7 @@ Resources:
                   - ecr:TagResource
                   - ecr:SetRepositoryPolicy
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
+                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -306,13 +306,10 @@ Resources:
               - Effect: Allow
                 Action:
                   - ecr:DescribeRepositories
+                  - ecr:DeleteRepository
+                  - ecr:ListTagsForResource
                 Resource:
                   - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
-              - Effect: Allow
-                Action:
-                  - ecr:DeleteRepository
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/${StackPrefix}-*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 

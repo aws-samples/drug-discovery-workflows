@@ -11,14 +11,15 @@ def list_workflows_with_tags(tags, omics_client=boto3.client("omics")):
     paginator = omics_client.get_paginator("list_workflows")
     for page in paginator.paginate():
         for workflow in page["items"]:
-            # print(workflow["arn"])
-            workflow_tags = omics_client.list_tags_for_resource(resourceArn=workflow["arn"]).get("tags")
-            # print(workflow_tags)
+            workflow_tags = omics_client.list_tags_for_resource(
+                resourceArn=workflow["arn"]
+            ).get("tags")
             # is query_dict a subset of tags?
             if tags.items() <= workflow_tags.items():
                 output.append(workflow["id"])
-    return output
+    LOGGER.info(f"Found the following workflows with matching tags:\n{output}")
 
+    return output
 
 
 def lambda_handler(event, context):
@@ -60,26 +61,19 @@ def lambda_handler(event, context):
                 {"response": "Resource deletion successful!"},
             )
         else:
-            LOGGER.info("FAILED!")
+            LOGGER.error("FAILED!")
             cfnresponse.send(
                 event,
                 context,
                 cfnresponse.FAILED,
                 {"response": "Unexpected event received from CloudFormation"},
             )
-    except:
-        LOGGER.info("FAILED!")
+    except Exception as e:
+        LOGGER.error("FAILED!")
+        LOGGER.error(e)
         cfnresponse.send(
             event,
             context,
             cfnresponse.FAILED,
             {"response": "Exception during processing"},
         )
-
-
-
-# if __name__ == "__main__":
-#     print("Hello")
-#     dict = {'Blurb': 'Blob', 'Name': 'ESMFold'}
-
-#     print(list_workflows_with_tags(dict))

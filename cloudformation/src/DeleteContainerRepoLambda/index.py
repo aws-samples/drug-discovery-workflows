@@ -20,6 +20,8 @@ def list_repositories_with_tags(tags, ecr_client=boto3.client("ecr")):
             # is query_dict a subset of tags?
             if tags.items() <= repo_tags.items():
                 output.append(repo["repositoryName"])
+    LOGGER.info(f"Found the following repositories with matching tags:\n{output}")
+
     return output
 
 
@@ -62,27 +64,19 @@ def lambda_handler(event, context):
                 {"response": "Resource deletion successful!"},
             )
         else:
-            LOGGER.info("FAILED!")
+            LOGGER.error("FAILED!")
             cfnresponse.send(
                 event,
                 context,
                 cfnresponse.FAILED,
                 {"response": "Unexpected event received from CloudFormation"},
             )
-    except:
-        LOGGER.info("FAILED!")
+    except Exception as e:
+        LOGGER.error("FAILED!")
+        LOGGER.error(e)
         cfnresponse.send(
             event,
             context,
             cfnresponse.FAILED,
             {"response": "Exception during processing"},
         )
-
-
-# if __name__ == "__main__":
-#     print("Hello")
-#     dict = {
-#         "StackId": "arn:aws:cloudformation:us-east-1:167428594774:stack/my-aho-dd-stack-ContainerBuiild-91ZODJONLH81/608fd000-f11c-11ee-aec0-0affcf5561ef"
-#     }
-
-#     print(list_repositories_with_tags(dict))

@@ -41,15 +41,16 @@ def lambda_handler(event, context):
                 {"response": "Resource deletion successful!"},
             )
         else:
-            LOGGER.info("FAILED!")
+            LOGGER.error("FAILED!")
             cfnresponse.send(
                 event,
                 context,
                 cfnresponse.FAILED,
                 {"response": "Unexpected event received from CloudFormation"},
             )
-    except:
-        LOGGER.info("FAILED!")
+    except Exception as e:
+        LOGGER.error("FAILED!")
+        LOGGER.error(e)
         cfnresponse.send(
             event,
             context,
