@@ -115,6 +115,12 @@ Resources:
                 Effect: Allow
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"
               - Action:
+                  - s3:GetObject
+                Effect: Allow
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::aws-hcls-ml*"
+                  - !Sub "arn:${AWS::Partition}:s3:::aws-genomics-static*"
+              - Action:
                   - logs:DescribeLogStreams
                   - logs:CreateLogStream
                   - logs:PutLogEvents
@@ -232,7 +238,7 @@ Resources:
           - Name: REGION
             Value: !Ref "AWS::Region"
           - Name: STACK_PREFIX
-            Value: !Ref StackPrefix            
+            Value: !Ref StackPrefix
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
