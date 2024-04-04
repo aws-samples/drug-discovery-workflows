@@ -27,16 +27,17 @@ Resources:
           Ref: ApplicationName
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
-        StackPrefix: !Join [
-          "-",
-          [
-            "aho-dd",
-            !Select [
-              4,
-              !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+        StackPrefix:
+          !Join [
+            "-",
+            [
+              "aho-dd",
+              !Select [
+                4,
+                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+              ],
             ],
-          ],
-        ]
+          ]
 
   WorkflowBuild:
     Type: "AWS::CloudFormation::Stack"
@@ -47,15 +48,15 @@ Resources:
           Ref: ApplicationName
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
-        StackPrefix: !Join [
-          "-",
-          [
-            "aho-dd",
-            !Select [
-              4,
-              !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+        StackPrefix:
+          !Join [
+            "-",
+            [
+              "aho-dd",
+              !Select [
+                4,
+                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+              ],
             ],
-          ],
-        ]
-
+          ]
 # Outputs:

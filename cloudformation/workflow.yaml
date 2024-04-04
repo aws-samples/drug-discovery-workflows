@@ -255,43 +255,43 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildWorkflowHeadProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub "${StackPrefix}-CodeBuildWorkflowHeadProject"
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Start CodeBuild head project for building all workflows
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        EnvironmentVariables:
-          - Name: ARTIFACTS_PATH
-            Value: "modules/workflows"
-          - Name: PROJECT_NAME
-            Value: !Ref "CodeBuildWorkflowProject"
-          - Name: STACK_PREFIX
-            Value: !Ref StackPrefix
-        Image: aws/codebuild/standard:7.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: false
-        Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
-      ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
-      Source:
-        BuildSpec: modules/buildspecs/buildspec_head.yaml
-        Location: !Sub "${S3BucketName}/build/code/code.zip"
-        Type: S3
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackPrefix
-          Value: !Ref StackPrefix
+  # CodeBuildWorkflowHeadProject:
+  #   Type: AWS::CodeBuild::Project
+  #   Properties:
+  #     Name: !Sub "${StackPrefix}-CodeBuildWorkflowHeadProject"
+  #     Artifacts:
+  #       Type: NO_ARTIFACTS
+  #     Description: Start CodeBuild head project for building all workflows
+  #     EncryptionKey: !Ref EncryptionKey
+  #     Environment:
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       EnvironmentVariables:
+  #         - Name: ARTIFACTS_PATH
+  #           Value: "modules/workflows"
+  #         - Name: PROJECT_NAME
+  #           Value: !Ref "CodeBuildWorkflowProject"
+  #         - Name: STACK_PREFIX
+  #           Value: !Ref StackPrefix
+  #       Image: aws/codebuild/standard:7.0
+  #       ImagePullCredentialsType: CODEBUILD
+  #       PrivilegedMode: false
+  #       Type: LINUX_CONTAINER
+  #     ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
+  #     ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
+  #     Source:
+  #       BuildSpec: modules/buildspecs/buildspec_head.yaml
+  #       Location: !Sub "${S3BucketName}/build/code/code.zip"
+  #       Type: S3
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref ApplicationName
+  #       - Key: StackPrefix
+  #         Value: !Ref StackPrefix
 
-  CodeBuildWorkflowHeadLambdaExecutionRole:
+  CodeBuildWorkflowLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildWorkflowHeadLambdaExecutionRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildWorkflowLambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -302,7 +302,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: StartCodeBuildWorkflowHeadLambdaPolicy
+        - PolicyName: StartCodeBuildWorkflowLambdaPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -310,21 +310,31 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !GetAtt CodeBuildWorkflowHeadProject.Arn
+                  - !GetAtt CodeBuildWorkflowProject.Arn
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              # - Effect: Allow
+                # Action:
+                  # - s3:ListBucket
+                # Resource:
+                  # - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"                  
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
-  StartCodeBuildWorkflowHeadLambda:
+  StartCodeBuildWorkflowLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowHeadLambda"
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/StartCodeBuildHeadLambda"
+      Code: "src/StartCodeBuildLambda"
       Description: Start CodeBuildWorkflowProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: CodeBuildWorkflowHeadLambdaExecutionRole.Arn
+        Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
       Runtime: python3.10
       Timeout: 10
       Tags:
@@ -333,15 +343,27 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  StartCodeBuildWorkflowHeadProject:
+  StartCodeBuildWorkflow:
     Type: Custom::ResourceForBuildingWorkflow
     Properties:
       ServiceToken:
-        Fn::GetAtt: StartCodeBuildWorkflowHeadLambda.Arn
+        Fn::GetAtt: StartCodeBuildWorkflowLambda.Arn
+      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
+      SourceSubfolder: "modules/workflows"
       ProjectName:
-        Ref: CodeBuildWorkflowHeadProject
+        Ref: CodeBuildWorkflowProject
       Timestamp:
         Ref: Timestamp
+
+  # CodeBuildWorkflowWaitHandle:
+  #   Type: AWS::CloudFormation::WaitConditionHandle
+
+  # CodeBuildWorkflowWaitCondition:
+  #   Type: AWS::CloudFormation::WaitCondition
+  #   Properties:
+  #     Handle: !Ref CodeBuildWorkflowWaitHandle
+  #     Timeout: 900
+  #     Count: !GetAtt StartCodeBuildWorkflow.ArtifactCount
 
   DeleteWorkflowLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -366,6 +388,7 @@ Resources:
                   - omics:DeleteWorkflow
                   - omics:GetWorkflow
                   - omics:ListWorkflows
+                  - omics:ListTagsForResource
                 Resource:
                   - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"
       ManagedPolicyArns:
@@ -390,10 +413,10 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  # DeleteWorkflows:
-  #   Type: Custom::ResourceForDeletingWorkflows
-  #   Properties:
-  #     ServiceToken:
-  #       Fn::GetAtt: DeleteWorkflowLambda.Arn
-  #     StackPrefix:
-  #       Ref: StackPrefix
+  DeleteWorkflows:
+    Type: Custom::ResourceForDeletingWorkflows
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: DeleteWorkflowLambda.Arn
+      StackPrefix:
+        Ref: StackPrefix

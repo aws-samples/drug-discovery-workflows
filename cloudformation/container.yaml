@@ -185,43 +185,43 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildContainerHeadProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: !Sub "${StackPrefix}-CodeBuildContainerHeadProject"
-      Artifacts:
-        Type: NO_ARTIFACTS
-      Description: Start CodeBuild head project for building all containers
-      EncryptionKey: !Ref EncryptionKey
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        EnvironmentVariables:
-          - Name: ARTIFACTS_PATH
-            Value: "modules/containers"
-          - Name: PROJECT_NAME
-            Value: !Ref "CodeBuildContainerProject"
-          - Name: STACK_PREFIX
-            Value: !Ref StackPrefix
-        Image: aws/codebuild/standard:7.0
-        ImagePullCredentialsType: CODEBUILD
-        PrivilegedMode: true
-        Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
-      ServiceRole: !GetAtt CodeBuildContainerRole.Arn
-      Source:
-        BuildSpec: modules/buildspecs/buildspec_head.yaml
-        Location: !Sub "${S3BucketName}/build/code/code.zip"
-        Type: S3
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackPrefix
-          Value: !Ref StackPrefix
+  # CodeBuildContainerHeadProject:
+  #   Type: AWS::CodeBuild::Project
+  #   Properties:
+  #     Name: !Sub "${StackPrefix}-CodeBuildContainerHeadProject"
+  #     Artifacts:
+  #       Type: NO_ARTIFACTS
+  #     Description: Start CodeBuild head project for building all containers
+  #     EncryptionKey: !Ref EncryptionKey
+  #     Environment:
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       EnvironmentVariables:
+  #         - Name: ARTIFACTS_PATH
+  #           Value: "modules/containers"
+  #         - Name: PROJECT_NAME
+  #           Value: !Ref "CodeBuildContainerProject"
+  #         - Name: STACK_PREFIX
+  #           Value: !Ref StackPrefix
+  #       Image: aws/codebuild/standard:7.0
+  #       ImagePullCredentialsType: CODEBUILD
+  #       PrivilegedMode: true
+  #       Type: LINUX_CONTAINER
+  #     ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
+  #     ServiceRole: !GetAtt CodeBuildContainerRole.Arn
+  #     Source:
+  #       BuildSpec: modules/buildspecs/buildspec_head.yaml
+  #       Location: !Sub "${S3BucketName}/build/code/code.zip"
+  #       Type: S3
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref ApplicationName
+  #       - Key: StackPrefix
+  #         Value: !Ref StackPrefix
 
-  CodeBuildContainerHeadLambdaExecutionRole:
+  CodeBuildContainerLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildContainerHeadLambdaExecutionRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildContainerLambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -232,7 +232,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: StartCodeBuildContainerHeadLambdaPolicy
+        - PolicyName: StartCodeBuildContainerLambdaPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -240,21 +240,26 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !GetAtt CodeBuildContainerHeadProject.Arn
+                  - !GetAtt CodeBuildContainerProject.Arn
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
-  StartCodeBuildContainerHeadLambda:
+  StartCodeBuildContainerLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${StackPrefix}-StartCodeBuildContainerHeadLambda"
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildContainerLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/StartCodeBuildHeadLambda"
+      Code: "src/StartCodeBuildLambda"
       Description: Start CodeBuildContainerProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: CodeBuildContainerHeadLambdaExecutionRole.Arn
+        Fn::GetAtt: CodeBuildContainerLambdaExecutionRole.Arn
       Runtime: python3.10
       Timeout: 10
       Tags:
@@ -263,13 +268,15 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  StartCodeBuildContainerHeadProject:
+  StartCodeBuildContainer:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
-        Fn::GetAtt: StartCodeBuildContainerHeadLambda.Arn
+        Fn::GetAtt: StartCodeBuildContainerLambda.Arn
+      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
+      SourceSubfolder: "modules/containers"
       ProjectName:
-        Ref: CodeBuildContainerHeadProject
+        Ref: CodeBuildContainerProject
       Timestamp:
         Ref: Timestamp
 
@@ -278,12 +285,10 @@ Resources:
 
   # CodeBuildContainerWaitCondition:
   #   Type: AWS::CloudFormation::WaitCondition
-  #   DependsOn:
-  #     - CodeBuildContainerHeadProject
   #   Properties:
   #     Handle: !Ref CodeBuildContainerWaitHandle
-  #     Timeout: 600
-  #     Count: 1
+  #     Timeout: 900
+  #     Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 
   DeleteContainerRepoLambdaExecutionRole:
     Type: AWS::IAM::Role

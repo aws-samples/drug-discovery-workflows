@@ -7,6 +7,9 @@ LOGGER.setLevel(logging.INFO)
 
 
 def list_workflows_with_tags(tags, omics_client=boto3.client("omics")):
+
+    LOGGER.info(f"Looking for workflows with the following tags:\n{tags}")
+
     output = []
     paginator = omics_client.get_paginator("list_workflows")
     for page in paginator.paginate():
@@ -52,7 +55,7 @@ def lambda_handler(event, context):
 
             for workflow in workflow_list:
                 LOGGER.info(f"Deleting workflow: {workflow}")
-                response = omics.delete_workflow(id=workflow, force=True)
+                response = omics.delete_workflow(id=workflow)
                 LOGGER.info(f"Repo deletion response:\n{response}")
             cfnresponse.send(
                 event,
