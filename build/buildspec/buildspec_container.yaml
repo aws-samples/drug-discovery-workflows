@@ -28,6 +28,6 @@ phases:
     commands:
       - echo Pushing the $NAME image
       - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest
-      # - JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
-      # - curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
+      - JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
+      - curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
       - echo Build completed on `date`

@@ -33,7 +33,9 @@ def get_zipfile_subfolders(zipdata: BytesIO, subfolder: str) -> list:
 
     subfolder = os.path.join(subfolder, "")
 
-    return [path.name for path in zipfile.Path(zipdata, subfolder).iterdir() if path.is_dir]
+    return [
+        path.name for path in zipfile.Path(zipdata, subfolder).iterdir() if path.is_dir
+    ]
 
 
 def start_artifact_build(

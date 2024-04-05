@@ -169,6 +169,8 @@ Resources:
             Value: !Ref "AWS::Region"
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildContainerWaitHandle
         Image: aws/codebuild/standard:6.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -176,7 +178,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
       ServiceRole: !GetAtt CodeBuildContainerRole.Arn
       Source:
-        BuildSpec: modules/buildspecs/buildspec_container.yaml
+        BuildSpec: build/buildspec/buildspec_container.yaml
         Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
       Tags:
@@ -184,39 +186,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
-
-  # CodeBuildContainerHeadProject:
-  #   Type: AWS::CodeBuild::Project
-  #   Properties:
-  #     Name: !Sub "${StackPrefix}-CodeBuildContainerHeadProject"
-  #     Artifacts:
-  #       Type: NO_ARTIFACTS
-  #     Description: Start CodeBuild head project for building all containers
-  #     EncryptionKey: !Ref EncryptionKey
-  #     Environment:
-  #       ComputeType: BUILD_GENERAL1_SMALL
-  #       EnvironmentVariables:
-  #         - Name: ARTIFACTS_PATH
-  #           Value: "modules/containers"
-  #         - Name: PROJECT_NAME
-  #           Value: !Ref "CodeBuildContainerProject"
-  #         - Name: STACK_PREFIX
-  #           Value: !Ref StackPrefix
-  #       Image: aws/codebuild/standard:7.0
-  #       ImagePullCredentialsType: CODEBUILD
-  #       PrivilegedMode: true
-  #       Type: LINUX_CONTAINER
-  #     ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
-  #     ServiceRole: !GetAtt CodeBuildContainerRole.Arn
-  #     Source:
-  #       BuildSpec: modules/buildspecs/buildspec_head.yaml
-  #       Location: !Sub "${S3BucketName}/build/code/code.zip"
-  #       Type: S3
-  #     Tags:
-  #       - Key: Application
-  #         Value: !Ref ApplicationName
-  #       - Key: StackPrefix
-  #         Value: !Ref StackPrefix
 
   CodeBuildContainerLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -254,14 +223,14 @@ Resources:
     Properties:
       FunctionName: !Sub "${StackPrefix}-StartCodeBuildContainerLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/StartCodeBuildLambda"
+      Code: "../lambda/StartCodeBuildLambda"
       Description: Start CodeBuildContainerProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildContainerLambdaExecutionRole.Arn
       Runtime: python3.10
-      Timeout: 10
+      Timeout: 30
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -280,15 +249,15 @@ Resources:
       Timestamp:
         Ref: Timestamp
 
-  # CodeBuildContainerWaitHandle:
-  #   Type: AWS::CloudFormation::WaitConditionHandle
+  CodeBuildContainerWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
 
-  # CodeBuildContainerWaitCondition:
-  #   Type: AWS::CloudFormation::WaitCondition
-  #   Properties:
-  #     Handle: !Ref CodeBuildContainerWaitHandle
-  #     Timeout: 900
-  #     Count: !GetAtt StartCodeBuildContainer.ArtifactCount
+  CodeBuildContainerWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Properties:
+      Handle: !Ref CodeBuildContainerWaitHandle
+      Timeout: 1800
+      Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 
   DeleteContainerRepoLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -323,14 +292,14 @@ Resources:
     Properties:
       FunctionName: !Sub "${StackPrefix}-DeleteContainerRepoLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/DeleteContainerRepoLambda"
+      Code: "../lambda/DeleteContainerRepoLambda"
       Description: Delete ECR repositories
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
       Runtime: python3.10
-      Timeout: 600
+      Timeout: 30
       Tags:
         - Key: Application
           Value: !Ref ApplicationName

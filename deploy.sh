@@ -35,14 +35,14 @@ done
 [ -z "$STACK_NAME" ] && { STACK_NAME="aho-ddw"; }
 [ -z "$REGION" ] && { INPUT_FILE="us-east-1"; }
 
-zip -r code.zip modules -x .\*/\*
-aws s3 cp code.zip s3://$BUCKET_NAME/build/code/code.zip
-rm code.zip
+zip -r build/code.zip * -x .\*/\*
+aws s3 cp build/code.zip s3://$BUCKET_NAME/build/code/code.zip
+rm build/code.zip
 
-aws cloudformation package --template-file cloudformation/root.yaml \
-  --output-template cloudformation/packaged.yaml --region $REGION \
+aws cloudformation package --template-file build/cloudformation/root.yaml \
+  --output-template build/cloudformation/packaged.yaml --region $REGION \
   --s3-bucket $BUCKET_NAME --s3-prefix build/cloudformation
-aws cloudformation deploy --template-file cloudformation/packaged.yaml \
+aws cloudformation deploy --template-file build/cloudformation/packaged.yaml \
   --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP
-rm cloudformation/packaged.yaml
+rm build/cloudformation/packaged.yaml

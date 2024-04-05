@@ -28,7 +28,6 @@ To add a new module, clone the repository and take a look at the `modules` folde
 
 ```txt
 modules/
-├── ...
 ├── containers
 │   ├── esmfold
 │   └── protein-utils
@@ -37,3 +36,5 @@ modules/
 ```
 
 The `containers` subfolder contains Dockerfiles and supporting files to build docker containers. Similarly, `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. Each subfolder is an independent build context. In other words, if you create a new `containers/my_docker` folder, the deployment process will use it as the context for a `docker build` command. The deployment process will process all subfolders under `containers` and `workflows` without any further configuration. Just drop in your modules and deploy!
+
+To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region.

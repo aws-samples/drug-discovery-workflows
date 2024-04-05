@@ -246,7 +246,7 @@ Resources:
       ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
       ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
       Source:
-        BuildSpec: modules/buildspecs/buildspec_workflow.yaml
+        BuildSpec: build/buildspec/buildspec_workflow.yaml
         Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
       Tags:
@@ -254,39 +254,6 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
-
-  # CodeBuildWorkflowHeadProject:
-  #   Type: AWS::CodeBuild::Project
-  #   Properties:
-  #     Name: !Sub "${StackPrefix}-CodeBuildWorkflowHeadProject"
-  #     Artifacts:
-  #       Type: NO_ARTIFACTS
-  #     Description: Start CodeBuild head project for building all workflows
-  #     EncryptionKey: !Ref EncryptionKey
-  #     Environment:
-  #       ComputeType: BUILD_GENERAL1_SMALL
-  #       EnvironmentVariables:
-  #         - Name: ARTIFACTS_PATH
-  #           Value: "modules/workflows"
-  #         - Name: PROJECT_NAME
-  #           Value: !Ref "CodeBuildWorkflowProject"
-  #         - Name: STACK_PREFIX
-  #           Value: !Ref StackPrefix
-  #       Image: aws/codebuild/standard:7.0
-  #       ImagePullCredentialsType: CODEBUILD
-  #       PrivilegedMode: false
-  #       Type: LINUX_CONTAINER
-  #     ResourceAccessRole: !GetAtt CodeBuildWorkflowRole.Arn
-  #     ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
-  #     Source:
-  #       BuildSpec: modules/buildspecs/buildspec_head.yaml
-  #       Location: !Sub "${S3BucketName}/build/code/code.zip"
-  #       Type: S3
-  #     Tags:
-  #       - Key: Application
-  #         Value: !Ref ApplicationName
-  #       - Key: StackPrefix
-  #         Value: !Ref StackPrefix
 
   CodeBuildWorkflowLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -316,11 +283,6 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
-              # - Effect: Allow
-                # Action:
-                  # - s3:ListBucket
-                # Resource:
-                  # - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}"                  
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -329,14 +291,14 @@ Resources:
     Properties:
       FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/StartCodeBuildLambda"
+      Code: "../lambda/StartCodeBuildLambda"
       Description: Start CodeBuildWorkflowProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
       Runtime: python3.10
-      Timeout: 10
+      Timeout: 30
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -354,16 +316,6 @@ Resources:
         Ref: CodeBuildWorkflowProject
       Timestamp:
         Ref: Timestamp
-
-  # CodeBuildWorkflowWaitHandle:
-  #   Type: AWS::CloudFormation::WaitConditionHandle
-
-  # CodeBuildWorkflowWaitCondition:
-  #   Type: AWS::CloudFormation::WaitCondition
-  #   Properties:
-  #     Handle: !Ref CodeBuildWorkflowWaitHandle
-  #     Timeout: 900
-  #     Count: !GetAtt StartCodeBuildWorkflow.ArtifactCount
 
   DeleteWorkflowLambdaExecutionRole:
     Type: AWS::IAM::Role
@@ -399,14 +351,14 @@ Resources:
     Properties:
       FunctionName: !Sub "${StackPrefix}-DeleteWorkflowLambda"
       ReservedConcurrentExecutions: 10
-      Code: "src/DeleteWorkflowLambda"
+      Code: "../lambda/DeleteWorkflowLambda"
       Description: Delete Amazon HealthOmics workflow
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteWorkflowLambdaExecutionRole.Arn
       Runtime: python3.10
-      Timeout: 600
+      Timeout: 30
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
