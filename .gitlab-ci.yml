@@ -31,7 +31,7 @@ stages:
 ################################
 
 cfn-lint:
-  image: python:3.8
+  image: python:3.11
   stage: lint
   before_script:
     - python --version # For debugging
