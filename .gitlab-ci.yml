@@ -18,7 +18,7 @@ default:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/amazonlinux:latest
 
 include:
-  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 
 stages:
   - lint
