@@ -1,0 +1,17 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+project:
+  name: aho-drug-discovery-workflows
+  package_lambda: false
+  s3_bucket: aho-drug-discovery-workflows
+  regions:
+    - us-east-1
+    - us-east-2
+    - us-west-2
+  parameters:
+    ApplicationName: 'aho-ddw-taskcat'
+    S3BucketName: 'aho-drug-discovery-workflows'
+tests:
+  default:
+    template: build/cloudformation/packaged.yaml
