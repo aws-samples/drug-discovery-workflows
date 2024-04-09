@@ -170,7 +170,7 @@ Resources:
       Description: Build Docker container
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_LARGE
         EnvironmentVariables:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
