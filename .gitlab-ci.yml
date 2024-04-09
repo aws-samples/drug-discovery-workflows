@@ -46,7 +46,7 @@ cfn-lint:
 cfn-nag:
   image:
     name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/stelligent/cfn_nag
-    entrypoint: ['']
+    entrypoint: [""]
   stage: lint
   script:
     - cfn_nag_scan --input-path build/cloudformation/*.yaml
@@ -66,15 +66,9 @@ push-to-s3-dev:
     - yum update -y && yum install -y awscli zip
   script:
     - zip -r build/code.zip . -x .\*/\* -x .gitlab-ci.yml
-    - zip -r build/code.zip * -x .\*/\*
-    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/build/code/code.zip
+    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/code/code.zip
     - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $DEV_BUCKET_PREFIX
     - aws s3 cp build/cloudformation/packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/packaged.yaml
-    # - aws cloudformation deploy --template-file build/cloudformation/packaged.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP
-    # - rm build/cloudformation/packaged.yaml
-    # - aws s3 cp batch-protein-folding.zip s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/batch-protein-folding.zip
-    # - aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $DEV_BUCKET_PREFIX --region $AWS_DEFAULT_REGION
-    # - aws s3 cp infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/batch-protein-folding-cfn-packaged.yaml
   artifacts:
     paths:
       - build/cloudformation/packaged.yaml
@@ -105,14 +99,14 @@ test_cfn:
 # deploy-main
 ################################
 
-# push-to-s3-main:
-#   stage: deploy-main
-#   before_script:
-#     - yum update -y && yum install -y awscli zip
-#   script:
-#     - zip -r batch-protein-folding.zip . -x .\*/\* -x .gitlab-ci.yml
-#     - aws s3 cp batch-protein-folding.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/batch-protein-folding.zip
-#     - aws cloudformation package --template-file infrastructure/cloudformation/batch-protein-folding-cfn-root.yaml --output-template infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX --region $AWS_DEFAULT_REGION
-#     - aws s3 cp infrastructure/cloudformation/batch-protein-folding-cfn-packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/batch-protein-folding-cfn-packaged.yaml      
-#   only:
-#     - main
+push-to-s3-main:
+  stage: deploy-main
+  before_script:
+    - yum update -y && yum install -y awscli zip
+  script:
+    - zip -r build/code.zip . -x .\*/\* -x .gitlab-ci.yml
+    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/build/code/code.zip
+    - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX
+    - aws s3 cp build/cloudformation/packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/packaged.yaml
+  only:
+    - main
