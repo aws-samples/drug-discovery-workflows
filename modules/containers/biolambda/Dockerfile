@@ -7,11 +7,7 @@ RUN dnf upgrade -y \
     wget-1.21.3 \
     && python -m venv /opt/venv \
     && source /opt/venv/bin/activate \
-    && pip install --no-cache-dir \
-    pandas==2.2.1 \
-    numpy==1.26.4 \
-    biopython==1.83 \
-    pyfastx==2.1.0 \
+    && pip install --no-cache-dir -r requirements.txt \
     && dnf clean all \
     && rm -rf /var/cache/dnf \
     && rm -rf /tmp/putils
@@ -23,4 +19,3 @@ COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
 ENTRYPOINT [ "python" ]
-
