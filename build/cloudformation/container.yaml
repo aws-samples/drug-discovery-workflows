@@ -266,7 +266,7 @@ Resources:
     Condition: WaitForContainerBuildCondition    
     Properties:
       Handle: !Ref CodeBuildContainerWaitHandle
-      Timeout: 1800
+      Timeout: 3600
       Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 
   DeleteContainerRepoLambdaExecutionRole:
