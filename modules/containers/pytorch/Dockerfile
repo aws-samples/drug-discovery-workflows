@@ -35,7 +35,8 @@ ARG TORCHDATA_URL=https://framework-binaries.s3.us-west-2.amazonaws.com/pytorch/
 #                  |_|
 ########################################################
 
-FROM nvidia/cuda:11.8.0-base-ubuntu20.04 AS ec2
+# FROM nvidia/cuda:11.8.0-base-ubuntu20.04 AS ec2
+FROM nvcr.io/nvidia/cuda:11.8.0-base-ubuntu20.04
 
 LABEL maintainer="Amazon AI"
 LABEL dlc_major_version="1"
