@@ -24,7 +24,7 @@ stages:
   - lint
   - deploy-dev
   - test
-  # - deploy-main
+  - deploy-main
 
 ################################
 # .pre
