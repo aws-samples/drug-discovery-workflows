@@ -20,6 +20,15 @@ Parameters:
     Description: Stack-specific prefix for resource naming
     Type: String
     Default: abc-123
+  WaitForContainerBuild:
+    Description: Should CloudFormation wait for all containers?
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]
+
+Conditions:
+  WaitForContainerBuildCondition:
+    "Fn::Equals": [Ref: "WaitForContainerBuild", "Y"]     
 
 Resources:
   EncryptionKey:
@@ -252,12 +261,13 @@ Resources:
   CodeBuildContainerWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
 
-  # CodeBuildContainerWaitCondition:
-  #   Type: AWS::CloudFormation::WaitCondition
-  #   Properties:
-  #     Handle: !Ref CodeBuildContainerWaitHandle
-  #     Timeout: 1800
-  #     Count: !GetAtt StartCodeBuildContainer.ArtifactCount
+  CodeBuildContainerWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: WaitForContainerBuildCondition    
+    Properties:
+      Handle: !Ref CodeBuildContainerWaitHandle
+      Timeout: 1800
+      Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 
   DeleteContainerRepoLambdaExecutionRole:
     Type: AWS::IAM::Role

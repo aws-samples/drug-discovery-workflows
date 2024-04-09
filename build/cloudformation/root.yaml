@@ -16,6 +16,11 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
+  WaitForContainerBuild:
+    Description: Should CloudFormation wait for all containers?
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]    
 
 Resources:
   ContainerBuiild:
@@ -27,6 +32,7 @@ Resources:
           Ref: ApplicationName
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
+        WaitForContainerBuild: !Ref WaitForContainerBuild
         StackPrefix:
           !Join [
             "-",
