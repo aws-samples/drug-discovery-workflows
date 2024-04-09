@@ -84,8 +84,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 ENV TORCH_CUDA_ARCH_LIST="3.7 5.0 7.0+PTX 7.5+PTX 8.0"
 
 RUN apt-get update \
- && apt-get -y upgrade \
- && apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
+    && apt-get -y upgrade \
+    && apt-get install -y --allow-downgrades --allow-change-held-packages --no-install-recommends \
     build-essential \
     ca-certificates \
     cmake \
@@ -124,26 +124,26 @@ RUN apt-get update \
     zlib1g-dev \
     openssh-client \
     openssh-server \
- && apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/* \
- && apt-get clean
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Install NCCL
 RUN cd /tmp \
- && git clone https://github.com/NVIDIA/nccl.git -b v${NCCL_VERSION}-1 \
- && cd nccl \
- && make -j64 src.build BUILDDIR=/usr/local \
- && rm -rf /tmp/nccl
+    && git clone https://github.com/NVIDIA/nccl.git -b v${NCCL_VERSION}-1 \
+    && cd nccl \
+    && make -j64 src.build BUILDDIR=/usr/local \
+    && rm -rf /tmp/nccl
 
 # Install OpenMPI
 RUN wget --quiet https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPEN_MPI_VERSION}.tar.gz \
- && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
- && cd openmpi-${OPEN_MPI_VERSION} \
- && ./configure --prefix=/home/.openmpi --with-cuda \
- && make all install \
- && cd .. \
- && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
- && rm -rf openmpi-${OPEN_MPI_VERSION}
+    && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
+    && cd openmpi-${OPEN_MPI_VERSION} \
+    && ./configure --prefix=/home/.openmpi --with-cuda \
+    && make all install \
+    && cd .. \
+    && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
+    && rm -rf openmpi-${OPEN_MPI_VERSION}
 
 # The ENV variables declared below are changed in the previous section
 # Grouping these ENV variables in the first section causes
@@ -154,10 +154,10 @@ RUN ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
 
 # Install CondaForge miniconda
 RUN curl -L -o ~/mambaforge.sh https://github.com/conda-forge/miniforge/releases/download/${MAMBA_VERSION}/Mambaforge-${MAMBA_VERSION}-Linux-x86_64.sh \
- && chmod +x ~/mambaforge.sh \
- && ~/mambaforge.sh -b -p /opt/conda \
- && rm ~/mambaforge.sh \
- && /opt/conda/bin/conda install -c conda-forge python=${PYTHON_VERSION} \
+    && chmod +x ~/mambaforge.sh \
+    && ~/mambaforge.sh -b -p /opt/conda \
+    && rm ~/mambaforge.sh \
+    && /opt/conda/bin/conda install -c conda-forge python=${PYTHON_VERSION} \
     cython \
     "mkl>=2023.2.0" \
     mkl-include \
@@ -170,12 +170,12 @@ RUN curl -L -o ~/mambaforge.sh https://github.com/conda-forge/miniforge/releases
     # Below 2 are included in miniconda base, but not mamba so need to install
     conda-content-trust \
     charset-normalizer \
- && /opt/conda/bin/conda install -c pytorch magma-cuda118 \
- && /opt/conda/bin/conda clean -ya
+    && /opt/conda/bin/conda install -c pytorch magma-cuda118 \
+    && /opt/conda/bin/conda clean -ya
 
 # symlink pip for OS use
 RUN pip install --upgrade pip --trusted-host pypi.org --trusted-host files.pythonhosted.org \
- && ln -s /opt/conda/bin/pip /usr/local/bin/pip3
+    && ln -s /opt/conda/bin/pip /usr/local/bin/pip3
 
 # Install Common python packages
 RUN pip install --no-cache-dir -U \
@@ -244,8 +244,8 @@ RUN curl -o /license.txt  https://aws-dlc-licenses.s3.amazonaws.com/pytorch-2.1/
 
 ## Cleanup ##
 RUN pip cache purge \
- && rm -rf /tmp/tmp* \
- && rm -iRf /root/.cache
+    && rm -rf /tmp/tmp* \
+    && rm -iRf /root/.cache
 
 # EXPOSE 8080 8081
 # ENTRYPOINT ["python", "/usr/local/bin/dockerd-entrypoint.py"]
