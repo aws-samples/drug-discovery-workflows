@@ -105,7 +105,7 @@ push-to-s3-main:
     - yum update -y && yum install -y awscli zip
   script:
     - zip -r build/code.zip . -x .\*/\* -x .gitlab-ci.yml
-    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/build/code/code.zip
+    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/code/code.zip
     - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX
     - aws s3 cp build/cloudformation/packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/packaged.yaml
   only:
