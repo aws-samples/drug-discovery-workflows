@@ -17,8 +17,6 @@ ARG TORCHVISION_URL=https://framework-binaries.s3.us-west-2.amazonaws.com/pytorc
 ARG TORCHAUDIO_URL=https://framework-binaries.s3.us-west-2.amazonaws.com/pytorch/v2.1.0/cuda11.8.0/torchaudio-2.1.0%2Bcu118-cp310-cp310-linux_x86_64.whl
 ARG TORCHTEXT_URL=https://framework-binaries.s3.us-west-2.amazonaws.com/pytorch/v2.1.0/cuda11.8.0/torchtext-0.16.0%2Bcu118-cp310-cp310-linux_x86_64.whl
 ARG TORCHDATA_URL=https://framework-binaries.s3.us-west-2.amazonaws.com/pytorch/v2.1.0/cuda11.8.0/torchdata-0.7.0%2B7c7597b-cp310-cp310-linux_x86_64.whl
-# ARG TORCHSERVE_VERSION
-# ARG SM_TOOLKIT_VERSION
 
 ########################################################
 #  _____ ____ ____    ___
@@ -82,7 +80,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Turing = 7.5+PTX (G4 Instances)
 # Ampere = 8.0;8.6+PTX (P4 and G5 Instances)
 # Ada = 8.9+PTX
-ENV TORCH_CUDA_ARCH_LIST="3.7 5.0 7.0+PTX 7.5+PTX 8.0"
+ENV TORCH_CUDA_ARCH_LIST="7.5+PTX 8.6+PTX"
+ENV NVCC_GENCODE="-gencode=arch=compute_75,code=sm_75 -gencode=arch=compute_86,code=sm_86"
+
 
 RUN apt-get update \
     && apt-get -y upgrade \
@@ -133,7 +133,8 @@ RUN apt-get update \
 RUN cd /tmp \
     && git clone https://github.com/NVIDIA/nccl.git -b v${NCCL_VERSION}-1 \
     && cd nccl \
-    && make -j64 src.build BUILDDIR=/usr/local \
+    # && make -j64 src.build BUILDDIR=/usr/local \
+    && make -j64 src.build BUILDDIR=/usr/local NVCC_GENCODE=$NVCC_GENCODE \
     && rm -rf /tmp/nccl
 
 # Install OpenMPI
@@ -182,9 +183,6 @@ RUN pip install --upgrade pip --trusted-host pypi.org --trusted-host files.pytho
 RUN pip install --no-cache-dir -U \
     boto3 \
     opencv-python \
-    # "nvgpu" is a dependency of TS but is disabled in SM DLC build,
-    # via ENV Variable "TS_DISABLE_SYSTEM_METRICS=true" in the SM section of this file.
-    # due to incompatibility with SM hosts 
     nvgpu \
     pyOpenSSL \
     cryptography \
@@ -206,116 +204,22 @@ RUN pip install --no-cache-dir -U \
     ${TORCHTEXT_URL} \
     ${TORCHDATA_URL}
 
-# Install TorchServe pypi dependencies directly from their requirements.txt file
-# NOTE: This also brings in unnecessary cpu dependencies like nvgpu
-# -> Numpy is higer version as required by torch
-# RUN pip install --no-cache-dir -U -r https://raw.githubusercontent.com/pytorch/serve/v${TORCHSERVE_VERSION}/requirements/common.txt \
-#  && pip install --no-cache-dir -U \ 
-#     "numpy>=1.22.2,<1.23" \
-#     torchserve==${TORCHSERVE_VERSION} \
-#     torch-model-archiver==${TORCHSERVE_VERSION}
-
 # add necessary certificate for aws sdk cpp download
 RUN mkdir -p /etc/pki/tls/certs && cp /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
 
-# create user and folders
-# RUN useradd -m model-server \
-#  && mkdir -p /home/model-server/tmp /opt/ml/model \
-#  && chown -R model-server /home/model-server /opt/ml/model
-
-# add TS entrypoint
-# COPY torchserve-ec2-entrypoint.py /usr/local/bin/dockerd-entrypoint.py
-# COPY config.properties /home/model-server
-# RUN chmod +x /usr/local/bin/dockerd-entrypoint.py
-
-# add telemetry
-# COPY deep_learning_container.py /usr/local/bin/deep_learning_container.py
-# RUN chmod +x /usr/local/bin/deep_learning_container.py
-
-# RUN HOME_DIR=/root \
-#  && curl -o ${HOME_DIR}/oss_compliance.zip https://aws-dlinfra-utilities.s3.amazonaws.com/oss_compliance.zip \
-#  && unzip ${HOME_DIR}/oss_compliance.zip -d ${HOME_DIR}/ \
-#  && cp ${HOME_DIR}/oss_compliance/test/testOSSCompliance /usr/local/bin/testOSSCompliance \
-#  && chmod +x /usr/local/bin/testOSSCompliance \
-#  && chmod +x ${HOME_DIR}/oss_compliance/generate_oss_compliance.sh \
-#  && ${HOME_DIR}/oss_compliance/generate_oss_compliance.sh ${HOME_DIR} ${PYTHON} \
-#  && rm -rf ${HOME_DIR}/oss_compliance*
-
 RUN curl -o /license.txt  https://aws-dlc-licenses.s3.amazonaws.com/pytorch-2.1/license.txt
+
+# Install additional dependencies from requirements.txt file
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
+    && rm /tmp/requirements.txt
 
 ## Cleanup ##
 RUN pip cache purge \
     && rm -rf /tmp/tmp* \
     && rm -iRf /root/.cache
 
-# EXPOSE 8080 8081
-# ENTRYPOINT ["python", "/usr/local/bin/dockerd-entrypoint.py"]
-# CMD ["torchserve", "--start", "--ts-config", "/home/model-server/config.properties", "--model-store", "/home/model-server/"]
+COPY scripts/ /home/scripts/
+WORKDIR /home/scripts
 
 ENTRYPOINT [ "python" ]
-
-# #################################################################
-# #  ____                   __  __       _
-# # / ___|  __ _  __ _  ___|  \/  | __ _| | _____ _ __
-# # \___ \ / _` |/ _` |/ _ \ |\/| |/ _` | |/ / _ \ '__|
-# #  ___) | (_| | (_| |  __/ |  | | (_| |   <  __/ |
-# # |____/ \__,_|\__, |\___|_|  |_|\__,_|_|\_\___|_|
-# #              |___/
-# #  ___                              ____           _
-# # |_ _|_ __ ___   __ _  __ _  ___  |  _ \ ___  ___(_)_ __   ___
-# #  | || '_ ` _ \ / _` |/ _` |/ _ \ | |_) / _ \/ __| | '_ \ / _ \
-# #  | || | | | | | (_| | (_| |  __/ |  _ <  __/ (__| | |_) |  __/
-# # |___|_| |_| |_|\__,_|\__, |\___| |_| \_\___|\___|_| .__/ \___|
-# #                      |___/                        |_|
-# #
-# # NOTE: This ImageRecipe is still under development
-# #################################################################
-
-# FROM ec2 AS sagemaker
-
-# LABEL maintainer="Amazon AI"
-# LABEL dlc_major_version="1"
-# LABEL com.amazonaws.sagemaker.capabilities.accept-bind-to-port=true
-# LABEL com.amazonaws.sagemaker.capabilities.multi-models=true
-
-# ARG PYTHON
-# ARG SM_TOOLKIT_VERSION
-# ARG TORCHSERVE_VERSION
-
-# ENV SAGEMAKER_SERVING_MODULE sagemaker_pytorch_serving_container.serving:main
-# ENV TS_DISABLE_SYSTEM_METRICS=true
-
-# # Install scikit-learn and pandas
-# RUN conda install -y -c conda-forge \
-#     scikit-learn \
-#     pandas
-
-# RUN pip install --no-cache-dir sagemaker-pytorch-inference==${SM_TOOLKIT_VERSION} \
-#     # hardcoded dependencies of sagemaker-pytorch-inference
-#     "scipy==1.10.1" \
-#     "boto3==1.28.60" \
-#     # solve below package version again given above hardcoded dependencies
-#     "awscli" \
-#     "botocore" \
-#     "s3transfer"
-
-# COPY torchserve-entrypoint.py /usr/local/bin/dockerd-entrypoint.py
-
-# RUN chmod +x /usr/local/bin/dockerd-entrypoint.py
-
-# RUN HOME_DIR=/root \
-#  && curl -o ${HOME_DIR}/oss_compliance.zip https://aws-dlinfra-utilities.s3.amazonaws.com/oss_compliance.zip \
-#  && unzip ${HOME_DIR}/oss_compliance.zip -d ${HOME_DIR}/ \
-#  && cp ${HOME_DIR}/oss_compliance/test/testOSSCompliance /usr/local/bin/testOSSCompliance \
-#  && chmod +x /usr/local/bin/testOSSCompliance \
-#  && chmod +x ${HOME_DIR}/oss_compliance/generate_oss_compliance.sh \
-#  && ${HOME_DIR}/oss_compliance/generate_oss_compliance.sh ${HOME_DIR} ${PYTHON} \
-#  && rm -rf ${HOME_DIR}/oss_compliance*
-
-# ## Cleanup ##
-# RUN rm -rf /tmp/tmp* \
-#  &&rm -iRf /root/.cache
-
-# EXPOSE 8080 8081
-# ENTRYPOINT ["python", "/usr/local/bin/dockerd-entrypoint.py"]
-# CMD ["torchserve", "--start", "--ts-config", "/home/model-server/config.properties", "--model-store", "/home/model-server/"]
