@@ -9,6 +9,13 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: Amazon HealthOmics Drug Discovery Workflows
+  Environment:
+    Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
+    Type: String
+    Default: main
+    AllowedValues:
+      - main
+      - dev    
   S3BucketName:
     Description: Name of the S3 bucket to use for deployment and run storage
     Type: String
@@ -20,6 +27,15 @@ Parameters:
     Description: Stack-specific prefix for resource naming
     Type: String
     Default: abc-123
+  WaitForContainerBuild:
+    Description: Should CloudFormation wait for all containers?
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]
+
+Conditions:
+  WaitForContainerBuildCondition:
+    "Fn::Equals": [Ref: "WaitForContainerBuild", "Y"]     
 
 Resources:
   EncryptionKey:
@@ -161,7 +177,7 @@ Resources:
       Description: Build Docker container
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_LARGE
         EnvironmentVariables:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"
@@ -179,7 +195,7 @@ Resources:
       ServiceRole: !GetAtt CodeBuildContainerRole.Arn
       Source:
         BuildSpec: build/buildspec/buildspec_container.yaml
-        Location: !Sub "${S3BucketName}/build/code/code.zip"
+        Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
         Type: S3
       Tags:
         - Key: Application
@@ -242,7 +258,7 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: StartCodeBuildContainerLambda.Arn
-      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
+      SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
       SourceSubfolder: "modules/containers"
       ProjectName:
         Ref: CodeBuildContainerProject
@@ -252,12 +268,13 @@ Resources:
   CodeBuildContainerWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
 
-  # CodeBuildContainerWaitCondition:
-  #   Type: AWS::CloudFormation::WaitCondition
-  #   Properties:
-  #     Handle: !Ref CodeBuildContainerWaitHandle
-  #     Timeout: 1800
-  #     Count: !GetAtt StartCodeBuildContainer.ArtifactCount
+  CodeBuildContainerWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: WaitForContainerBuildCondition    
+    Properties:
+      Handle: !Ref CodeBuildContainerWaitHandle
+      Timeout: 3600
+      Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 
   DeleteContainerRepoLambdaExecutionRole:
     Type: AWS::IAM::Role

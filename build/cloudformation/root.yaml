@@ -9,6 +9,13 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: Amazon HealthOmics Drug Discovery Workflows
+  Environment:
+    Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
+    Type: String
+    Default: main
+    AllowedValues:
+      - main
+      - dev
   S3BucketName:
     Description: Name of the S3 bucket to use for deployment and run storage
     Type: String
@@ -16,6 +23,11 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
+  WaitForContainerBuild:
+    Description: Should CloudFormation wait for all containers?
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]
 
 Resources:
   ContainerBuiild:
@@ -25,8 +37,10 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
+        Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
+        WaitForContainerBuild: !Ref WaitForContainerBuild
         StackPrefix:
           !Join [
             "-",
@@ -46,6 +60,7 @@ Resources:
       Parameters:
         ApplicationName:
           Ref: ApplicationName
+        Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
         StackPrefix:
