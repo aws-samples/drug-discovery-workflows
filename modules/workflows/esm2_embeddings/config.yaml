@@ -1,0 +1,15 @@
+name: ESM2 Embeddings
+description: "This workflow generates numerical embeddings for one or more protein amino acid sequences using the ESM-2 protein language model."
+engine: WDL
+main: main.wdl
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+  model_name:
+    description: "ESM-2 model name to use for embeddings generation"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: 'ESM2 Embeddings'
+accelerators: GPU
