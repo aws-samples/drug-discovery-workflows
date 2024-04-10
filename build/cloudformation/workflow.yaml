@@ -317,7 +317,7 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: StartCodeBuildWorkflowLambda.Arn
-      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
+      SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
       SourceSubfolder: "modules/workflows"
       ProjectName:
         Ref: CodeBuildWorkflowProject

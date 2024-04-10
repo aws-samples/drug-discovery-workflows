@@ -258,7 +258,7 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: StartCodeBuildContainerLambda.Arn
-      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
+      SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
       SourceSubfolder: "modules/containers"
       ProjectName:
         Ref: CodeBuildContainerProject
