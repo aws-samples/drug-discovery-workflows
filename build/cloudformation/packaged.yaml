@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'omics-protein-folding-omics.yaml: Creates Omics resources.'
+Parameters:
+  ApplicationName:
+    Description: Name of the application, if applicable
+    Type: String
+    Default: Amazon HealthOmics Drug Discovery Workflows
+  Environment:
+    Description: Leave this as "main" unless you are testing a pre-release versions
+      of this architecture.
+    Type: String
+    Default: main
+    AllowedValues:
+    - main
+    - dev
+  S3BucketName:
+    Description: Name of the S3 bucket to use for deployment and run storage
+    Type: String
+  Timestamp:
+    Description: Timestamp for the cfn deployment
+    Type: Number
+    Default: 9999999999
+  WaitForContainerBuild:
+    Description: Should CloudFormation wait for all containers?
+    Type: String
+    Default: N
+    AllowedValues:
+    - Y
+    - N
+Resources:
+  ContainerBuiild:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.us-east-1.amazonaws.com/167428594774-us-east-1-aho/build/cloudformation/a42f9d384f151ca815aa6fbad4a2f100.template
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment:
+          Ref: Environment
+        S3BucketName:
+          Ref: S3BucketName
+        Timestamp:
+          Ref: Timestamp
+        WaitForContainerBuild:
+          Ref: WaitForContainerBuild
+        StackPrefix:
+          Fn::Join:
+          - '-'
+          - - aho-dd
+            - Fn::Select:
+              - 4
+              - Fn::Split:
+                - '-'
+                - Fn::Select:
+                  - 2
+                  - Fn::Split:
+                    - /
+                    - Ref: AWS::StackId
+  WorkflowBuild:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.us-east-1.amazonaws.com/167428594774-us-east-1-aho/build/cloudformation/eff07fd0c869014656ca40e1276c0b54.template
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment:
+          Ref: Environment
+        S3BucketName:
+          Ref: S3BucketName
+        Timestamp:
+          Ref: Timestamp
+        StackPrefix:
+          Fn::Join:
+          - '-'
+          - - aho-dd
+            - Fn::Select:
+              - 4
+              - Fn::Split:
+                - '-'
+                - Fn::Select:
+                  - 2
+                  - Fn::Split:
+                    - /
+                    - Ref: AWS::StackId

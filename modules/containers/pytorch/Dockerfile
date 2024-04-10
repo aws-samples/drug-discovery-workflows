@@ -133,8 +133,7 @@ RUN apt-get update \
 RUN cd /tmp \
     && git clone https://github.com/NVIDIA/nccl.git -b v${NCCL_VERSION}-1 \
     && cd nccl \
-    # && make -j64 src.build BUILDDIR=/usr/local \
-    && make -j64 src.build BUILDDIR=/usr/local NVCC_GENCODE=$NVCC_GENCODE \
+    && make -j64 src.build BUILDDIR=/usr/local NVCC_GENCODE="$NVCC_GENCODE" \
     && rm -rf /tmp/nccl
 
 # Install OpenMPI
