@@ -2,6 +2,7 @@ from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
 import torch
 import numpy as np
 import argparse
+import csv
 
 
 def generate_embeddings(
@@ -51,7 +52,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "seq_file", help="Path to input CSV file with sequences to process", type=str
+        "input_file", help="Path to input CSV file with sequences to process", type=str
     )
     parser.add_argument(
         "--model_name",
@@ -78,8 +79,13 @@ if __name__ == "__main__":
         type=str,
     )
 
+if __name__ == "__main__":
+
     args = parser.parse_args()
+    with open(args.input_file, newline="") as csvfile:
+        reader = csv.reader(csvfile)
+        seqs = [row[1] for row in reader]
     output = generate_embeddings(
-        args.text, args.model_name, args.batch_size, args.quant, args.output_file
+        seqs, args.model_name, args.batch_size, args.quant, args.output_file
     )
     print(output)

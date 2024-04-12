@@ -1,11 +1,9 @@
 import argparse
-import boto3
-import csv
 import logging
 import os
 import pyfastx
 import random
-import requests
+import shutil
 import tempfile
 import tqdm
 from urllib.parse import urlparse
@@ -16,10 +14,17 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+
 def parse_args():
     """Parse the arguments."""
     logging.info("Parsing arguments")
     parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "source",
+        type=str,
+        help="Path to input .fasta or .fasta.gz file, e.g. s3://myfasta.fa, http://myfasta.fasta.gz, ~/myfasta.fasta, etc",
+    )
 
     parser.add_argument(
         "--max_records_per_partition",
@@ -34,15 +39,25 @@ def parse_args():
         help="Output dir for processed files",
     )
     parser.add_argument(
-        "--shuffle",
-        type=bool,
-        default=True,
-        help="Shuffle the records in each csv partition?",
+        "--save_csv",
+        "-c",
+        action="store_true",
+        default=False,
+        help="Save csv files to output dir?",
     )
     parser.add_argument(
-        "--source",
-        type=str,
-        help="Path to input .fasta or .fasta.gz file, e.g. s3://myfasta.fa, http://myfasta.fasta.gz, ~/myfasta.fasta, etc",
+        "-f",
+        "--save_fasta",
+        action="store_true",
+        default=True,
+        help="Save FASTA file to output dir?",
+    )
+    parser.add_argument(
+        "--shuffle",
+        "-s",
+        action="store_true",
+        default=True,
+        help="Shuffle the records in each csv partition?",
     )
 
     args, _ = parser.parse_known_args()
@@ -56,31 +71,33 @@ def main(args):
         os.makedirs(args.output_dir)
 
     tmp_dir = tempfile.TemporaryDirectory(dir=os.getcwd())
+    input_file = os.path.join(tmp_dir.name, "input.fa")
+    input_path = download(args.source, input_file)
 
-    logging.info("Downloading FASTA")
-    fasta_dir = (
-        os.path.join(args.output_dir, "fasta")
-        if args.save_fasta
-        else os.path.join(tmp_dir.name, "fasta")
+    output_path = split_fasta(
+        fasta_file=input_path,
+        output_dir=args.output_dir,
+        max_records_per_partition=args.max_records_per_partition,
+        shuffle=args.shuffle,
+        save_fasta=args.save_fasta,
+        save_csv=args.save_csv,
     )
-    fasta_path = download(args.source, fasta_dir)
-
-    logging.info(f"Writing csv files to {args.output_dir}")
-
-    csv_path = fasta_to_csv(fasta_path, args.output_dir, args.max_records_per_partition)
 
     tmp_dir.cleanup()
-    logging.info("Save complete")
-    return csv_path
+    logging.info(f"Files saved to {args.output_dir}")
+
+    return output_path
 
 
 def download(source: str, filename: str) -> str:
-    logging.info(f"Downloading {source} to {filename}")
     output_dir = os.path.dirname(filename)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     if source.startswith("s3"):
+        import boto3
+
+        logging.info(f"Downloading {source} to {filename}")
         s3 = boto3.client("s3")
         parsed = urlparse(source, allow_fragments=False)
         bucket = parsed.netloc
@@ -102,6 +119,10 @@ def download(source: str, filename: str) -> str:
                 Callback=lambda bytes_transferred: pb.update(bytes_transferred),
             )
     elif source.startswith("http"):
+        import requests
+
+        logging.info(f"Downloading {source} to {filename}")
+
         with open(filename, "wb") as f:
             with requests.get(source, stream=True) as r:
                 r.raise_for_status()
@@ -120,28 +141,38 @@ def download(source: str, filename: str) -> str:
                         pb.update(len(chunk))
                         f.write(chunk)
     elif os.path.isfile(source):
-        logging.info(f"{source} already exists")
+        logging.info(f"Copying {source} to {filename}")
+        shutil.copyfile(source, filename)
     else:
         raise ValueError(f"Invalid source: {source}")
+
     return filename
 
 
-def fasta_to_csv(
-    fasta: str,
-    output_dir: str = "csv",
+def split_fasta(
+    fasta_file: str,
+    output_dir: str = os.getcwd(),
     max_records_per_partition=2000000,
-    shuffle=False,
+    shuffle=True,
+    save_fasta: bool = True,
+    save_csv: bool = False,
 ) -> list:
-    """Split a .fasta or .fasta.gz file into multiple .csv files."""
+    """Split a .fasta or .fasta.gz file into multiple files."""
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    print("Reading FASTA file")
+    if save_fasta and not os.path.exists(os.path.join(output_dir, "fasta")):
+        os.makedirs(os.path.join(output_dir, "fasta"))
+
+    if save_csv and not os.path.exists(os.path.join(output_dir, "csv")):
+        os.makedirs(os.path.join(output_dir, "csv"))
+
+    print(f"Splitting {fasta_file}")
     fasta_list = []
     fasta_idx = 0
 
     for i, seq in tqdm.tqdm(
-        enumerate(pyfastx.Fasta(fasta, build_index=False, uppercase=True))
+        enumerate(
+            pyfastx.Fasta(fasta_file, build_index=False, uppercase=True, full_name=True)
+        )
     ):
         fasta_list.append(seq)
 
@@ -149,22 +180,38 @@ def fasta_to_csv(
             if shuffle:
                 random.shuffle(fasta_list)
             fasta_idx = int(i / max_records_per_partition)
-            _write_seq_record_to_csv(fasta_list, output_dir, fasta_idx)
+            if save_fasta:
+                write_seq_record_to_fasta(fasta_list, output_dir, fasta_idx)
+            if save_csv:
+                write_seq_record_to_csv(fasta_list, output_dir, fasta_idx)
             fasta_list = []
-    else:
-        _write_seq_record_to_csv(fasta_list, output_dir, fasta_idx + 1)
+        else:
+            if save_fasta:
+                write_seq_record_to_fasta(fasta_list, output_dir, fasta_idx + 1)
+            if save_csv:
+                write_seq_record_to_csv(fasta_list, output_dir, fasta_idx + 1)
     return output_dir
 
 
-def _write_seq_record_to_csv(content_list, output_dir, index):
-    output_path = os.path.join(output_dir, f"x{str(index).rjust(3, '0')}.csv")
-    logging.info(f"Writing {len(content_list)} records to {output_path}")
+def write_seq_record_to_fasta(content_list, output_dir, index):
+    output_path = os.path.join(
+        output_dir, "fasta", f"x{str(index).rjust(3, '0')}.fasta"
+    )
 
     with open(output_path, "w") as f:
-        writer = csv.writer(f)
-        writer.writerow(("id", "text"))
-        writer.writerows(content_list)
-    return None
+        for record in content_list:
+            f.write(f">{record[0]}\n{record[1]}\n")
+    return output_path
+
+
+def write_seq_record_to_csv(content_list, output_dir, index):
+    output_path = os.path.join(output_dir, "csv", f"x{str(index).rjust(3, '0')}.csv")
+
+    with open(output_path, "w") as f:
+        f.write(f"id,text\n")
+        for record in content_list:
+            f.write(f"{record[0]},{record[1].replace(",","")}\n")
+    return output_path
 
 
 if __name__ == "__main__":
