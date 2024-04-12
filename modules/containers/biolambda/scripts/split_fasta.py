@@ -49,7 +49,7 @@ def parse_args():
         "-f",
         "--save_fasta",
         action="store_true",
-        default=True,
+        default=False,
         help="Save FASTA file to output dir?",
     )
     parser.add_argument(
@@ -210,7 +210,7 @@ def write_seq_record_to_csv(content_list, output_dir, index):
     with open(output_path, "w") as f:
         f.write(f"id,text\n")
         for record in content_list:
-            f.write(f"{record[0]},{record[1].replace(",","")}\n")
+            f.write(f"{record[0].replace(',','')},{record[1].replace(',','')}\n")
     return output_path
 
 

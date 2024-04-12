@@ -3,6 +3,14 @@ import torch
 import numpy as np
 import argparse
 import csv
+import logging
+from tqdm import tqdm
+
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)
 
 
 def generate_embeddings(
@@ -13,7 +21,10 @@ def generate_embeddings(
     output_file: str = "embeddings.npy",
 ):
 
-    if quant:
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    if quant and device != "cpu":
+        logging.info("Quantizing model")
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
@@ -29,22 +40,24 @@ def generate_embeddings(
     )
 
     tmp = []
-    total_batches = len(text) // batch_size
-    for n, batch in enumerate(
-        [text[i : i + batch_size] for i in range(0, len(text), batch_size)]
+    logging.info(f"Generating embeddings for {len(text)} sequences")
+    total_batches = (len(text) // batch_size) + 1
+    for n, batch in tqdm(
+        enumerate([text[i : i + batch_size] for i in range(0, len(text), batch_size)]),
+        desc=f"Generating embeddings",
     ):
         print(f"Batch {n+1} of {total_batches}")
         inputs = tokenizer(
             batch, return_tensors="pt", truncation=True, padding=True, max_length=1024
-        )
+        ).to(device)
         with torch.no_grad():
             predictions = model(**inputs)
         # Return mean embeddings after removing <cls> and <eos> tokens and converting to numpy.
-        tmp.append(predictions.last_hidden_state[:, 1:-1, :].numpy().mean(axis=1))
+        tmp.append(predictions.last_hidden_state[:, 1:-1, :].cpu().numpy().mean(axis=1))
     output = np.vstack(tmp)
     print(f"Output shape: {output.shape}")
     print(f"Saving embeddings to {output_file}")
-    output.save
+    np.save(output_file, output)
     return output_file
 
 
@@ -68,9 +81,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--quant",
+        action="store_true",
         help="Whether to use 4bit quant for model inference",
         default=False,
-        type=bool,
     )
     parser.add_argument(
         "--output_file",
@@ -83,9 +96,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     with open(args.input_file, newline="") as csvfile:
-        reader = csv.reader(csvfile)
-        seqs = [row[1] for row in reader]
+        reader = csv.DictReader(csvfile)
+        seqs = [row["text"] for row in reader]
+
     output = generate_embeddings(
         seqs, args.model_name, args.batch_size, args.quant, args.output_file
     )
-    print(output)
