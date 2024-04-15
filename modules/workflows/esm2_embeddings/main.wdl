@@ -16,7 +16,7 @@ workflow ESM2EmbeddingsFlow {
         input:
             csv_path = ShardFastaTask.csv,
             pretrained_model_name_or_path = pretrained_model_name_or_path,
-            model_name = model_name,
+            pretrained_model_name_or_path = pretrained_model_name_or_path,
             batch_size =  24,
             docker_image = "pytorch:latest"
     }
@@ -24,7 +24,7 @@ workflow ESM2EmbeddingsFlow {
     #     call ESM2EmbeddingsTask{
     #         input:
     #             csv_path = csv,
-    #             model_name = model_name,
+    #             pretrained_model_name_or_path = pretrained_model_name_or_path,
     #             batch_size =  24,
     #             docker_image = "pytorch:latest"
     #     }
