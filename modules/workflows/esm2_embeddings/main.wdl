@@ -15,7 +15,7 @@ workflow ESM2EmbeddingsFlow {
     call ESM2EmbeddingsTask{
         input:
             csv_path = ShardFastaTask.csv,
-            model_parameters = model_parameters,
+            pretrained_model_name_or_path = pretrained_model_name_or_path,
             model_name = model_name,
             batch_size =  24,
             docker_image = "pytorch:latest"
@@ -72,7 +72,7 @@ task ESM2EmbeddingsTask {
     command <<<
         set -euxo pipefail
         printenv
-        tar -xvf ~{model_parameters} .
+        tar -xvf ~{pretrained_model_name_or_path} .
         /opt/conda/bin/python /home/scripts/generate_esm2_embeddings.py ~{csv_path} --pretrained_model_name_or_path="." --output_file=embeddings.npy
     >>>
     runtime {
