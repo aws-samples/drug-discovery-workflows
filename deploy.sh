@@ -18,7 +18,7 @@
 #   -b "my-deployment-bucket" \
 #   -n "my-aho-ddw-stack" \
 #   -r "us-east-1" \
-#   -w "T"
+#   -w "Y"
 
 set -e
 unset -v BUCKET_NAME ENVIRONMENT STACK_NAME REGION TIMESTAMP WAITFORCONTAINER
@@ -41,7 +41,7 @@ done
 [ -z "$REGION" ] && { REGION="us-east-1"; }
 [ -z "$WAITFORCONTAINER" ] && { WAITFORCONTAINER="N"; }
 
-zip -r build/code.zip * -x .\*/\*
+zip -r build/code.zip * -x .\*/\* -x tests
 aws s3 cp build/code.zip s3://$BUCKET_NAME/build/$ENVIRONMENT/code/code.zip
 rm build/code.zip
 

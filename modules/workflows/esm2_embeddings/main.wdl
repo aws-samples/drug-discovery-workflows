@@ -4,7 +4,7 @@ workflow ESM2EmbeddingsFlow {
     input {
         File fasta_path
         Int max_records_per_partition = 24
-        String pretrained_model_name_or_path = "s3://167428594774-us-east-1-aho/models/esm/esm2_t6_8M_UR50D.tar"
+        String pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t6_8M_UR50D.tar"
     }
 
     call ShardFastaTask{
@@ -17,7 +17,7 @@ workflow ESM2EmbeddingsFlow {
         call ESM2EmbeddingsTask{
             input:
                 csv_path = csv,
-                pretrained_model_name_or_path = pretrained_model_name_or_path,
+                pretrained_model_uri = pretrained_model_uri,
                 batch_size =  24,
                 docker_image = "{{pytorch:latest}}"
         }
@@ -54,7 +54,7 @@ task ShardFastaTask {
 task ESM2EmbeddingsTask {
     input {
         File csv_path
-        File pretrained_model_name_or_path = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
+        File pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
         String memory = "32 GiB"
         Int cpu = 4
         String docker_image = "{{pytorch:latest}}"
@@ -62,7 +62,7 @@ task ESM2EmbeddingsTask {
     }
     command <<<
         set -euxo pipefail
-        tar -xvf ~{pretrained_model_name_or_path} .
+        tar -xvf ~{pretrained_model_uri} .
         /opt/conda/bin/python /home/scripts/generate_esm2_embeddings.py ~{csv_path} \
         --pretrained_model_name_or_path="." --output_file=embeddings.npy
     >>>
