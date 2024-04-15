@@ -159,11 +159,11 @@ def split_fasta(
 ) -> list:
     """Split a .fasta or .fasta.gz file into multiple files."""
 
-    if save_fasta and not os.path.exists(os.path.join(output_dir, "fasta")):
-        os.makedirs(os.path.join(output_dir, "fasta"))
+    # if save_fasta and not os.path.exists(os.path.join(output_dir, "fasta")):
+    #     os.makedirs(os.path.join(output_dir, "fasta"))
 
-    if save_csv and not os.path.exists(os.path.join(output_dir, "csv")):
-        os.makedirs(os.path.join(output_dir, "csv"))
+    # if save_csv and not os.path.exists(os.path.join(output_dir, "csv")):
+    #     os.makedirs(os.path.join(output_dir, "csv"))
 
     print(f"Splitting {fasta_file}")
     fasta_list = []
@@ -195,8 +195,10 @@ def split_fasta(
 
 def write_seq_record_to_fasta(content_list, output_dir, index):
     output_path = os.path.join(
-        output_dir, "fasta", f"x{str(index).rjust(3, '0')}.fasta"
+        output_dir,
+        f"x{str(index).rjust(3, '0')}.fasta",
     )
+    logging.info(f"Writing {output_path}")
 
     with open(output_path, "w") as f:
         for record in content_list:
@@ -205,8 +207,8 @@ def write_seq_record_to_fasta(content_list, output_dir, index):
 
 
 def write_seq_record_to_csv(content_list, output_dir, index):
-    output_path = os.path.join(output_dir, "csv", f"x{str(index).rjust(3, '0')}.csv")
-
+    output_path = os.path.join(output_dir, f"x{str(index).rjust(3, '0')}.csv")
+    logging.info(f"Writing {output_path}")
     with open(output_path, "w") as f:
         f.write(f"id,text\n")
         for record in content_list:
