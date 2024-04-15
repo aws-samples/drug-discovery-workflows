@@ -14,5 +14,5 @@ parameterTemplate:
     optional: true
 storageCapacity: 1200
 tags:
-  Name: 'ESM2 Embeddings'
+  Name: "ESM2 Embeddings"
 accelerators: GPU
