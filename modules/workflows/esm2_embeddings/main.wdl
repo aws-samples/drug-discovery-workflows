@@ -11,7 +11,7 @@ workflow ESM2EmbeddingsFlow {
         input:
             fasta_path = fasta_path,
             max_records_per_partition = max_records_per_partition,
-            docker_image = "biolambda:latest",
+            docker_image = "{{biolambda:latest}}",
     }
     scatter (csv in ShardFastaTask.csvs){
         call ESM2EmbeddingsTask{
@@ -19,7 +19,7 @@ workflow ESM2EmbeddingsFlow {
                 csv_path = csv,
                 pretrained_model_name_or_path = pretrained_model_name_or_path,
                 batch_size =  24,
-                docker_image = "pytorch:latest"
+                docker_image = "{{pytorch:latest}}"
         }
     }
     output {
@@ -32,7 +32,7 @@ task ShardFastaTask {
         File fasta_path
         Int cpu = 2
         String memory = "4 GiB"        
-        String docker_image = "biolambda"
+        String docker_image = "{{biolambda:latest}}"
         Int max_records_per_partition = 24
     }
     command <<<
@@ -57,7 +57,7 @@ task ESM2EmbeddingsTask {
         File pretrained_model_name_or_path = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
         String memory = "32 GiB"
         Int cpu = 4
-        String docker_image = "pytorch"
+        String docker_image = "{{pytorch:latest}}"
         Int batch_size = 24
     }
     command <<<
