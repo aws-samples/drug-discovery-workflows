@@ -15,7 +15,7 @@ logging.basicConfig(
 
 def generate_embeddings(
     text: list,
-    model_name: str = "facebook/esm2_t36_3B_UR50D",
+    pretrained_model_name_or_path: str = "facebook/esm2_t36_3B_UR50D",
     batch_size: int = 24,
     quant: bool = False,
     output_file: str = "embeddings.npy",
@@ -34,9 +34,9 @@ def generate_embeddings(
     else:
         bnb_config = None
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
     model = AutoModel.from_pretrained(
-        model_name, device_map="auto", quantization_config=bnb_config
+        pretrained_model_name_or_path, device_map="auto", quantization_config=bnb_config
     )
 
     tmp = []
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         "input_file", help="Path to input CSV file with sequences to process", type=str
     )
     parser.add_argument(
-        "--model_name",
+        "--pretrained_model_name_or_path",
         help="ESM model to use",
         default="facebook/esm2_t36_3B_UR50D",
         type=str,
@@ -100,5 +100,9 @@ if __name__ == "__main__":
         seqs = [row["text"] for row in reader]
 
     output = generate_embeddings(
-        seqs, args.model_name, args.batch_size, args.quant, args.output_file
+        seqs,
+        args.pretrained_model_name_or_path,
+        args.batch_size,
+        args.quant,
+        args.output_file,
     )
