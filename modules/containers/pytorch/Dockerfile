@@ -125,6 +125,7 @@ RUN apt-get update \
     zlib1g-dev \
     openssh-client \
     openssh-server \
+    nano \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
@@ -160,7 +161,6 @@ RUN curl -L -o ~/mambaforge.sh https://github.com/conda-forge/miniforge/releases
     && rm ~/mambaforge.sh \
     && /opt/conda/bin/conda install -c conda-forge python=${PYTHON_VERSION} \
     cython \
-    "mkl>=2023.2.0" \
     mkl-include \
     parso \
     scipy \
@@ -186,7 +186,8 @@ RUN pip install --no-cache-dir -U \
     pyOpenSSL \
     cryptography \
     "ipython>=8.10.0,<9.0" \
-    "urllib3>=1.26.18,<2"
+    "urllib3>=1.26.18,<2" \
+    "mkl>=2023.2.0,<2024.1"
 
 # Ensure PyTorch did not get installed from Conda or pip, prior to now
 # Any Nvidia installs for the DLC will be below, removing nvidia and cuda packages from pip here

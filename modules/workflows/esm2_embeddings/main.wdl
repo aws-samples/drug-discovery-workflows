@@ -10,19 +10,26 @@ workflow ESM2EmbeddingsFlow {
         input:
             fasta_path = fasta_path,
             max_records_per_partition = 100,
-            docker_image = "{{biolambda:latest}}",
+            docker_image = "biolambda:latest",
     }
-    scatter (fasta in ShardFastaTask.fastas){
-        call ESM2EmbeddingsTask{
-            input:
-                fasta_path = fasta,
-                model_name = model_name,
-                batch_size =  24
-                quant = True
-                docker_image = "{{pytorch:latest}}"
-        }
+    call ESM2EmbeddingsTask{
+        input:
+            csv_path = ShardFastaTask.csv,
+            model_name = model_name,
+            batch_size =  24,
+            docker_image = "pytorch:latest"
     }
+    # scatter (csv in ShardFastaTask.csvs){
+    #     call ESM2EmbeddingsTask{
+    #         input:
+    #             csv_path = csv,
+    #             model_name = model_name,
+    #             batch_size =  24,
+    #             docker_image = "pytorch:latest"
+    #     }
+    # }
     output {
+        # Array[File] embeddings = ESM2EmbeddingsTask.embeddings
         File embeddings = ESM2EmbeddingsTask.embeddings
     } 
 }
@@ -48,14 +55,15 @@ task ShardFastaTask {
         cpu: cpu
     }
     output {
-        Array[File] fastas = ~{output_dir}
+        # Array[File] csvs=glob("/home/scripts/output/*.csv")
+        File csv = "/home/scripts/output/*.csv"
     }
 }
 
 task ESM2EmbeddingsTask {
     input {
-        File fasta_path
-        # File model_parameters = "ref_data/esmfold_parameters_221230.tar"
+        File csv_path
+        File model_parameters = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
         String memory = "32 GiB"
         Int cpu = 4
         String docker_image = "pytorch"
@@ -67,7 +75,7 @@ task ESM2EmbeddingsTask {
         set -euxo pipefail
         printenv
         mkdir output
-        /opt/venv/bin/python /home/scripts/generate_esm2_embeddings.py ~{fasta_path} --model_name=~{model_name} --output_file=~{output_dir}/embeddings.npy
+        /opt/venv/bin/python /home/scripts/generate_esm2_embeddings.py ~{csv_path} --model_name=~{model_name} --output_file=~{output_dir}/embeddings.npy
     >>>
     runtime {
         docker: docker_image,
