@@ -3,12 +3,9 @@ version 1.0
 workflow ESM2EmbeddingsFlow {
     input {
         File fasta_path
-        String weights_s3_bucket = "167428594774-us-east-1-aho"
-        String weights_s3_key = "/models/esm/esm2_t6_8M_UR50D.tar"
         Int max_records_per_partition = 24
+        String pretrained_model_name_or_path = "s3://167428594774-us-east-1-aho/models/esm/esm2_t6_8M_UR50D.tar"
     }
-
-    File pretrained_model_name_or_path = "s3://" + weights_s3_bucket + weights_s3_key
 
     call ShardFastaTask{
         input:
