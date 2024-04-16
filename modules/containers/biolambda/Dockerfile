@@ -20,4 +20,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
-ENTRYPOINT [ "python" ]
+ENTRYPOINT [ "/opt/venv/bin/python" ]

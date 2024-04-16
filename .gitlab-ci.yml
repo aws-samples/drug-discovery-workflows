@@ -10,7 +10,6 @@
 # SPDX-License-Identifier: Apache-2.0
 variables:
   AWS_DEFAULT_REGION: us-east-1
-  DEPLOYMENT_BUCKET_NAME: aho-drug-discovery-workflows
   DEV_BUCKET_PREFIX: build/dev
   MAIN_BUCKET_PREFIX: build/main
 
@@ -66,9 +65,9 @@ push-to-s3-dev:
     - yum update -y && yum install -y awscli zip
   script:
     - zip -r build/code.zip . -x .\*/\* -x .gitlab-ci.yml
-    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/code/code.zip
-    - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $DEV_BUCKET_PREFIX
-    - aws s3 cp build/cloudformation/packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/packaged.yaml
+    - aws s3 cp build/code.zip s3://$DEV_DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/code/code.zip
+    - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEV_DEPLOYMENT_BUCKET_NAME --s3-prefix $DEV_BUCKET_PREFIX
+    - aws s3 cp build/cloudformation/packaged.yaml s3://$DEV_DEPLOYMENT_BUCKET_NAME/$DEV_BUCKET_PREFIX/packaged.yaml
   artifacts:
     paths:
       - build/cloudformation/packaged.yaml
@@ -105,8 +104,8 @@ push-to-s3-main:
     - yum update -y && yum install -y awscli zip
   script:
     - zip -r build/code.zip . -x .\*/\* -x .gitlab-ci.yml
-    - aws s3 cp build/code.zip s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/code/code.zip
-    - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX
-    - aws s3 cp build/cloudformation/packaged.yaml s3://$DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/packaged.yaml
+    - aws s3 cp build/code.zip s3://$MAIN_DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/code/code.zip
+    - aws cloudformation package --template-file build/cloudformation/root.yaml --output-template build/cloudformation/packaged.yaml --region $AWS_DEFAULT_REGION --s3-bucket $MAIN_DEPLOYMENT_BUCKET_NAME --s3-prefix $MAIN_BUCKET_PREFIX
+    - aws s3 cp build/cloudformation/packaged.yaml s3://$MAIN_DEPLOYMENT_BUCKET_NAME/$MAIN_BUCKET_PREFIX/packaged.yaml
   only:
     - main
