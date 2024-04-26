@@ -222,4 +222,6 @@ RUN pip cache purge \
 COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
+ENV TMPDIR="/tmp"
+
 ENTRYPOINT [ "python" ]
