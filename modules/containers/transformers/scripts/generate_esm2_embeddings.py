@@ -92,14 +92,12 @@ if __name__ == "__main__":
         type=str,
     )
 
-if __name__ == "__main__":
-
     args = parser.parse_args()
     with open(args.input_file, newline="") as csvfile:
         reader = csv.DictReader(csvfile)
         seqs = [row["text"] for row in reader]
 
-    output = generate_embeddings(
+    generate_embeddings(
         seqs,
         args.pretrained_model_name_or_path,
         args.batch_size,

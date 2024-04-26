@@ -5,34 +5,20 @@
 import argparse
 import json
 
-# import esm
 import logging
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
-from pathlib import Path
-import re
-from resource import getrusage, RUSAGE_SELF
-import sys
-from time import gmtime, strftime
-from timeit import default_timer as timer
 import torch
-import typing as T
-import uuid
 import csv
 from transformers import AutoTokenizer, EsmForProteinFolding
 import os
+from tqdm import tqdm
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter(
-    "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-    datefmt="%y/%m/%d %H:%M:%S",
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
 )
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-PathLike = T.Union[str, Path]
 
 
 def plot_pae(pae, output) -> None:
@@ -49,131 +35,84 @@ def plot_pae(pae, output) -> None:
     return None
 
 
+def predict_structures(
+    seqs: list,
+    pretrained_model_name_or_path: str = "facebook/esmfold_v1",
+    output_dir: str = "output",
+):
+
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
+    model = EsmForProteinFolding.from_pretrained(
+        pretrained_model_name_or_path, device_map="auto"
+    )
+
+    logging.info(f"Predicting structures for {len(seqs)} sequences")
+    for n, seq in tqdm(
+        enumerate(seqs),
+        desc=f"Generating structures",
+    ):
+        logging.info(f"Sequence {n+1} of {len(seqs)+1}")
+        metrics = {"sequence": seq, "sequence_length": len(seq)}
+        inputs = tokenizer(seq, return_tensors="pt", add_special_tokens=False).to(
+            device
+        )
+        with torch.no_grad():
+            outputs = model(**inputs)
+
+        output = {key: value.cpu() for key, value in outputs.items()}
+        pdb_string = model.output_to_pdb(output)[0]
+        output_dir = os.path.join(args.output_dir, str(n))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        output_file = os.path.join(output_dir, "prediction.pdb")
+
+        with open(output_file, "w") as f:
+            f.write(pdb_string)
+        metrics.update(
+            {
+                "mean_plddt": round(torch.mean(output["plddt"]).item(), 3),
+                "ptm": round(output["ptm"].item(), 3),
+                "max_predicted_aligned_error": round(
+                    output["max_predicted_aligned_error"].item(), 3
+                ),
+            }
+        )
+        torch.save(output, os.path.join(output_dir, "outputs.pt"))
+        pae = output["predicted_aligned_error"]
+        plot_pae(pae[0], os.path.join(output_dir, "pae.png"))
+        with open(os.path.join(output_dir, "metrics.json"), "w") as f:
+            json.dump(metrics, f)
+
+
 if __name__ == "__main__":
-    start_time = timer()
-    metrics = {
-        "model_name": "ESMFold",
-        "start_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime()),
-    }
-    # Parse arguments
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
-        "--input_file",
-        help="Path to input file",
-        type=Path,
-        required=True,
+        "input_file", help="Path to input CSV file with sequences to process", type=str
     )
     parser.add_argument(
-        "-o", "--pdb", help="Path to output PDB directory", type=Path, required=True
+        "--pretrained_model_name_or_path",
+        help="ESMFold model to use",
+        default="facebook/esmfold_v1",
+        type=str,
     )
     parser.add_argument(
-        "-m",
-        "--model-dir",
-        help="Parent path to Pretrained ESM data directory. ",
-        type=Path,
-        default="data/weights",
+        "--output_dir",
+        help="(Optional) Path to output dir",
+        default="output",
+        type=str,
     )
 
     args = parser.parse_args()
-    if not args.input_file.exists():
-        raise FileNotFoundError(args.input_file)
-    args.pdb.mkdir(exist_ok=True)
-
-    # Read input_file and sort sequences by length
-    logger.info(f"Reading sequences from {args.input_file}")
-    start_sequence_load_time = timer()
     with open(args.input_file, newline="") as csvfile:
         reader = csv.DictReader(csvfile)
-        all_sequences = [row["text"] for row in reader]
+        seqs = [row["text"] for row in reader]
 
-    # if len(all_sequences) > 1:
-    # seq = all_sequences[0]
-
-    seq_count = len(all_sequences)
-
-    logger.info(f"Loaded {seq_count} sequences from {args.input_file}")
-    metrics.update(
-        {"timings": {"sequence_load": round(timer() - start_sequence_load_time, 3)}}
+    predict_structures(
+        seqs,
+        args.pretrained_model_name_or_path,
+        args.output_dir,
     )
-
-    # Load models
-    logger.info("Loading model")
-    start_model_load_time = timer()
-
-    model = EsmForProteinFolding.from_pretrained(args.model_dir)
-    tokenizer = AutoTokenizer.from_pretrained(args.model_dir)
-    metrics["timings"].update({"model_load": round(timer() - start_model_load_time, 3)})
-
-    # Predict structure
-    logger.info("Starting Predictions")
-    metrics["predictions"] = []
-    start_prediction_time = timer()
-    for i, seq in enumerate(all_sequences):
-        logger.info(f"Predicting sequence {i}")
-        logger.info(f"Raw input is {seq}")
-        metrics["predictions"].append({"sequence": seq, "length": len(seq)})
-        inputs = tokenizer(seq, return_tensors="pt", add_special_tokens=False)
-
-        try:
-            output = model(**inputs)
-        except RuntimeError as err:
-            metrics.update({"error": err.args[0]})
-            metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
-            with open(os.path.join(args.pdb, i, "metrics.json", "w")) as f:
-                json.dump(metrics, f)
-            raise
-        except Exception as err:
-            metrics.update({"error": err})
-            metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
-            with open(os.path.join(args.pdb, i, "metrics.json", "w")) as f:
-                json.dump(metrics, f)
-            raise
-        metrics["predictions"][i].update(
-            {"prediction_time": round(timer() - start_prediction_time, 3)}
-        )
-
-        # Parse outputs
-        start_output_time = timer()
-        output = {key: value.cpu() for key, value in output.items()}
-        pdb_string = model.output_to_pdb(output)[0]
-        output_file = os.path.join(args.pdb, i, "prediction.pdb")
-        output_file.write_text(pdb_string)
-        mean_plddt = round(output["mean_plddt"].item(), 3)
-        ptm = round(output["ptm"].item(), 3)
-        max_predicted_aligned_error = round(
-            output["max_predicted_aligned_error"].item(), 3
-        )
-        peak_mem = getrusage(RUSAGE_SELF).ru_maxrss / 1000000
-        peak_gpu_mem = torch.cuda.max_memory_allocated() / 1000000000
-
-        torch.save(output, os.path.join(args.pdb, i, "outputs.pt"))
-
-        pae = output["predicted_aligned_error"]
-        plot_pae(pae[0], os.path.join(args.pdb, i, "pae.png"))
-
-        metrics["predictions"][i].update(
-            {
-                "pLDDT": mean_plddt,
-                "pTM": ptm,
-                "max_predicted_aligned_error": max_predicted_aligned_error,
-                "peak_memory_gb": peak_mem,
-                "peak_gpu_memory_gb": peak_gpu_mem,
-            }
-        )
-
-        metrics["predictions"][i].update({"output_time": round(timer() - start_output_time, 3)})
-        seq_end_time = timer()
-        seq_total_time = round(seq_end_time - start_time, 3)
-        logger.info(
-            f"Predicted structure length {len(seq)}, pLDDT {mean_plddt}, "
-            f"pTM {ptm} in {seq_total_time}s. "
-            f"Peak memory usage (GB) {peak_mem}. "
-            f"Peak GPU memory usage (GB) {peak_gpu_mem}."
-        )
-    end_time = timer()
-    total_time = round(end_time - start_time, 3)
-    metrics["timings"].update({"total": total_time})
-    metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})        
-    with open(os.path.join(args.pdb, "metrics.json", "w")) as f:
-        json.dump(metrics, f)

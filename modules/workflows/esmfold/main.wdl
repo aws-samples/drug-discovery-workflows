@@ -3,7 +3,7 @@ version 1.0
 workflow ESMFoldFlow {
     input {
         File fasta_path
-        Int max_records_per_partition = 24
+        Int max_records_per_partition = 2
         String model_parameters = "s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
     }
 
@@ -63,9 +63,9 @@ task ESMFoldTask {
         String output_dir = "output"    
     }
     command <<<
-        # export TMPDIR="/tmp"
         tar -xvf ~{model_parameters} -C $TMPDIR
-        /opt/conda/bin/python /home/scripts/esmfold_inference.py -i ~{csv_path} -o ~{output_dir} -m $TMPDIR
+        /opt/conda/bin/python /home/scripts/esmfold_inference.py ~{csv_path} \
+        --output_dir ~{output_dir} --pretrained_model_name_or_path $TMPDIR
     >>>
     runtime {
         docker: docker_image,
