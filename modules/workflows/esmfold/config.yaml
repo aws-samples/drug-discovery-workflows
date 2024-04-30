@@ -9,7 +9,7 @@ parameterTemplate:
   max_records_per_partition:
     description: "Number of partitions to shard the input fasta file into"
     optional: true
-  pretrained_model_uri:
+  model_parameters:
     description: "S3 URL for a .tar file containing ESMFold model weights "
     optional: true
 storageCapacity: 1200

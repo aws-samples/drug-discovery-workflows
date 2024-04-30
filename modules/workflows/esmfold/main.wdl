@@ -3,7 +3,7 @@ version 1.0
 workflow ESMFoldFlow {
     input {
         File fasta_path
-        Int max_records_per_partition = 2
+        Int max_records_per_partition = 1
         String model_parameters = "s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
     }
 
@@ -57,30 +57,27 @@ task ESMFoldTask {
     input {
         File csv_path
         File model_parameters
-        String memory = "32 GiB"
-        Int cpu = 4
+        String memory = "16 GiB"
+        Int cpu = 2
         String docker_image = "esmfold"
-        String output_dir = "output"    
     }
     command <<<
-        mkdir model ~{output_dir}
-        tar -xvf ~{model_parameters} -C model
+        set -euxo pipefail
+        tar -xvf ~{model_parameters} -C $(pwd)
         /opt/conda/bin/python /home/scripts/esmfold_inference.py ~{csv_path} \
-        --output_dir ~{output_dir} --pretrained_model_name_or_path model
-        ls -la ~{output_dir}
+        --output_dir $(pwd) --pretrained_model_name_or_path $(pwd)
     >>>
     runtime {
         docker: docker_image,
         memory: memory,
-        acceleratorCount: 1,
-        acceleratorType: "nvidia-tesla-t4-a10g",
+        # acceleratorCount: 1,
+        # acceleratorType: "nvidia-tesla-t4-a10g",
         cpu: cpu
         }
     output {
-        File pdb = "~{output_dir}/prediction.pdb"
-        File metrics = "~{output_dir}/metrics.json"
-        File pae = "~{output_dir}/pae.png"
-        File outputs = "~{output_dir}/outputs.pt"
+        File pdb = "prediction.pdb"
+        File metrics = "metrics.json"
+        File pae = "pae.png"
+        File outputs = "outputs.pt"
     }
 }
-
