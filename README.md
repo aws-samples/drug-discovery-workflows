@@ -6,6 +6,20 @@ A collection of Amazon HealthOmics workflows to accelerate drug discovery.
 
 ## Deployment
 
+### Quick Start
+
+1. Choose **Launch Stack** and (if prompted) log into your AWS account:
+
+    [![Launch Stack](img/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/build/main/packaged.yaml)  
+2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
+3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
+4. Choose **Create stack**.  
+    ![Choose Create Stack](img/create_stack.png)  
+5. Wait 30 minutes for AWS CloudFormation to create the necessary infrastructure stack and module containers.
+6. Once the deployment has finished, you can view your private workflows from the Amazon HealthOmics Workflows console.
+
+### Custom Deployment
+
 1. Clone this repository to your local environment.
 2. Authenticate into your AWS account of interest and `cd` into the project dir.
 3. Run the following command, replacing the placeholders with the name of a S3 bucket,

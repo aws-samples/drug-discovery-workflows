@@ -1,10 +1,10 @@
 version 1.0
 
-workflow ESM2EmbeddingsFlow {
+workflow ESMFoldFlow {
     input {
         File fasta_path
-        Int max_records_per_partition = 24
-        String pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t6_8M_UR50D.tar"
+        Int max_records_per_partition = 1
+        String model_parameters = "s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
     }
 
     call ShardFastaTask{
@@ -14,16 +14,18 @@ workflow ESM2EmbeddingsFlow {
             docker_image = "{{biolambda:latest}}",
     }
     scatter (csv in ShardFastaTask.csvs){
-        call ESM2EmbeddingsTask{
+        call ESMFoldTask{
             input:
                 csv_path = csv,
-                pretrained_model_uri = pretrained_model_uri,
-                batch_size =  24,
+                model_parameters = model_parameters,
                 docker_image = "{{transformers:latest}}"
         }
     }
     output {
-        Array[File] embeddings = ESM2EmbeddingsTask.embeddings
+        Array[File] pdb = ESMFoldTask.pdb
+        Array[File] metrics = ESMFoldTask.metrics
+        Array[File] pae = ESMFoldTask.pae
+        Array[File] outputs = ESMFoldTask.outputs
     } 
 }
 
@@ -51,30 +53,31 @@ task ShardFastaTask {
     }
 }
 
-task ESM2EmbeddingsTask {
+task ESMFoldTask {
     input {
         File csv_path
-        File pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
-        String memory = "32 GiB"
-        Int cpu = 4
-        String docker_image = "{{transformers:latest}}"
-        Int batch_size = 24
+        File model_parameters
+        String memory = "16 GiB"
+        Int cpu = 8
+        String docker_image = "{{esmfold}}"
     }
     command <<<
         set -euxo pipefail
-        tar -xvf ~{pretrained_model_uri} .
-        /opt/conda/bin/python /home/scripts/generate_esm2_embeddings.py ~{csv_path} \
-        --pretrained_model_name_or_path="." --output_file=embeddings.npy
+        tar -xvf ~{model_parameters} -C $(pwd)
+        /opt/conda/bin/python /home/scripts/esmfold_inference.py ~{csv_path} \
+        --output_dir $(pwd) --pretrained_model_name_or_path $(pwd)
     >>>
     runtime {
         docker: docker_image,
         memory: memory,
         acceleratorCount: 1,
         acceleratorType: "nvidia-tesla-t4-a10g",
-        cpu: cpu        
-    }
+        cpu: cpu
+        }
     output {
-        File embeddings = "embeddings.npy"
+        File pdb = "prediction.pdb"
+        File metrics = "metrics.json"
+        File pae = "pae.png"
+        File outputs = "outputs.pt"
     }
 }
-
