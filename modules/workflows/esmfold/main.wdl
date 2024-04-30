@@ -63,9 +63,11 @@ task ESMFoldTask {
         String output_dir = "output"    
     }
     command <<<
-        tar -xvf ~{model_parameters} -C $TMPDIR
+        mkdir model ~{output_dir}
+        tar -xvf ~{model_parameters} -C model
         /opt/conda/bin/python /home/scripts/esmfold_inference.py ~{csv_path} \
-        --output_dir ~{output_dir} --pretrained_model_name_or_path $TMPDIR
+        --output_dir ~{output_dir} --pretrained_model_name_or_path model
+        ls -la ~{output_dir}
     >>>
     runtime {
         docker: docker_image,
