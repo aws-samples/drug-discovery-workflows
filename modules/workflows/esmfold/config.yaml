@@ -1,5 +1,5 @@
-name: ESM2 Embeddings
-description: "This workflow generates numerical embeddings for one or more protein amino acid sequences using the ESM-2 protein language model."
+name: ESMFold
+description: "This workflow predicts the 3D structures for one or more protein amino acid sequences using the ESMFold protein language model."
 engine: WDL
 main: main.wdl
 parameterTemplate:

@@ -11,14 +11,14 @@ workflow ESMFoldFlow {
         input:
             fasta_path = fasta_path,
             max_records_per_partition = max_records_per_partition,
-            docker_image = "biolambda:latest",
+            docker_image = "{{biolambda:latest}}",
     }
     scatter (csv in ShardFastaTask.csvs){
         call ESMFoldTask{
             input:
                 csv_path = csv,
                 model_parameters = model_parameters,
-                docker_image = "transformers:latest"
+                docker_image = "{{transformers:latest}}"
         }
     }
     output {
@@ -34,7 +34,7 @@ task ShardFastaTask {
         File fasta_path
         Int cpu = 2
         String memory = "4 GiB"        
-        String docker_image = "biolambda:latest"
+        String docker_image = "{{biolambda:latest}}"
         Int max_records_per_partition = 24
     }
     command <<<
@@ -58,8 +58,8 @@ task ESMFoldTask {
         File csv_path
         File model_parameters
         String memory = "16 GiB"
-        Int cpu = 2
-        String docker_image = "esmfold"
+        Int cpu = 8
+        String docker_image = "{{esmfold}}"
     }
     command <<<
         set -euxo pipefail
@@ -70,8 +70,8 @@ task ESMFoldTask {
     runtime {
         docker: docker_image,
         memory: memory,
-        # acceleratorCount: 1,
-        # acceleratorType: "nvidia-tesla-t4-a10g",
+        acceleratorCount: 1,
+        acceleratorType: "nvidia-tesla-t4-a10g",
         cpu: cpu
         }
     output {
