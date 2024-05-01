@@ -222,9 +222,6 @@ RUN pip cache purge \
 COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
-<<<<<<<< HEAD:modules/containers/pytorch/Dockerfile
-========
 ENV TMPDIR="/tmp"
 
->>>>>>>> dev:modules/containers/transformers/Dockerfile
 ENTRYPOINT [ "python" ]
