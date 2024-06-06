@@ -7,11 +7,11 @@ AlphaFold-Multimer requires several steps: at a high level they bundle into:
 2. Multisequence alignment (MSA) 
 3. Inference
 
-Traditionally, the download and prepare data stage will download `tar.gz` files and unpack. This script has a series of optimizations that are designed to improve data staging times. On average, we have seen improvements of ~75min on data staging. These are: 
+Traditionally, the download and prepare data stage will download `tar.gz` files and unpack. This script has a series of optimizations that are designed to improve data staging times. These are: 
 1. Declare specific files to download rather than just rely on recursive download. This takes advantage of AWS HealthOmics' ability to scale out downloads horizontally. You can find these locations in the `nextflow.config` file.
-2. Keep the unpacked data in S3 and download there. This removes the need for `tar.gz` files. The compute resources associated with data preparation cost more and increase data preparation times. Instead, you're offloading the compute resources to HealthOmics imports, which is free for customers. Second, storage costs go down in HealthOmics as the overall run time decreases. While this increases S3 footprint, this is modest compared to the overall run savings.
+2. Keep the unpacked data in S3 and download there. This removes the need for `tar.gz` files. The compute resources associated with data preparation cost more and increase data preparation times. Instead, you're offloading the compute resources to HealthOmics imports, which is free for customers. Second, storage costs go down in HealthOmics as the overall run time decreases. All of the data is hosted by AWS HealthOmics, so you do not increase your S3 footprint.
 
-Additionally, the inference step includes a unified memory declaration, which is needed for larger residue sizes. This effectively spills over memory utilization for GPU-mem to vRAM in the cases where it is needed. There may be additional optimizations that can be made here.
+The inference step has been optimized to support larger inferences (>2600 residues). If you only need to predict complexes of ~1000-1500 residues, you are likely safe to decrease the inference resources from 8 vCPU/32GB RAM to 4vCPU/16GB.
 
 ## Containers
 
