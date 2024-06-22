@@ -1,3 +1,3 @@
 {
-    "fasta_path":"s3://mybucket/test_data/monomer/alphafold_monomer_multi_test.fasta"
+    "fasta_path":"s3://ajfriedm-healthomics-data-us-east-1/test_data/monomer/test_dir_import/"
 }
