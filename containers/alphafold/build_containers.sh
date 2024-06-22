@@ -18,7 +18,7 @@ docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/alphafold-data:latest
 cd ..
 
 # build alphafold-predict
-cd alphafold2
+cd alphafold-predict
 docker build -t $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/alphafold-predict:latest .
 docker push $ACCOUNT.dkr.ecr.$REGION.amazonaws.com/alphafold-predict:latest
 cd ..

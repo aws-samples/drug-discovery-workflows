@@ -5,13 +5,13 @@ include {
     SearchMgnify;
     SearchBFD;
     SearchTemplatesTask;
-} from './modules/searches'
+} from '../../modules/alphafold2/searches'
 
 include {
     UnpackBFD;
     UnpackPdb70nSeqres;
     UnpackMMCIF;
-} from './modules/unpack'
+} from '../../modules/unpack'
 
 workflow {
     //Convert to files
