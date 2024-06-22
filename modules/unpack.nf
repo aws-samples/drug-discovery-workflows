@@ -145,6 +145,5 @@ process UnpackRecords {
     """
     set -euxo pipefail
     echo -e ">${header}\n${seqString}" > input.fasta
-    cat input.fasta
     """
 }

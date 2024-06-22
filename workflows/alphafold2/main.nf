@@ -5,20 +5,28 @@ include {
     SearchMgnify;
     SearchBFD;
     SearchTemplatesTask;
-} from '../../modules/alphafold2/searches'
+} from './modules/searches'
 
 include {
     UnpackBFD;
     UnpackPdb70nSeqres;
     UnpackMMCIF;
-    UnpackRecords;
-} from '../../modules/unpack'
-
+} from './modules/unpack'
 
 workflow {
-    fasta_records = Channel.fromPath(params.fasta_path).splitFasta(record: [id: true, header: true, seqString: true])
+    //Convert to files
+    if (params.fasta_path[-1] == "/") {
+        fasta_path = params.fasta_path + "*"
+    } else {
+        fasta_path = params.fasta_path
+    }
+    
+    fasta_files = Channel
+                  .fromPath(fasta_path)
+                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
 
-    UnpackRecords(fasta_records)
+    uniref30 = Channel.fromPath(params.uniref30_database_src).first()
+    alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
 
     UnpackBFD(params.bfd_database_a3m_ffdata,
               params.bfd_database_a3m_ffindex,
@@ -38,26 +46,27 @@ workflow {
                 params.pdb_mmcif_src9, 
                 params.pdb_mmcif_obsolete)
 
-    SearchUniref90(UnpackRecords.out.fasta, params.uniref90_database_src)
-    SearchMgnify(UnpackRecords.out.fasta, params.mgnify_database_src)
-    SearchBFD(UnpackRecords.out.fasta, UnpackBFD.out.db_folder, params.uniref30_database_src)
+    SearchUniref90(fasta_files, params.uniref90_database_src)
+    SearchMgnify(fasta_files, params.mgnify_database_src)
+    SearchBFD(fasta_files, UnpackBFD.out.db_folder, uniref30)
 
-    SearchTemplatesTask(UnpackRecords.out.fasta, SearchUniref90.out.msa, UnpackPdb70nSeqres.out.db_folder)
+    SearchTemplatesTask(SearchUniref90.out.msa, UnpackPdb70nSeqres.out.db_folder)
 
-    GenerateFeaturesTask(UnpackRecords.out.fasta,
-                         SearchUniref90.out.msa, 
-                         SearchMgnify.out.msa, 
-                         SearchBFD.out.msa, 
-                         SearchTemplatesTask.out.pdb_hits, 
+    msa_tuples = fasta_files
+                 .join(SearchUniref90.out.msa)
+                 .join(SearchMgnify.out.msa)
+                 .join(SearchBFD.out.msa)
+                 .join(SearchTemplatesTask.out.pdb_hits)
+
+    GenerateFeaturesTask(msa_tuples,
                          UnpackMMCIF.out.db_folder, 
                          UnpackMMCIF.out.db_obsolete)
 
     model_nums = Channel.of(0,1,2,3,4)
-    AlphaFoldTask(UnpackRecords.out.fasta, GenerateFeaturesTask.out.features, params.alphafold_model_parameters, model_nums)
+    features = GenerateFeaturesTask.out.features.combine(model_nums)
+    AlphaFoldInference(features, alphafold_model_parameters, params.random_seed, params.run_relax)
 }
 
-
-//GenerateFeaturesTask
 process GenerateFeaturesTask {
     tag "${id}"
     label "data"
@@ -66,31 +75,31 @@ process GenerateFeaturesTask {
     publishDir "/mnt/workflow/pubdir/${id}/features"
 
     input:
-        tuple val(id), path(fasta_path)
-        path uniref90_msa
-        path mgnify_msa
-        path bfd_msa
-        path template_hits
+        tuple val(id), path(fasta_path), path(uniref90_msa), path(mgnify_msa), path(bfd_msa), path(template_hits)
         path pdb_mmcif_folder
         path mmcif_obsolete_path
 
     output:
-        path "output/features.pkl", emit: features
+        tuple val(id), path ("output/features.pkl"), emit: features
         path "output/metrics.json", emit: metrics
 
     script:
     """
     set -euxo pipefail
 
-    mkdir -p \${TMPDIR}/msa
-    cp -p $uniref90_msa \${TMPDIR}/msa/
-    cp -p $mgnify_msa \${TMPDIR}/msa/
-    cp -p $bfd_msa \${TMPDIR}/msa/
-    cp -p $template_hits \${TMPDIR}/msa/
+    md5sum $uniref90_msa
+    md5sum $mgnify_msa
+    md5sum $bfd_msa
+
+    mkdir -p msa
+    cp -p $uniref90_msa msa/
+    cp -p $mgnify_msa msa/
+    cp -p $bfd_msa msa/
+    cp -p $template_hits msa/
 
     /opt/venv/bin/python /opt/generate_features.py \
       --fasta_paths=$fasta_path \
-      --msa_dir=\${TMPDIR}/msa \
+      --msa_dir=msa \
       --template_mmcif_dir="$pdb_mmcif_folder" \
       --obsolete_pdbs_path="$mmcif_obsolete_path" \
       --template_hits=$template_hits \
@@ -100,20 +109,21 @@ process GenerateFeaturesTask {
     """
 }
 
-process AlphaFoldTask {
+process AlphaFoldInference {
     tag "${id}_${modelnum}"
     errorStrategy 'retry'
     label 'predict'
-    cpus { 4 * Math.pow(2, task.attempt) }
-    memory { 16.GB * Math.pow(2, task.attempt) }
+    cpus { 2 * Math.pow(2, task.attempt) }
+    memory { 8.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
     maxRetries 2
     publishDir "/mnt/workflow/pubdir/${id}/prediction_${modelnum}"
+
     input:
-        tuple val(id), path(fasta_path)
-        path features
+        tuple val(id), path (features), val(modelnum)
         path alphafold_model_parameters
-        val modelnum
+        val random_seed
+        val run_relax
 
     output:
         path "metrics.json", emit: metrics
@@ -124,10 +134,12 @@ process AlphaFoldTask {
     set -euxo pipefail
     mkdir -p model/params
     tar -xvf $alphafold_model_parameters -C model/params
+    export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
+    export TF_FORCE_UNIFIED_MEMORY=1
     /opt/conda/bin/python /app/alphafold/predict.py \
-      --target_id=\${target_id} --features_path=$features --model_preset=monomer_ptm \
-      --model_dir=model --random_seed=42 --output_dir=output \
-      --run_relax=false --use_gpu_relax=false --model_num=$modelnum
+      --target_id=$id --features_path=$features --model_preset=monomer_ptm \
+      --model_dir=model --random_seed=$random_seed --output_dir=output \
+      --run_relax=${run_relax} --use_gpu_relax=${run_relax} --model_num=$modelnum
     mv output/metrics.json .
     rm -rf output/msas
     """

@@ -12,23 +12,25 @@ process SearchUniref90 {
         path database_path
 
     output:
-        path "output/uniref90_hits.sto", emit: msa
-        path "output/uniref90_metrics.json", emit: metrics
+        tuple val(id), path ("output_${id}/uniref90_hits.sto"), emit: msa
+        path "output_${id}/uniref90_metrics.json", emit: metrics
 
     script:
     """
     set -euxo pipefail
+    cat $fasta_path
 
-    mkdir -p output
+    mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_path \
       --database_type=uniref90 \
       --database_path=$database_path \
-      --output_dir=output \
+      --output_dir=output_${id} \
       --cpu=$task.cpus
 
-    mv output/metrics.json output/uniref90_metrics.json
+    mv output_${id}/metrics.json output_${id}/uniref90_metrics.json
+    md5sum output_${id}/uniref90_hits.sto
     """
 }
 
@@ -44,23 +46,25 @@ process SearchMgnify {
         path database_path
 
     output:
-        path "output/mgnify_hits.sto", emit: msa
-        path "output/mgnify_metrics.json", emit: metrics
+        tuple val(id), path ("output_${id}/mgnify_hits.sto"), emit: msa
+        path "output_${id}/mgnify_metrics.json", emit: metrics
 
     script:
     """
     set -euxo pipefail
+    cat $fasta_path
     
-    mkdir -p output
+    mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_path \
       --database_type=mgnify \
       --database_path=$database_path \
-      --output_dir=output \
+      --output_dir=output_${id} \
       --cpu=$task.cpus
     
-    mv output/metrics.json output/mgnify_metrics.json
+    mv output_${id}/metrics.json output_${id}/mgnify_metrics.json
+    md5sum output_${id}/mgnify_hits.sto
     """
 }
 
@@ -77,25 +81,26 @@ process SearchBFD {
         path uniref30_database_folder
 
     output:
-        path "output/bfd_hits.a3m", emit: msa
-        path "output/bfd_metrics.json", emit: metrics
+        tuple val(id), path ("output_${id}/bfd_uniref_hits.a3m"), emit: msa
+        path "output_${id}/bfd_metrics.json", emit: metrics
 
     script:
     """
     set -euxo pipefail
-
-    mkdir -p output
+    cat $fasta_path
+    mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_path \
       --database_type=bfd \
       --database_path=$bfd_database_folder \
       --database_path_2=$uniref30_database_folder \
-      --output_dir=output \
+      --output_dir=output_${id} \
       --cpu=$task.cpus
 
-    mv output/metrics.json output/bfd_metrics.json
-
+    mv output_${id}/metrics.json output_${id}/bfd_metrics.json
+    mv output_${id}/bfd_hits.a3m output_${id}/bfd_uniref_hits.a3m
+    md5sum output_${id}/bfd_uniref_hits.a3m
     """
 }
 
@@ -107,27 +112,26 @@ process SearchTemplatesTask {
     publishDir "/mnt/workflow/pubdir/${id}"
 
     input:
-        tuple val(id), path(fasta_path)
-        path msa_path
+        tuple val(id), path (msa_path)
         path pdb_db_folder
 
     output:
-        path "output/pdb_hits.hhr", emit: pdb_hits
-        path "output/pdb_metrics.json", emit: metrics
+        tuple val(id), path ("output_${id}/pdb_hits.hhr"), emit: pdb_hits
+        path "output_${id}/pdb_metrics.json", emit: metrics
 
     script:
     """
     set -euxo pipefail
 
-    mkdir -p output
+    mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/search_templates.py \
           --msa_path=$msa_path \
-          --output_dir=output \
+          --output_dir=output_${id} \
           --database_path=$pdb_db_folder \
           --model_preset=monomer_ptm \
           --cpu=$task.cpus
     
-    mv output/metrics.json output/pdb_metrics.json
+    mv output_${id}/metrics.json output_${id}/pdb_metrics.json
     """
 }
