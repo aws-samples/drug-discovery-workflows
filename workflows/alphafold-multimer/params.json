@@ -1,0 +1,4 @@
+{
+    "fasta_path":"s3://ajfriedm-healthomics-output-us-east-1/test_data/multimer/7unl.fasta",
+    "target_id": "7unl"
+}

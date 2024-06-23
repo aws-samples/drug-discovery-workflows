@@ -71,8 +71,12 @@ process SearchMgnify {
 process SearchBFD {
     tag "${id}"
     label 'data'
-    cpus 16
-    memory '128 GB'
+
+    cpus { 8 * Math.pow(2, task.attempt) }
+    memory { 64.GB * Math.pow(2, task.attempt) }
+    maxRetries 1
+    errorStrategy 'retry'
+    
     publishDir "/mnt/workflow/pubdir/${id}"
 
     input:

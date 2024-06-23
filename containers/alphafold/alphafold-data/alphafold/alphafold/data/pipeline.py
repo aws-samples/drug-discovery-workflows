@@ -69,6 +69,7 @@ def make_msa_features(msas: Sequence[parsers.Msa]) -> FeatureDict:
       int_msa.append(
           [residue_constants.HHBLITS_AA_TO_ID[res] for res in sequence])
       deletion_matrix.append(msa.deletion_matrix[sequence_index])
+      print (len(msa.deletion_matrix[sequence_index]))
       identifiers = msa_identifiers.get_identifiers(
           msa.descriptions[sequence_index])
       species_ids.append(identifiers.species_id.encode('utf-8'))
@@ -76,6 +77,7 @@ def make_msa_features(msas: Sequence[parsers.Msa]) -> FeatureDict:
   num_res = len(msas[0].sequences[0])
   num_alignments = len(int_msa)
   features = {}
+  
   features['deletion_matrix_int'] = np.array(deletion_matrix, dtype=np.int32)
   features['msa'] = np.array(int_msa, dtype=np.int32)
   features['num_alignments'] = np.array(
