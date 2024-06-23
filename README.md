@@ -6,7 +6,7 @@ A collection of Amazon HealthOmics workflows to accelerate drug discovery.
 
 ## Deployment
 
-For individual deployments, you also can navigate to the README in `workflows/<workflow-name>. The following is currently a WIP, but will be the recommended way shortly!
+For individual deployments, you also can navigate to the README in `workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
 
 ### Quick Start
 
