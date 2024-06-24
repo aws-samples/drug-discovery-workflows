@@ -1,0 +1,10 @@
+{
+  "input_pdb": {
+    "description": "Path to input pdb",
+    "optional": false
+  },
+  "model_parameters": {
+    "description": "Path to model parameters",
+    "optional": true
+  }
+}

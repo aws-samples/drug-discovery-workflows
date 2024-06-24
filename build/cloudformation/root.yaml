@@ -30,7 +30,7 @@ Parameters:
     AllowedValues: [Y, N]
 
 Resources:
-  ContainerBuiild:
+  ContainerBuild:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: container.yaml

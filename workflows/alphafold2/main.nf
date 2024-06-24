@@ -128,7 +128,7 @@ process AlphaFoldInference {
     output:
         path "metrics.json", emit: metrics
         path "output/*", emit: results
-    
+
     script:
     """
     set -euxo pipefail

@@ -1,1 +1,0 @@
-FROM nvcr.io/nvidia/clara/bionemo-framework:1.3
