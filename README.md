@@ -4,23 +4,15 @@
 
 A collection of Amazon HealthOmics workflows to accelerate drug discovery.
 
+## News
+
+Amazon HealthOmics Drug Discovery Workflows now supports the [ESM3](https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1) model by [EvolutionaryScale](https://www.evolutionaryscale.ai/)! Please see the `README` file at `workflows/protein_annotation/` for more information.
+
 ## Deployment
 
 For individual deployments, you also can navigate to the README in `workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
 
 ### Quick Start
-
-1. Choose **Launch Stack** and (if prompted) log into your AWS account:
-
-    [![Launch Stack](img/LaunchStack.jpg)](https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://aws-hcls-ml.s3.amazonaws.com/build/main/packaged.yaml)  
-2. For **Stack Name**, enter a value unique to your account and region. Leave the other parameters as their default values and select **Next**.  
-3. Select **I acknowledge that AWS CloudFormation might create IAM resources with custom names**.  
-4. Choose **Create stack**.  
-    ![Choose Create Stack](img/create_stack.png)  
-5. Wait 30 minutes for AWS CloudFormation to create the necessary infrastructure stack and module containers.
-6. Once the deployment has finished, you can view your private workflows from the Amazon HealthOmics Workflows console.
-
-### Custom Deployment
 
 1. Clone this repository to your local environment.
 2. Authenticate into your AWS account of interest and `cd` into the project dir.
@@ -38,9 +30,14 @@ The CloudFormation deployment should finish in about 3 minutes. It will take ano
 
 Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
 
+### Data
+
+Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
+
 ## Development (WIP)
 
 To add a new module, fork the repository. There are three main components:
+
 * **Containers:** contains the required information/data to build Docker images for specific tasks
 * **Modules:** common packages, such as MSA search/unpacking data that multiple algorithms may use
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.

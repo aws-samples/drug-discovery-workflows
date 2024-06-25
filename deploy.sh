@@ -53,3 +53,4 @@ aws cloudformation deploy --template-file build/cloudformation/packaged.yaml \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP \
   WaitForContainerBuild=$WAITFORCONTAINER Environment=$ENVIRONMENT
 rm build/cloudformation/packaged.yaml
+esm3-sagemaker-sample-notebook
