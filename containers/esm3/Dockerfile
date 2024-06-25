@@ -130,16 +130,16 @@ RUN yum update -y && yum install -y \
     which \
     && yum clean all \
     && rm -rf /var/cache/yum/* \
-    && curl -L -o openmpi-${OPEN_MPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPEN_MPI_VERSION}.tar.gz \
-    && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
-    && cd openmpi-${OPEN_MPI_VERSION} \
-    && ./configure --prefix=/home/.openmpi --with-cuda \
-    && make all install \
-    && cd .. \
-    && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
-    && rm -rf openmpi-${OPEN_MPI_VERSION} \
-    && mkdir -p /home/model-server/tmp /opt/ml/model \
-    && ompi_info --parsable --all | grep mpi_built_with_cuda_support:value \
+    # && curl -L -o openmpi-${OPEN_MPI_VERSION}.tar.gz https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPEN_MPI_VERSION}.tar.gz \
+    # && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
+    # && cd openmpi-${OPEN_MPI_VERSION} \
+    # && ./configure --prefix=/home/.openmpi --with-cuda \
+    # && make all install \
+    # && cd .. \
+    # && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
+    # && rm -rf openmpi-${OPEN_MPI_VERSION} \
+    # && mkdir -p /home/model-server/tmp /opt/ml/model \
+    # && ompi_info --parsable --all | grep mpi_built_with_cuda_support:value \
     && curl -L -o ~/miniforge3.sh https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE3_VERSION}/Mambaforge-${MINIFORGE3_VERSION}-Linux-x86_64.sh \
     && chmod +x ~/miniforge3.sh \
     && ~/miniforge3.sh -b -p /opt/conda \
@@ -215,14 +215,11 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     && rm awscliv2.zip
 
 COPY --from=dlc-ec2 /opt/conda /opt/conda
-COPY --from=dlc-ec2 /home/.openmpi /home/.openmpi
-# COPY torchserve-ec2-entrypoint.py /usr/local/bin/dockerd-entrypoint.py
-# COPY config.properties /home/model-server/config.properties
-# COPY example.json run.py /home/model-server/
+# COPY --from=dlc-ec2 /home/.openmpi /home/.openmpi
 # This will eventually hold the OSS inference code
 COPY esm /home/model-server/esm
 
-ENV PATH="$PATH:/home/.openmpi/bin"
+# ENV PATH="$PATH:/home/.openmpi/bin"
 ENV PATH=/opt/conda/bin:$PATH
 # makes AllToAll complete successfully. Update will be included in NCCL 2.20.*
 ENV NCCL_CUMEM_ENABLE=0
@@ -232,9 +229,7 @@ WORKDIR /home/model-server
 ############################################################################
 FROM model-server as esm3
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN pip install attrs "scikit-learn==1.4.1.post1" "numpy<2"
-# RUN git clone https://github.com/evolutionaryscale/esm.git --depth 1
-COPY esm /home/model-server/
+RUN pip install attrs "scikit-learn==1.4.1.post1" "numpy<2" "esm"
 COPY predict_annotations.py /home/model-server/
 
 

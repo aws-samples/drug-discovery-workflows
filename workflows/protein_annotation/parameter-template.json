@@ -5,6 +5,6 @@
   },
   "model_parameters": {
     "description": "Path to model parameters",
-    "optional": true
+    "optional": false
   }
 }

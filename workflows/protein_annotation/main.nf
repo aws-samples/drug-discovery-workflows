@@ -1,7 +1,7 @@
 nextflow.enable.dsl = 2
 
 params.input_pdb
-params.model_parameters = "s3://471112526672-customer-data-evolutionaryscale/240619/evoscale-data.tar.gz"
+params.model_parameters
 
 workflow {
 

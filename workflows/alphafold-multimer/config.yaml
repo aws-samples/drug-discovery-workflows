@@ -1,11 +1,14 @@
-name: AlphaFold-Multimer
-description: "Predict protein function annotations with ESM3"
+name: AlphaFold2-Multimer
+description: "Predict multi-chain protein structures with AlphaFold2-Multimer"
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
-  input_pdb:
-    description: "Path to input pdb"
+  target_id:
+    description: "The ID of the target being run."
     optional: false
-storageCapacity: 1200
+  fasta_path: 
+    description: "Input file in multi-FASTA format."
+    optional: false
+storageCapacity: 4800
 tags:
-  Name: "ProteinAnnotation"
+  Name: "AlphaFold2Multimer"

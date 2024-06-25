@@ -8,7 +8,7 @@ parameterTemplate:
     optional: false
   model_parameters:
     description: "Path to model parameters"
-    optional: true
+    optional: false
 storageCapacity: 1200
 tags:
   Name: "ProteinAnnotation"

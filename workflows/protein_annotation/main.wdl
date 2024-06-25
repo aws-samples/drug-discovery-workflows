@@ -3,7 +3,7 @@ version 1.0
 workflow ProteinAnnotation {
     input {
         File input_pdb
-        File model_parameters = "s3://471112526672-customer-data-evolutionaryscale/240619/evoscale-data.tar.gz"
+        File model_parameters
     }
     call ESM3FunctionAnnotationTask{
         input:
@@ -19,7 +19,7 @@ task ESM3FunctionAnnotationTask {
     input {
         File input_pdb
         Int cpu = 4
-        File model_parameters = "s3://471112526672-customer-data-evolutionaryscale/240619/evoscale-data.tar.gz"
+        File model_parameters
         String memory = "16 GiB"
         String docker_image = "{{esm3:latest}}"
     }
