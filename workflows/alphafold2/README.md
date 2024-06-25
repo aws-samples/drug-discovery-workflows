@@ -52,7 +52,7 @@ Assuming you still have your region/account environment variables, you can do th
 
 ```
 sed -i 's/123456789012/'$ACCOUNT'/' workflows/alphafold2/nextflow.config
-sed -i 's/123456789012/'$REGION'/' workflows/alphafold2/nextflow.config
+sed -i 's/us-east-1/'$REGION'/' workflows/alphafold2/nextflow.config
 ```
 
 ### Step 4: Create Workflow
