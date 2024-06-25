@@ -31,7 +31,7 @@ process RunInference {
         inference.output_prefix=output/rfdiffusion \
         inference.model_directory_path=${model_parameters} \
         inference.input_pdb=${input_pdb} \
-        inference.num_designs=3=${num_deisgns} \
+        inference.num_designs=${num_deisgns} \
         'contigmap.contigs=[10-40/A163-181/10-40]'
     """
 
