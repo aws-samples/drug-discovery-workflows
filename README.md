@@ -1,12 +1,12 @@
-# Drug Discovery Workflows for Amazon HealthOmics
+# Drug Discovery Workflows for AWS HealthOmics
 
 ## Description
 
-A collection of Amazon HealthOmics workflows to accelerate drug discovery.
+A collection of AWS HealthOmics workflows to accelerate drug discovery.
 
 ## News
 
-Amazon HealthOmics Drug Discovery Workflows now supports the [ESM3](https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1) model by [EvolutionaryScale](https://www.evolutionaryscale.ai/)! Please see the `README` file at `workflows/protein_annotation/` for more information.
+AWS HealthOmics Drug Discovery Workflows now supports the [ESM3](https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1) model by [EvolutionaryScale](https://www.evolutionaryscale.ai/)! Please see the `README` file at `workflows/protein_annotation/` for more information.
 
 ## Deployment
 
