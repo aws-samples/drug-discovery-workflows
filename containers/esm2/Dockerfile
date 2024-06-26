@@ -138,21 +138,21 @@ RUN cd /tmp \
     && rm -rf /tmp/nccl
 
 # Install OpenMPI
-RUN wget --quiet https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPEN_MPI_VERSION}.tar.gz \
-    && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
-    && cd openmpi-${OPEN_MPI_VERSION} \
-    && ./configure --prefix=/home/.openmpi --with-cuda \
-    && make all install \
-    && cd .. \
-    && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
-    && rm -rf openmpi-${OPEN_MPI_VERSION}
+# RUN wget --quiet https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-${OPEN_MPI_VERSION}.tar.gz \
+#     && gunzip -c openmpi-${OPEN_MPI_VERSION}.tar.gz | tar xf - \
+#     && cd openmpi-${OPEN_MPI_VERSION} \
+#     && ./configure --prefix=/home/.openmpi --with-cuda \
+#     && make all install \
+#     && cd .. \
+#     && rm openmpi-${OPEN_MPI_VERSION}.tar.gz \
+#     && rm -rf openmpi-${OPEN_MPI_VERSION}
 
 # The ENV variables declared below are changed in the previous section
 # Grouping these ENV variables in the first section causes
 # ompi_info to fail. This is only observed in CPU containers
-ENV PATH="$PATH:/home/.openmpi/bin"
-ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/.openmpi/lib/"
-RUN ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
+# ENV PATH="$PATH:/home/.openmpi/bin"
+# ENV LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/.openmpi/lib/"
+# RUN ompi_info --parsable --all | grep mpi_built_with_cuda_support:value
 
 # Install CondaForge miniconda
 RUN curl -L -o ~/mambaforge.sh https://github.com/conda-forge/miniforge/releases/download/${MAMBA_VERSION}/Mambaforge-${MAMBA_VERSION}-Linux-x86_64.sh \

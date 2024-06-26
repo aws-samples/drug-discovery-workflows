@@ -1,0 +1,6 @@
+{
+  "input_pdb": {
+      "description": "Input PDB file for scaffolding.",
+      "optional": false
+    }
+  }
