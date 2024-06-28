@@ -18,7 +18,7 @@ workflow ESMFoldFlow {
             input:
                 csv_path = csv,
                 model_parameters = model_parameters,
-                docker_image = "{{transformers:latest}}"
+                docker_image = "{{esm2:latest}}"
         }
     }
     output {

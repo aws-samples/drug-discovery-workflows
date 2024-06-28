@@ -19,7 +19,7 @@ workflow ESM2EmbeddingsFlow {
                 csv_path = csv,
                 pretrained_model_uri = pretrained_model_uri,
                 batch_size =  24,
-                docker_image = "{{transformers:latest}}"
+                docker_image = "{{esm2:latest}}"
         }
     }
     output {
@@ -57,7 +57,7 @@ task ESM2EmbeddingsTask {
         File pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t36_3B_UR50D.tar"
         String memory = "32 GiB"
         Int cpu = 4
-        String docker_image = "{{transformers:latest}}"
+        String docker_image = "{{esm2:latest}}"
         Int batch_size = 24
     }
     command <<<
