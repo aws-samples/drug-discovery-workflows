@@ -63,6 +63,8 @@ workflow {
     // Predict. Five separate models
     model_nums = Channel.of(0,1,2,3,4)
     AlphaFoldMultimerInference(params.target_id, GenerateFeaturesTask.out.features, params.alphafold_model_parameters, model_nums, params.random_seed, params.run_relax)
+
+    MergeRankings(AlphaFoldMultimerInference.out.results.collect())
 }
 
 // Check the inputs and get size etc
@@ -150,8 +152,8 @@ process AlphaFoldMultimerInference {
         val run_relax
 
     output:
-        path "metrics.json", emit: metrics
-        path "output/*", emit: results
+        tuple (path "metrics.json"), path ("output/*"), emit: results
+        //path "output/*", emit: results
     
     script:
     """
@@ -167,4 +169,17 @@ process AlphaFoldMultimerInference {
     mv output/metrics.json .
     rm -rf output/msas
     """
+}
+
+
+//Merge Rankings
+process MergeRankings {
+    cpus 2
+    memory 4.GB
+    publishDir "/mnt/workflow/pubdir/final"
+
+    input:
+    tuple (path "metrics.json"), path ("output/*")
+
+    output:
 }
