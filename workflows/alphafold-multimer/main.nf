@@ -63,6 +63,8 @@ workflow {
     // Predict. Five separate models
     model_nums = Channel.of(0,1,2,3,4)
     AlphaFoldMultimerInference(params.target_id, GenerateFeaturesTask.out.features, params.alphafold_model_parameters, model_nums, params.random_seed, params.run_relax)
+
+    MergeRankings(AlphaFoldMultimerInference.out.results.collect())
 }
 
 // Check the inputs and get size etc
@@ -140,7 +142,7 @@ process AlphaFoldMultimerInference {
     memory { 16.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
     maxRetries 2
-    publishDir "/mnt/workflow/pubdir/predictions_${modelnum}"
+    publishDir "/mnt/workflow/pubdir"
     input:
         val target_id
         path features
@@ -150,8 +152,7 @@ process AlphaFoldMultimerInference {
         val run_relax
 
     output:
-        path "metrics.json", emit: metrics
-        path "output/*", emit: results
+        path "output_model_${modelnum}/", emit: results
     
     script:
     """
@@ -162,9 +163,35 @@ process AlphaFoldMultimerInference {
     export TF_FORCE_UNIFIED_MEMORY=1
     /opt/conda/bin/python /app/alphafold/predict.py \
       --target_id=$target_id --features_path=$features --model_preset=multimer \
-      --model_dir=model --random_seed=$random_seed --output_dir=output \
+      --model_dir=model --random_seed=$random_seed --output_dir=output_model_${modelnum} \
       --run_relax=${run_relax} --use_gpu_relax=${run_relax} --model_num=$modelnum
-    mv output/metrics.json .
-    rm -rf output/msas
+
+    rm -rf output_model_${modelnum}/msas
+    """
+}
+
+
+//Merge Rankings
+process MergeRankings {
+    cpus 2
+    memory 4.GB
+    publishDir "/mnt/workflow/pubdir"
+    label 'data'
+
+    input:
+    path results
+
+    output:
+    path "rankings.json", emit: rankings
+    path "top_hit*", emit: top_hit
+    
+    script:
+    """
+    mkdir -p output
+    echo ${results}
+    # Create top hit
+    /opt/venv/bin/python /opt/merge_rankings.py --output_dir output/ --model_dirs ${results}
+    mv output/top_hit* .
+    mv output/rankings.json .
     """
 }
