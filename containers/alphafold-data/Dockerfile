@@ -76,7 +76,7 @@ COPY --from=build /usr/local/bin /usr/bin
 COPY alphafold /app/alphafold
 COPY hhsearch.py hmmsearch.py /app/alphafold/alphafold/data/tools/
 COPY stereo_chemical_props.txt /app/alphafold/alphafold/common/
-COPY create_msa_monomer.py search_templates.py generate_features.py new_pipelines.py update_locations.py filter_pdb.py /opt/
+COPY create_msa_monomer.py search_templates.py generate_features.py new_pipelines.py update_locations.py filter_pdb.py merge_rankings.py /opt/
 
 # Install python and other dependencies
 RUN yum upgrade -y \

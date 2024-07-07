@@ -5,7 +5,7 @@ process SearchUniref90 {
     label 'data'
     cpus 8
     memory '32 GB'
-    publishDir "/mnt/workflow/pubdir/${id}"
+    publishDir "/mnt/workflow/pubdir/${id}/msa"
 
     input:
         tuple val(id), path(fasta_path)
@@ -39,7 +39,7 @@ process SearchMgnify {
     label 'data'
     cpus 8
     memory '64 GB'
-    publishDir "/mnt/workflow/pubdir/${id}"
+    publishDir "/mnt/workflow/pubdir/${id}/msa"
 
     input:
         tuple val(id), path(fasta_path)
@@ -77,7 +77,7 @@ process SearchBFD {
     maxRetries 1
     errorStrategy 'retry'
     
-    publishDir "/mnt/workflow/pubdir/${id}"
+    publishDir "/mnt/workflow/pubdir/${id}/msa"
 
     input:
         tuple val(id), path(fasta_path)
@@ -113,7 +113,7 @@ process SearchTemplatesTask {
     label 'data'
     cpus 2
     memory '8 GB'
-    publishDir "/mnt/workflow/pubdir/${id}"
+    publishDir "/mnt/workflow/pubdir/${id}/msa"
 
     input:
         tuple val(id), path (msa_path)
