@@ -51,7 +51,7 @@ popd
 
 # Compile kalign2 from source
 RUN pushd /tmp && \
-wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz \
+wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz --no-check-certificate \
 && mkdir -p /tmp/kalign2/build \
 && tar -xvzf current.tar.gz -C /tmp/kalign2 \
 && pushd /tmp/kalign2 \
