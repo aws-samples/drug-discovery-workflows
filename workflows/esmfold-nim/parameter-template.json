@@ -1,0 +1,6 @@
+{
+  "fasta_path": {
+      "description": "Input path to FASTA files. This can be a path to a single FASTA or a directory containing a set of files.",
+      "optional": false
+  }
+}

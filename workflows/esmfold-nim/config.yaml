@@ -1,0 +1,11 @@
+name: ESMFoldNIM
+description: "Generate 3D protein structures using the ESMFold BioNeMo NIM"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path: 
+    description: "Input path to FASTA files. This can be a path to a single FASTA or a directory containing a set of files."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "ESMFold-NIM"
