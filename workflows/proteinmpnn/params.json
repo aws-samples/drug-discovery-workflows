@@ -1,0 +1,5 @@
+{
+    "pdb_path":"s3://mybucket/test_data/proteinmpnn/inputs/PDB_monomers/pdbs/5L33.pdb",
+    "pdb_path_chains": "A",
+    "num_seq_per_target": 3
+}

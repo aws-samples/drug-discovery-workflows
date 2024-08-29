@@ -1,0 +1,14 @@
+{
+  "pdb_path": {
+      "description": "Input PDB file for scaffolding.",
+      "optional": false
+  },
+  "pdb_path_chains": {
+    "description": "Chains to inference on.",
+    "optional": false
+  },
+  "num_seq_per_target": {
+    "description": "Number of sequences to generate. Default is 1",
+    "optional": true
+  }
+}

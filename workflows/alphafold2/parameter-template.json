@@ -1,6 +1,6 @@
 {
   "fasta_path": {
-      "description": "Input file in FASTA format. Only single-chain inputs are supported at this time.",
+      "description": "Input file in FASTA format or a directory containing FASTA files. Only single-chain inputs are supported at this time.",
       "optional": false
-    }
   }
+}

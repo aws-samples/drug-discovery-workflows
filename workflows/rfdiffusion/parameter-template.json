@@ -1,6 +1,10 @@
 {
   "input_pdb": {
-      "description": "Input PDB file for scaffolding.",
-      "optional": false
-    }
+    "description": "Input PDB file for scaffolding.",
+    "optional": false
+  },
+  "num_designs": {
+    "description": "Number of designs to predict.",
+    "optional": false
   }
+}
