@@ -28,11 +28,16 @@ desired stack name, and region:
 
 The CloudFormation deployment should finish in about 3 minutes. It will take another 30 minutes to build the algorithm containers.
 
-Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
+Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK. You may re-run the `./deploy.sh` script with the same arguments to update the CloudFormation stacks after code modifications to NextFlow scripts, Dockerfiles, or container build context directories are saved. This will trigger a rebuild and push of containers to ECR with the `latest` tag, and create new versions of the HealthOmics workflows.
 
 ### Data
 
 Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
+
+### Infrastructure Diagram
+
+<!-- Not final form yet -->
+<img src="./img/infra-diagram.png" />
 
 ## Development (WIP)
 
