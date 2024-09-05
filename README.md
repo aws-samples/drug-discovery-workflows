@@ -34,6 +34,11 @@ Once the deployment has finished, you can create a private workflow run using th
 
 Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
 
+### Infrastructure Diagram
+
+<!-- Not final form yet -->
+<img src="./img/infra-diagram.png" />
+
 ## Development (WIP)
 
 To add a new module, fork the repository. There are three main components:
