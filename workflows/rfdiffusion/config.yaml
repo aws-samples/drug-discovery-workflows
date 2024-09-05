@@ -3,7 +3,7 @@ description: "Generate 3D protein structures"
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
-  fasta_path: 
+  input_pdb: 
     description: "Input PDB file for scaffolding."
     optional: false
 storageCapacity: 1200
