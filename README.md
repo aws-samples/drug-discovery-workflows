@@ -66,3 +66,46 @@ workflows/
 The `containers` folder contains Dockerfiles and supporting files to build docker containers. The deployment process will attempt to use every subfolder here as a Docker build context without any further configuration. Right now, there are two types of containers provided by default. "Framework" containers like "biolambda" and "transformers" provide general-purpose ML environments to run custom scripts (passed in during container build via the "scripts" folder). "Algorithm" containers like "alphafold", on the other hand, contain dependencies and scripts for spoecific models, in many cases lightly adapted from open source repositories. These are meant to be used as-is, without much customization.
 
 Similarly, the `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}.
+
+### Development Test Script
+
+The `testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
+
+Prerequisites:
+- S3 bucket with input data
+- S3 bucket to store outputs, can be the same as the input bucket
+- HealthOmics execution role with access to the buckets
+
+
+`testparams/rfdiffusion.params.json`:
+```sh
+{
+  "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb"
+}
+```
+
+Example run with full argument list:
+
+```sh
+./testrun.sh \
+-w rfdiffusion \
+-a 123456789012 \
+-r us-east-1 \
+-o "arn:aws:iam::123456789012:role/healthomics-dev-role" \
+-b mybucket \
+-p testparams/rfdiffusion.params.json
+```
+
+Or create an `.aws/env` file to simplify the arguments:
+```sh
+WORKFLOW_NAME=rfdiffusion
+ACCOUNT_ID=123456789012
+REGION=us-east-1
+OMICS_EXECUTION_ROLE=arn:aws:iam::123456789012:role/healthomics-dev-role
+OUTPUT_BUCKET=mybucket
+```
+
+and then:
+```sh
+./testrun.sh -p testparams/rfdiffusion.params.json
+```

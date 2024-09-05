@@ -1,28 +1,34 @@
 #!/bin/bash
 
-# usage: ./testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET
+# usage: ./testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS
 
 set -ex
-unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET
+unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS
 
 TIMESTAMP=$(date +%s)
 
-# set variables
-while getopts 'w:a:r:o:b:' OPTION; do
+# Source environment variables from .aws/env if it exists
+if [ -f ".aws/env" ]; then
+  source .aws/env
+fi
+
+# Set variables from arguments if they are not already set
+while getopts 'w:a:r:o:b:p:' OPTION; do
   case "$OPTION" in
-  w) WORKFLOW_NAME="$OPTARG" ;;
-  a) ACCOUNT_ID="$OPTARG" ;;
-  r) REGION="$OPTARG" ;;
-  o) OMICS_EXECUTION_ROLE="$OPTARG" ;;
-  b) OUTPUT_BUCKET="$OPTARG" ;;
+  w) [ -z "$WORKFLOW_NAME" ] && WORKFLOW_NAME="$OPTARG" ;;
+  a) [ -z "$ACCOUNT_ID" ] && ACCOUNT_ID="$OPTARG" ;;
+  r) [ -z "$REGION" ] && REGION="$OPTARG" ;;
+  o) [ -z "$OMICS_EXECUTION_ROLE" ] && OMICS_EXECUTION_ROLE="$OPTARG" ;;
+  b) [ -z "$OUTPUT_BUCKET" ] && OUTPUT_BUCKET="$OPTARG" ;;
+  p) PARAMETERS="$OPTARG" ;;
   *) exit 1 ;;
   esac
 done
 
 # Check if the required variables are set
-if [ -z "$WORKFLOW_NAME" ] || [ -z "$ACCOUNT_ID" ] || [ -z "$REGION" ] || [ -z "$OMICS_EXECUTION_ROLE" ] || [ -z "$OUTPUT_BUCKET" ]; then
+if [ -z "$WORKFLOW_NAME" ] || [ -z "$ACCOUNT_ID" ] || [ -z "$REGION" ] || [ -z "$OMICS_EXECUTION_ROLE" ] || [ -z "$OUTPUT_BUCKET" ] || [ -z "$PARAMETERS" ]; then
   echo "Error: Missing required arguments."
-  echo "Usage: $0 -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION"
+  echo "Usage: $0 -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS"
   exit 1
 fi
 
@@ -55,7 +61,7 @@ aws omics start-run \
     --workflow-id $workflow_id \
     --name $WORKFLOW_NAME-dev-$TIMESTAMP \
     --role-arn "$OMICS_EXECUTION_ROLE" \
-    --parameters file://tmp/$WORKFLOW_NAME/params.json \
+    --parameters "$PARAMETERS" \
     --region $REGION \
     --output-uri s3://$OUTPUT_BUCKET/out
 
