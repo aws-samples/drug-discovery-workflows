@@ -98,7 +98,6 @@ Example run with full argument list:
 
 Or create an `.aws/env` file to simplify the arguments:
 ```sh
-WORKFLOW_NAME=rfdiffusion
 ACCOUNT_ID=123456789012
 REGION=us-east-1
 OMICS_EXECUTION_ROLE=arn:aws:iam::123456789012:role/healthomics-dev-role
@@ -107,5 +106,5 @@ OUTPUT_BUCKET=mybucket
 
 and then:
 ```sh
-./testrun.sh -p testparams/rfdiffusion.params.json
+./testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
 ```

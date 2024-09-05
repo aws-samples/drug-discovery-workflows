@@ -15,7 +15,7 @@ fi
 # Set variables from arguments if they are not already set
 while getopts 'w:a:r:o:b:p:' OPTION; do
   case "$OPTION" in
-  w) [ -z "$WORKFLOW_NAME" ] && WORKFLOW_NAME="$OPTARG" ;;
+  w) WORKFLOW_NAME="$OPTARG" ;;
   a) [ -z "$ACCOUNT_ID" ] && ACCOUNT_ID="$OPTARG" ;;
   r) [ -z "$REGION" ] && REGION="$OPTARG" ;;
   o) [ -z "$OMICS_EXECUTION_ROLE" ] && OMICS_EXECUTION_ROLE="$OPTARG" ;;
