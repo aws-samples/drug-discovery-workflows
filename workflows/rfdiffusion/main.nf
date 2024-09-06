@@ -159,7 +159,7 @@ process RunInference {
         path model_parameters
         path input_pdb
         val num_designs
-        path yaml_file optional true
+        // path yaml_file optional true
 
     output:
         path 'output/*', emit: results
@@ -170,7 +170,7 @@ process RunInference {
     mkdir -p output
     export HYDRA_FULL_ERROR=1 
 
-    if [ -f "${yaml_file}" ]; then
+    if [ -f "todo_yaml" ]; then
         # Use the YAML file for configuration
         python3.9 /app/RFdiffusion/scripts/run_inference.py --config ${yaml_file}
     else
@@ -185,7 +185,6 @@ process RunInference {
             inference.symmetry=null \
             inference.recenter=True \
             inference.radius=10.0 \
-
     fi
     """
 }
