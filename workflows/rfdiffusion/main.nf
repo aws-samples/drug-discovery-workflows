@@ -2,9 +2,10 @@ nextflow.enable.dsl = 2
 
 // static data files are in nextflow.config
 workflow {
-    RunInference(params.model_parameters,
+    RunInference(params.model_params, 
                  params.input_pdb,
-                 params.num_designs)
+                 params.num_designs,
+                 params.container_image)
 }
 
 // Configuration options
@@ -156,10 +157,14 @@ process RunInference {
     publishDir '/mnt/workflow/pubdir'
 
     input:
-        path model_parameters
+        path model_params
         path input_pdb
         val num_designs
+        val container_image
         // path yaml_file optional true
+
+    container:
+        container_image
 
     output:
         path 'output/*', emit: results
@@ -177,7 +182,7 @@ process RunInference {
         # Use individual arguments
         python3.9 /app/RFdiffusion/scripts/run_inference.py \
             inference.output_prefix=output/rfdiffusion \
-            inference.model_directory_path=${model_parameters} \
+            inference.model_directory_path=${model_params} \
             inference.input_pdb=${input_pdb} \
             inference.num_designs=${num_designs} \
             'contigmap.contigs=[10-40/A163-181/10-40]'

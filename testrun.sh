@@ -67,4 +67,4 @@ aws omics start-run \
     --output-uri s3://$OUTPUT_BUCKET/out
 
 # Cleanup
-rm -rf tmp/$WORKFLOW_NAME
+rm -rf tmp
