@@ -172,7 +172,7 @@ process RunInference {
 
     if [ -f "todo_yaml" ]; then
         # Use the YAML file for configuration
-        python3.9 /app/RFdiffusion/scripts/run_inference.py --config ${yaml_file}
+        python3.9 /app/RFdiffusion/scripts/run_inference.py --config yaml_file
     else
         # Use individual arguments
         python3.9 /app/RFdiffusion/scripts/run_inference.py \
