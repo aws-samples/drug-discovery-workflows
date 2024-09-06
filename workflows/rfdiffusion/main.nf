@@ -182,7 +182,7 @@ process RunInference {
             inference.model_directory_path=${model_params} \
             inference.input_pdb=${input_pdb} \
             inference.num_designs=${num_designs} \
-            'contigmap.contigs=[10-40/A163-181/10-40]'
+            'contigmap.contigs=[10-40/A163-181/10-40]' \
             inference.ckpt_override_path=null \
             inference.symmetry=null \
             inference.recenter=True \
