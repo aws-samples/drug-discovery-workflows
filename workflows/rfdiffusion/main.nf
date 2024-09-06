@@ -4,8 +4,7 @@ nextflow.enable.dsl = 2
 workflow {
     RunInference(params.model_params, 
                  params.input_pdb,
-                 params.num_designs,
-                 params.container_image)
+                 params.num_designs)
 }
 
 // Configuration options
@@ -160,11 +159,9 @@ process RunInference {
         path model_params
         path input_pdb
         val num_designs
-        val container_image
         // path yaml_file optional true
 
-    container:
-        container_image
+    container params.container_image
 
     output:
         path 'output/*', emit: results
