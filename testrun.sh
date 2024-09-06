@@ -46,9 +46,9 @@ docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
 # Package the workflow
 mkdir -p tmp/$WORKFLOW_NAME
 cp -r workflows/$WORKFLOW_NAME/* tmp/$WORKFLOW_NAME
-sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" tmp/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
-sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" tmp/$WORKFLOW_NAME/*.nf 2>/dev/null || true
-sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" tmp/$WORKFLOW_NAME/*.config 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.nf 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.config 2>/dev/null || true
 zip -j -r tmp/$WORKFLOW_NAME/workflow.zip tmp/$WORKFLOW_NAME
 
 # Create the workflow

@@ -184,7 +184,7 @@ process RunInference {
             inference.ckpt_override_path=null \
             inference.symmetry=null \
             inference.recenter=True \
-            inference.radius=10.0 \
+            inference.radius=10.0
     fi
     """
 }
