@@ -12,6 +12,9 @@ parameterTemplate:
   container_image: 
     description: "Container image"
     optional: false
+  num_designs:
+    description: "Number of designs to generate"
+    optional: true
 storageCapacity: 1200
 tags:
   Name: "RFDiffusion"
