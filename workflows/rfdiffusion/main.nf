@@ -4,6 +4,7 @@ nextflow.enable.dsl = 2
 workflow {
     RunInference(params.model_params, 
                  params.input_pdb,
+                 params.contigs,
                  params.num_designs)
 }
 
@@ -158,6 +159,7 @@ process RunInference {
     input:
         path model_params
         path input_pdb
+        val contigs
         val num_designs
         // path yaml_file optional true
 
@@ -182,7 +184,7 @@ process RunInference {
             inference.model_directory_path=${model_params} \
             inference.input_pdb=${input_pdb} \
             inference.num_designs=${num_designs} \
-            'contigmap.contigs=[10-40/A163-181/10-40]' \
+            contigmap.contigs=${contigs} \
             inference.ckpt_override_path=null \
             inference.symmetry=null \
             inference.recenter=True \

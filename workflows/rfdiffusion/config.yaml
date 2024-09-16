@@ -7,8 +7,11 @@ parameterTemplate:
     description: "Input PDB file for scaffolding."
     optional: false
   model_params: 
-    description: "S3 path of rfdiffusion model files"
+    description: "S3 path of RFdiffusion model files"
     optional: false
+  contigs:
+    description: "Contigs"
+    optional: true
   container_image: 
     description: "Container image"
     optional: false

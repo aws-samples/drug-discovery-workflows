@@ -7,8 +7,16 @@
     "description": "S3 path of rfdiffusion model files",
     "optional": false
   },
+  "contigs": {
+    "description": "Unchanged regions of a sequence",
+    "optional": true
+  },
   "container_image": {
     "description": "Container image",
     "optional": false
+  },
+  "num_designs": {
+    "description": "Number of designs to generate",
+    "optional": true
   }
 }

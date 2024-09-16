@@ -1,5 +1,7 @@
 {
     "input_pdb":"s3://mybucket/test_data/rfdiffusion/5TPN.pdb",
     "model_params":"s3://my_bucket/test_data/rfdiffusion/model_parameters/",
-    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest"
+    "contigs":"[nnn-nnn]",
+    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest",
+    "num_designs": 1
 }
