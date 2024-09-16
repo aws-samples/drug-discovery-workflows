@@ -77,7 +77,7 @@ ROLEARN=
 OUTPUTLOC=s3://<mybucket>/nab/output/
 PARAMS=./params.json
 
-aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUTLOC --storage-type DYNAMIC --parameters file://definition/params.json --name nim-nab
+aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUTLOC --storage-type STATIC --parameters file://definition/params.json --name nim-nab
 ```
 
 All results are written to a location defined within `$OUTPUTLOC` above. To get to the root directory of the ouputs, you can use the `GetRun` API, which provides the path as `runOutputUri`. Alternatively, this location is available in the console.
