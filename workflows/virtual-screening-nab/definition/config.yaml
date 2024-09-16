@@ -1,0 +1,14 @@
+name: NIMAgentBlueprint
+description: "MolMIM => Alphafold2 => Diffdock"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  smi_input_path: 
+    description: "Input SMILES."
+    optional: false
+  fasta_path: 
+    description: "Input file in FASTA format."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "NAB"

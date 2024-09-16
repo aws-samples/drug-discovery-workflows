@@ -1,0 +1,10 @@
+{
+  "smi_input_path": {
+      "description": "Input file in JSON format.",
+      "optional": false
+  },
+  "fasta_path": {
+      "description": "Input file in FASTA format.",
+      "optional": false
+  }
+}
