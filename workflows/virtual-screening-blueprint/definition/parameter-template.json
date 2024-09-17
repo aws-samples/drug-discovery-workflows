@@ -1,0 +1,18 @@
+{
+  "smi_input_path": {
+      "description": "Input file in SMI format.",
+      "optional": false
+  },
+  "fasta_path": {
+      "description": "Input file in FASTA format.",
+      "optional": false
+  },
+  "num_molecules": {
+  	  "description": "Number of molecules to generate by MolMIM.",
+  	  "optional": false
+  },
+  "num_poses": {
+  	  "description": "Number of docking poses.",
+  	  "optional": false
+  }
+}
