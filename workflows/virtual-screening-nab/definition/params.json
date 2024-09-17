@@ -1,4 +1,0 @@
-{
-    "smi_input_path":"s3://<mybucket>/molmim/input/",
-    "fasta_path":"s3://<mybucket>/alphafold/input/"
-}

@@ -1,7 +1,6 @@
 import json, sys, os
 import numpy as np
 import torch
-from types import SimpleNamespace
 from typing import Callable, Dict, List
 from guided_molecule_gen.optimizer import MoleculeGenerationOptimizer
 from guided_molecule_gen.oracles import qed, tanimoto_similarity
@@ -61,7 +60,7 @@ def penalized_logp(smiles_list):
 
     return np.array(score_list)
 
-def generate(model, body, publishDir):
+def generate(model, smiles, num_molecules):
     # Define property function mapping
     PROPERTIES: Dict[str, Callable] = {
         "QED": qed,
@@ -95,18 +94,19 @@ def generate(model, body, publishDir):
 
         return oracle
 
-    # Get parameters from body
-    property_type = body.property_name
-    sim_threshold = body.min_similarity
-    minimize = body.minimize
-    num_molecules = body.num_molecules
+    smiles = smiles
+    num_molecules = int(num_molecules)
+    # Configuration parameters
+    algorithm="CMA-ES"
+    property_type = "QED"
+    sim_threshold = 0.4
+    minimize = False
+    n_steps = 3
+    radius = 1.0
     scoring_function = PROPERTIES[property_type]
     opt_function = create_oracle(
         PROPERTIES, SCALING_FACTORS, property_name=property_type, sim_threshold=sim_threshold, minimize=minimize
     )
-    smiles = body.smi
-    n_steps = body.iterations
-    radius = body.scaled_radius
 
     # Run appropriate algorithm
     controlled_gen_kwargs = {
@@ -116,11 +116,11 @@ def generate(model, body, publishDir):
     model_wrapped = ControlledGenerationPerceiverEncoderInferenceWrapper(
         model, enforce_perceiver=True, hidden_steps=1, **controlled_gen_kwargs
     )
-    if body.algorithm == "CMA-ES":
+    if algorithm == "CMA-ES":
         optimizer = MoleculeGenerationOptimizer(
             model_wrapped,
             opt_function,
-            [smiles],
+            smiles,
             popsize=20,  # larger values will be slower but more thorough
             optimizer_args={"sigma": 0.75},
         )
@@ -143,11 +143,13 @@ def generate(model, body, publishDir):
     scored_output = [
         {"smiles": smiles_string, "score": score} for smiles_string, score in zip(generated_smiles, scores)
     ]
-    output = sorted(scored_output, key=lambda v: v["score"], reverse=not minimize)[:num_molecules]
+    output = sorted(scored_output, key=lambda v: v["score"], reverse=not minimize)
+    if num_molecules<len(output):
+        output = output[:num_molecules]
 
     for i, s in enumerate(output):
         m = Chem.MolFromSmiles(s['smiles'])
-        w = Chem.SDWriter(f'{publishDir}/{i+1}.sdf')
+        w = Chem.SDWriter(f'{i+1}.sdf')
         w.write(m)
 
 if __name__ == "__main__":
@@ -159,6 +161,12 @@ if __name__ == "__main__":
     # Redefine BIONEMO_HOME to tmp directory to handle outputs
     os.environ["BIONEMO_HOME"] = "/tmp/bionemo"
     model = MolMIMInference(cfg, interactive=True)
-	
-    body=json.load(open(sys.argv[1]), object_hook=lambda d: SimpleNamespace(**d))
-    generate(model, body, sys.argv[2])
+
+    with open(sys.argv[1], 'r') as fh:
+        lines = fh.readlines()
+    smiles = []
+    for l in lines:
+        s = l.split(' ')[0].strip()
+        if len(s)>1 and not s.startswith('SMILE'):
+            smiles.append(s)
+    generate(model, smiles, sys.argv[2])

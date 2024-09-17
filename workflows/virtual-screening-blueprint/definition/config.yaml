@@ -9,6 +9,12 @@ parameterTemplate:
   fasta_path: 
     description: "Input file in FASTA format."
     optional: false
-storageCapacity: 1200
+  num_molecules:
+    description: "Number of molecules to generate by MolMIM."
+    optional: false
+  num_poses:
+    description: "Number of docking poses."
+    optional: false
+storageCapacity: 4800
 tags:
   Name: "NAB"

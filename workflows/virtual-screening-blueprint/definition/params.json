@@ -1,0 +1,6 @@
+{
+    "smi_input_path":"s3://{mybucket}/molmim/input/",
+    "fasta_path":"s3://{mybucket}/alphafold/input/",
+    "num_molecules": 5,
+    "num_poses": 5
+}

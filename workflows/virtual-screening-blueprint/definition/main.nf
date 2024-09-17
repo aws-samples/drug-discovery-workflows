@@ -3,26 +3,18 @@ nextflow.enable.dsl = 2
 // static data files are in nextflow.config
 workflow {
     //Convert to files
-    if (params.smi_input_path[-1] == "/") {
-        smi_input_path = params.smi_input_path + "*"
-    } else {
-        smi_input_path = params.smi_input_path
-    }
-
     if (params.fasta_path[-1] == "/") {
         fasta_path = params.fasta_path + "*"
     } else {
         fasta_path = params.fasta_path
     }
 
-    smiles = Channel.fromPath(smi_input_path)
-        .collectFile(name: 'smi_input.json')
+    if (params.smi_input_path[-1] == "/") {
+        smi_input_path = params.smi_input_path + "*"
+    } else {
+        smi_input_path = params.smi_input_path
+    }
 
-    RunMolMIMGenerate(
-        params.molmim_script,
-        params.molmim_model,
-        smiles
-    )
 
     sequences = Channel.fromPath(fasta_path)
         .collectFile(name: 'temp.fasta')
@@ -36,58 +28,33 @@ workflow {
         sequences
     )
 
-    num_poses = 3
+    smiles = Channel.fromPath(smi_input_path)
+        .collectFile(name: 'smi_input.smi')
+
+    RunMolMIMGenerate(
+        params.molmim_script,
+        params.molmim_model,
+        smiles,
+        params.num_molecules
+    )
+
     RunDiffdock(
         params.diffdock_script,
         params.diffdock_model,
         RunMolMIMGenerate.out.sdfs,
-        RunAlphaFold2.out.pdfs,
-        num_poses
+        RunAlphaFold2.out.pdbs,
+        params.num_poses
     )
 }
 
-process RunMolMIMGenerate {
-    label 'molmim'
-    cpus 8
-    memory "32 GB"
-    accelerator 1, type: "nvidia-tesla-a10g"
-    publishDir "/mnt/workflow/pubdir/"
-
-    input:
-        path molmim_script
-        path model
-        path smiles
-
-    output:
-        path "*.sdf", emit: sdfs
-    script:
-    """
-    set -ex
-
-    export CUDA_VISIBLE_DEVICES=0
-    export NIM_CACHE_PATH=${model}
-
-    for s in `cat ${smiles}`
-    do
-        echo \$s
-
-        python ${molmim_script} ${smiles} .
-        sleep 1
-    done
-
-    sleep 60
-    """
-}
-
-
 process RunAlphaFold2 {
-    errorStrategy 'retry'
     label 'alphafold2'
+    errorStrategy 'retry'
     cpus { 2 * Math.pow(2, task.attempt+2) }
     memory { 8.GB * Math.pow(2, task.attempt+2) }
     accelerator 1, type: 'nvidia-tesla-a10g'
     maxRetries 1
-    publishDir "/mnt/workflow/pubdir/"
+    publishDir "/mnt/workflow/pubdir/alphafold2/"
 
     input:
         path model_parameters
@@ -95,7 +62,7 @@ process RunAlphaFold2 {
         path sequences
 
     output:
-        path "*.pdb", emit: pdfs
+        path "*.pdb", emit: pdbs
     script:
     """
     set -euxo pipefail
@@ -107,17 +74,47 @@ process RunAlphaFold2 {
     do
         python ${executable} \$seq
     done
-    sleep 10
+    """
+}
+
+
+process RunMolMIMGenerate {
+    label 'molmim'
+    errorStrategy 'retry'
+    cpus { 2 * Math.pow(2, task.attempt) }
+    memory { 8.GB * Math.pow(2, task.attempt) }
+    accelerator 1, type: 'nvidia-tesla-a10g'
+    maxRetries 1
+    publishDir "/mnt/workflow/pubdir/molmim/"
+
+    input:
+        path molmim_script
+        path model
+        path smiles
+        val num_molecules
+
+    output:
+        path "*.sdf", emit: sdfs
+    script:
+    """
+    set -ex
+
+    export CUDA_VISIBLE_DEVICES=0
+    export NIM_CACHE_PATH=${model}
+
+    python ${molmim_script} ${smiles} ${num_molecules}
     """
 }
 
 
 process RunDiffdock {
     label 'diffdock'
-    cpus 8
-    memory "32 GB"
-    accelerator 1, type: "nvidia-tesla-a10g"
-    publishDir "/mnt/workflow/pubdir/"
+    errorStrategy 'retry'
+    cpus { 2 * Math.pow(2, task.attempt) }
+    memory { 8.GB * Math.pow(2, task.attempt) }
+    accelerator 1, type: 'nvidia-tesla-a10g'
+    maxRetries 1
+    publishDir "/mnt/workflow/pubdir/diffdock/"
 
     input:
         path executable
@@ -137,13 +134,15 @@ process RunDiffdock {
     export PYTHONPATH="${PYTHONPATH}:/opt/./"
     /usr/local/lib/python3.10/dist-packages/nimlib/triton_start.sh -m ${model_parameters}/bionemo-diffdock_v1.2.0 -p 8080 -l 0 &
     Triton_PID=\$!
-    sleep 300
+    sleep 120
+
+
     for pro in ${protein_file}
     do
         for lig in ${ligand_file}
         do
             /usr/bin/python3 ${executable} \$pro \$lig ${num_poses}
-            sleep 10
+            sleep 1
         done
     done
     echo "shutting down TritonServe"

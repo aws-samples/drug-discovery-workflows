@@ -1,1 +1,0 @@
-{"smi":"CN1C=NC2=C1C(=O)N(C(=O)N2C)C", "algorithm":"CMA-ES", "num_molecules":5, "property_name":"QED", "minimize": false, "min_similarity": 0.4, "particles": 8, "iterations": 3, "scaled_radius": 1.0}
