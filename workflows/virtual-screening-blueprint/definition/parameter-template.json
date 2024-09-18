@@ -14,5 +14,9 @@
   "num_poses": {
   	  "description": "Number of docking poses.",
   	  "optional": false
+  },
+  "max_retries": {
+      "description": "Max number of retries of Nextflow processes.",
+      "optional": false
   }
 }

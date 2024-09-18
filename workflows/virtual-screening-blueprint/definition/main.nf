@@ -50,10 +50,10 @@ workflow {
 process RunAlphaFold2 {
     label 'alphafold2'
     errorStrategy 'retry'
-    cpus { 2 * Math.pow(2, task.attempt+2) }
-    memory { 8.GB * Math.pow(2, task.attempt+2) }
+    cpus { 4 * Math.pow(2, task.attempt) }
+    memory { 16.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
-    maxRetries 1
+    maxRetries params.max_retries
     publishDir "/mnt/workflow/pubdir/alphafold2/"
 
     input:
@@ -84,7 +84,7 @@ process RunMolMIMGenerate {
     cpus { 2 * Math.pow(2, task.attempt) }
     memory { 8.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
-    maxRetries 1
+    maxRetries params.max_retries
     publishDir "/mnt/workflow/pubdir/molmim/"
 
     input:
@@ -113,7 +113,7 @@ process RunDiffdock {
     cpus { 2 * Math.pow(2, task.attempt) }
     memory { 8.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
-    maxRetries 1
+    maxRetries params.max_retries
     publishDir "/mnt/workflow/pubdir/diffdock/"
 
     input:

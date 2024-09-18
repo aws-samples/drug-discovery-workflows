@@ -1,4 +1,4 @@
-# Generative Virtual Screening NIM Agent Blueprint on AWS HealthOmics
+# NVIDIA Generative Virtual Screening Blueprint on AWS HealthOmics
 
 This repository helps you set up and run [NVIDIA Inference Microservices (NIMs) Agent Blueprint](https://github.com/NVIDIA-NIM-Agent-Blueprints/generative-virtual-screening/tree/main) on AWS HealthOmics for generative virtual screening. Currently, this repository presents an example, which can be modified as needed for your specific use case.
 
@@ -35,7 +35,7 @@ Create the following S3 buckets and folders:
 First upload python scripts (in `scripts` folder) to run inside NIM containers, including `molmim_generate.py`, `alphafold2_predict.py`, and `run_diffdock.py` to S3 path `s3://{mybucket}/nim/scripts/`. 
 
 Secondly, upload sample SMILES and FASTA files in the `input` folder to s3:
-* `s3://{mybucket}/molmim/input/inputsmiles1.json`
+* `s3://{mybucket}/molmim/input/sampleinput.smi`
 * `s3://{mybucket}/alphafold2/input/mysequence.fasta`
 
 Lastly, upload the model weights to S3. Run your NIM containers on EC2 instance following the quickstart instructions one-by-one: [molmim](https://docs.nvidia.com/nim/bionemo/molmim/latest/quickstart-guide.html), [alphafold2](https://docs.nvidia.com/nim/bionemo/alphafold2/latest/quickstart-guide.html), and [diffdock](https://docs.nvidia.com/nim/bionemo/diffdock/latest/getting-started.html). During the container runtime, each container will first download the model weights to a predefined path, set up by a container environment variable `NIM_CACHE_PATH`. You can login each container using command line like `docker exec -u root -it <containerid> sh`, [download and install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), and go to `NIM_CACHE_PATH` folder and sync the local model weights inside the container to the s3 paths created earlier. You S3 model weights should looks like:
