@@ -1,0 +1,27 @@
+name: Docker Build
+
+on: 
+  workflow_dispatch:  # Manual deploy from Github Actions interface
+  push:  # Run automatically when any Dockerfile is edited
+    paths:
+    - '**/Dockerfile'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      #- name: Log in to Docker Hub
+      #  run: |
+      #    echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image for CUDA (amd64)
+        run: |
+          cd containers/alphafold-predict
+          docker build -t alphafold-predict .
+
+      #- name: Push Docker image to Docker Hub
+      #  run: |
+      #    docker push your_image_name:latest
