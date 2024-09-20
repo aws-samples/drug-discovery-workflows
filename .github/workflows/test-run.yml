@@ -1,4 +1,4 @@
-name: Docker Build
+name: Workflow Test Run
 
 on: 
   workflow_dispatch:  # Manual deploy from Github Actions interface
