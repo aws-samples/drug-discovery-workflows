@@ -74,4 +74,25 @@ Resources:
               ],
             ],
           ]
-# Outputs:
+
+  DownloadBuild:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: download.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment: !Ref Environment
+        S3BucketName: !Ref S3BucketName
+        Timestamp: !Ref Timestamp
+        StackPrefix:
+          !Join [
+            "-",
+            [
+              "aho-dd",
+              !Select [
+                4,
+                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+              ],
+            ],
+          ]
