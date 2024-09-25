@@ -32,13 +32,13 @@
             env:
               VALIDATE_ALL_CODEBASE: true
               
-              #VALIDATE_BASH: true                 # Recommend 
-              #VALIDATE_DOCKERFILE_HADOLINT: true  # Strongly recommend
-              #VALIDATE_GROOVY: true               # Strongly recommend
-              VALIDATE_GITLEAKS: true              # Strongly recommend
+              # VALIDATE_BASH: true                 # Recommend 
+              # VALIDATE_DOCKERFILE_HADOLINT: true  # Strongly recommend
+              # VALIDATE_GROOVY: true               # Strongly recommend
+              # VALIDATE_GITLEAKS: true              # Strongly recommend
               VALIDATE_CHECKOV: false              # Recommend
               VALIDATE_CLOUDFORMATION: false       # Recommend
-              VALIDATE_JSON: true
+              # VALIDATE_JSON: true
 
               VALIDATE_BASH_EXEC: false            # Recommend disable
 
@@ -48,7 +48,7 @@
               VALIDATE JSCPD: false
               VALIDATE_MARKDOWN: false
               VALIDATE_MARKDOWN_PRETTIER: false
-              
+
 
 
 
