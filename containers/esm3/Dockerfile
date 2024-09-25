@@ -28,7 +28,7 @@ ENV NV_CUDNN_PACKAGE libcudnn8-${NV_CUDNN_VERSION}.cuda12.1
 COPY cuda.repo-x86_64 /etc/yum.repos.d/cuda.repo
 COPY NGC-DL-CONTAINER-LICENSE /
 
-RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87 && \
+RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3b80c87 && \  #gitleaks:allow
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/rhel9/${NVARCH}/D42D0685.pub | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA && \
     echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict - \
     && yum update -y && yum install -y \
@@ -42,7 +42,7 @@ RUN NVIDIA_GPGKEY_SUM=d0664fbbdb8c32356d45de36c5984617217b2d0bef41b93ccecd326ba3
     libcublas-12-1-${NV_LIBCUBLAS_VERSION} \
     ${NV_LIBNCCL_PACKAGE} \
     # cuda-runtime-cudnn8
-    ${NV_CUDNN_PACKAGE} #gitleaks:allow
+    ${NV_CUDNN_PACKAGE}
 
 
 ############################################################################
