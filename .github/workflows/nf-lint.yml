@@ -1,6 +1,6 @@
 name: Lint Nextflow Pipelines
 
-on: [pull_request, workflow_dispatch]
+on: [push, pull_request]
 
 jobs:
   lint:
@@ -10,29 +10,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'adopt'
-          java-version: '21'
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3.6.1
 
-      - name: Download CodeNarc and SLF4J
+      - name: Build Docker Image
         run: |
-          wget https://repo1.maven.org/maven2/org/codenarc/CodeNarc/3.3.0/CodeNarc-3.3.0-all.jar
-          wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
-          wget https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar
+          docker build -t nextflow-linter https://github.com/awslabs/linter-rules-for-nextflow.git#main
 
-      - name: Build Linter Rules
+      - name: Lint Nextflow pipelines
         run: |
-          git clone https://github.com/awslabs/linter-rules-for-nextflow.git
-          cd linter-rules-for-nextflow
-          ./gradlew clean build
-
-      - name: Lint Nextflow Pipelines
-        run: |
-          java  -Dorg.slf4j.simpleLogger.defaultLogLevel=error \
-          -classpath ./linter-rules/build/libs/linter-rules-0.1.jar:CodeNarc-3.3.0-all.jar:slf4j-api-1.7.36.jar:slf4j-simple-1.7.36.jar \
+          docker run --rm -v ${{ github.workspace }}:/workspace nextflow-linter \
+          java -Dorg.slf4j.simpleLogger.defaultLogLevel=error \
+          -classpath /linter-rules/build/libs/linter-rules-0.1.jar:/CodeNarc-3.3.0-all.jar:/slf4j-api-1.7.36.jar:/slf4j-simple-1.7.36.jar \
           org.codenarc.CodeNarc \
           -report=text:stdout \
-          -rulesetfiles=rulesets/healthomics.xml \
-          -includes=**/**.nf
+          -rulesetfiles=/linter-rules/rulesets/healthomics.xml \
+          -includes=**/*.nf
