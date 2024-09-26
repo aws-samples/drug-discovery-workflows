@@ -24,4 +24,10 @@ jobs:
 
     - name: Lint Nextflow pipelines
       run: |
-        find . -type f \( -name 'nextflow.config' -o -name 'main.nf' \) -exec nf-core lint {} \;
+        cd workflows
+        for wf in ./workflows/*/
+        do
+          cd "$wf"
+          nf-core lint .
+          cd - > /dev/null
+        done
