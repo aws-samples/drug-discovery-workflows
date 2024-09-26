@@ -24,14 +24,16 @@ jobs:
 
     - name: Lint Nextflow pipelines
       run: |
-        set -x
         for wf in $(ls -1 workflows)
         do
           if [ -d "workflows/${wf}" ]; then
+            # Add a makeshift .nf-core.yml
             echo "Linting ${wf}"
             cd "workflows/${wf}"
+            echo "name: $(basename ${wf})" > .nf-core.yml"
+            echo "repository_type: pipeline" >> ".nf-core.yml"
+            cat .nf-core.yml
             nf-core lint
             cd - > /dev/null
           fi
         done
-        set +x
