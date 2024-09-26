@@ -35,16 +35,16 @@
               
               # Below checks are recommended, leave commented
               # VALIDATE_BASH: true                 
-              # VALIDATE_DOCKERFILE_HADOLINT: true  
-              VALIDATE_GROOVY: false               
-              VALIDATE_GITLEAKS: false              
+              # VALIDATE_DOCKERFILE_HADOLINT: true            
               # VALIDATE_JSON: true
               # VALIDATE_YAML: true
-              VALIDATE_CHECKOV: false              
+              VALIDATE_CHECKOV: false
               VALIDATE_CLOUDFORMATION: false
 
               # Below checks are recommended disabled
               VALIDATE_BASH_EXEC: false
+              VALIDATE_GROOVY: false      # Using a nextflow lint          
+              VALIDATE_GITLEAKS: false    # Gitleaks bug in super-linter  
 
               # Below checks are optional
               VALIDATE_JSON_PRETTIER: false
@@ -62,10 +62,5 @@
               VALIDATE_PYTHON_RUFF: false
               VALIDATE_SHELL_SHFMT: false
               VALIDATE_YAML_PRETTIER: false
-
-
-
-
-
               # To report GitHub Actions status checks
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
