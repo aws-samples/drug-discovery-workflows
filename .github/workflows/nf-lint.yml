@@ -31,7 +31,7 @@ jobs:
             echo "Linting ${wf}"
             cd "workflows/${wf}"
             echo "name: $(basename ${wf})" > .nf-core.yml
-            echo "repository_type: pipeline" >> ".nf-core.yml
+            echo "repository_type: pipeline" >> .nf-core.yml
             cat .nf-core.yml
             nf-core lint
             cd - > /dev/null
