@@ -1,0 +1,43 @@
+name: Docker Build
+
+on: 
+  workflow_dispatch:  # Manual deploy from Github Actions interface
+    inputs:
+      choice:
+        description: 'Select a container to build'
+        required: true
+        type: choice
+        options:
+          - alphafold-data
+          - alphafold-predict
+          - biolamda
+          - esm2
+          - esm3
+          - protein-utils
+          - proteinmpnn
+          - rfdiffusion
+          
+  #push:  # Run automatically when any Dockerfile is edited
+  #  paths:
+  #  - '**/Dockerfile'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      #- name: Log in to Docker Hub
+      #  run: |
+      #    echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image for CUDA (amd64)
+        run: |
+          echo "You selected: ${{ github.event.inputs.choice }}"
+          cd "containers/${{ github.event.inputs.choice }}"
+          docker build -t "${{ github.event.inputs.choice }}" .
+
+      #- name: Push Docker image to Docker Hub
+      #  run: |
+      #    docker push your_image_name:latest
