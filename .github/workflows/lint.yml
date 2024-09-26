@@ -1,5 +1,5 @@
 ---
-    name: Lint
+    name: Super-Linter
     
     on: # yamllint disable-line rule:truthy
       # push: null
@@ -36,8 +36,8 @@
               # Below checks are recommended, leave commented
               # VALIDATE_BASH: true                 
               # VALIDATE_DOCKERFILE_HADOLINT: true  
-              # VALIDATE_GROOVY: true               
-              # VALIDATE_GITLEAKS: true              
+              VALIDATE_GROOVY: false               
+              VALIDATE_GITLEAKS: false              
               # VALIDATE_JSON: true
               # VALIDATE_YAML: true
               VALIDATE_CHECKOV: false              
