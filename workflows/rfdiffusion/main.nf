@@ -41,7 +41,8 @@ process RunInference {
     if [ -f "${yaml_file}" ]; then
         # Use the YAML file for configuration
         python3.9 /app/RFdiffusion/scripts/run_inference.py \
-            --config-path ${yaml_file} \
+            --config-path . \
+            --config-name ${yaml_file.baseName} \
             inference.output_prefix=output/rfdiffusion \
             inference.model_directory_path=${model_params} \
             inference.input_pdb=${input_pdb}
