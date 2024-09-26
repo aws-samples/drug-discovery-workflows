@@ -30,7 +30,7 @@ jobs:
           if [ -d "workflows/${wf}" ]; then
             echo "Linting ${wf}"
             cd "workflows/${wf}"
-            nf-core lint .
+            nf-core lint
             cd - > /dev/null
           fi
         done
