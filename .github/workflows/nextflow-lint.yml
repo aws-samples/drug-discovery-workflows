@@ -1,0 +1,45 @@
+name: Lint Nextflow Pipelines
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3.6.1
+
+      - name: Build Docker Image
+        run: |
+          docker build -t nextflow-linter https://github.com/awslabs/linter-rules-for-nextflow.git#main
+
+      - name: Lint Nextflow pipelines
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/data nextflow-linter \
+           java -Dorg.slf4j.simpleLogger.defaultLogLevel=error \
+           -classpath /linter-rules/build/libs/linter-rules-0.1.jar:/CodeNarc-3.3.0-all.jar:/slf4j-api-1.7.36.jar:/slf4j-simple-1.7.36.jar \
+           org.codenarc.CodeNarc \
+           -basedir=/data \
+           -report=text:stdout \
+           -rulesetfiles=/linter-rules/rulesets/healthomics.xml \
+           -includes=**/*.nf
+
+          echo "$output"
+    
+          # Extract P1 violations and count them
+          P1_count=$(echo "$output" | grep -c 'P=1')
+
+          # Colorize output for better visibility
+          echo "$output" | sed 's/P=1/\x1b[31mP=1\x1b[0m/g' | sed 's/P=2/\x1b[33mP=2\x1b[0m/g' | sed 's/P=3/\x1b[32mP=3\x1b[0m/g'
+
+          # Fail if there are any P1 violations
+          if [ "$P1_count" -gt 0 ]; then
+            echo "❌ Lint failed due to $P1_count critical violation(s)."
+            exit 1
+          else
+            echo "✅ No critical violations found."
+          fi
