@@ -24,10 +24,12 @@ jobs:
 
     - name: Lint Nextflow pipelines
       run: |
+        set -x
         cd workflows
         for wf in ./workflows/*/
         do
-          cd "$wf"
+          cd "workflows/$wf"
           nf-core lint .
           cd - > /dev/null
         done
+        set +x
