@@ -8,7 +8,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: NF-Core lint
-      uses: maxibor/nf-core-gh-action@master
+      uses: nf-core/gh-actions-lint@master
       with:
           nextflow_version: '20.04.1'
           nfcore_version: '1.9'
