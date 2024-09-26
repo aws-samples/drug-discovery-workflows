@@ -27,9 +27,9 @@ jobs:
         set -x
         for wf in $(ls -1 workflows)
         do
-          if [ -d "$wf" ]; then
-            echo "Linting $wf"
-            cd "workflows/$wf"
+          if [ -d "workflows/${wf}" ]; then
+            echo "Linting ${wf}"
+            cd "workflows/${wf}"
             nf-core lint .
             cd - > /dev/null
           fi
