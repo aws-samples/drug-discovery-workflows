@@ -21,11 +21,11 @@ process RunInference {
 
     // All are optional, because we can pass a yaml file
     input:
-        path model_params optional false
-        path input_pdb optional false
-        val contigs optional true
-        val num_designs optional true
-        path yaml_file optional true
+        path model_params
+        path input_pdb
+        val contigs
+        val num_designs
+        path yaml_file
 
     container params.container_image
 
