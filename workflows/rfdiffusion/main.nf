@@ -19,7 +19,7 @@ process RunInference {
     accelerator 1, type: 'nvidia-tesla-a10g'
     publishDir '/mnt/workflow/pubdir'
 
-    // All are optional, because we can pass a yaml file
+    // contigs, num_designs, yaml_file are optional, because we can pass a yaml file to set
     input:
         path model_params
         path input_pdb
