@@ -26,10 +26,13 @@ jobs:
       run: |
         set -x
         cd workflows
-        for wf in ./workflows/*/
+        for wf in ls -1 workflows
         do
-          cd "workflows/$wf"
-          nf-core lint .
-          cd - > /dev/null
+          if [ -d "$wf" ]; then
+            echo "Linting $wf"
+            cd "workflows/$wf"
+            nf-core lint .
+            cd - > /dev/null
+          fi
         done
         set +x
