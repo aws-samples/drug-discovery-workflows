@@ -1,4 +1,8 @@
 {
+  "container_image": {
+    "description": "Container image",
+    "optional": false
+  },
   "input_pdb": {
     "description": "Input PDB file for scaffolding.",
     "optional": false
@@ -11,11 +15,11 @@
     "description": "Unchanged regions of a sequence",
     "optional": true
   },
-  "container_image": {
-    "description": "Container image",
-    "optional": false
-  },
   "num_designs": {
+    "description": "Number of designs to generate",
+    "optional": true
+  },
+  "yaml_file": {
     "description": "Number of designs to generate",
     "optional": true
   }

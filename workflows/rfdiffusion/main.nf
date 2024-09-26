@@ -5,149 +5,12 @@ workflow {
     RunInference(params.model_params, 
                  params.input_pdb,
                  params.contigs,
-                 params.num_designs)
+                 params.num_designs,
+                 params.yaml_file)
 }
 
 // Configuration options
 // https://github.com/RosettaCommons/RFdiffusion/blob/main/config/inference/base.yaml
-// inference:
-//   input_pdb: null
-//   num_designs: 10
-//   design_startnum: 0
-//   ckpt_override_path: null
-//   symmetry: null
-//   recenter: True
-//   radius: 10.0
-//   model_only_neighbors: False
-//   output_prefix: samples/design
-//   write_trajectory: True
-//   scaffold_guided: False
-//   model_runner: SelfConditioning
-//   cautious: True
-//   align_motif: True
-//   symmetric_self_cond: True
-//   final_step: 1
-//   deterministic: False
-//   trb_save_ckpt_path: null
-//   schedule_directory_path: null
-//   model_directory_path: null
-// 
-// contigmap:
-//   contigs: null
-//   inpaint_seq: null
-//   inpaint_str: null
-//   inpaint_str_helix: null
-//   inpaint_str_strand: null
-//   inpaint_str_loop: null
-//   provide_seq: null
-//   length: null
-// 
-// model:
-//   n_extra_block: 4
-//   n_main_block: 32
-//   n_ref_block: 4
-//   d_msa: 256
-//   d_msa_full: 64
-//   d_pair: 128
-//   d_templ: 64
-//   n_head_msa: 8
-//   n_head_pair: 4
-//   n_head_templ: 4
-//   d_hidden: 32
-//   d_hidden_templ: 32
-//   p_drop: 0.15
-//   SE3_param_full:
-//     num_layers: 1
-//     num_channels: 32
-//     num_degrees: 2
-//     n_heads: 4
-//     div: 4
-//     l0_in_features: 8
-//     l0_out_features: 8
-//     l1_in_features: 3
-//     l1_out_features: 2
-//     num_edge_features: 32
-//   SE3_param_topk:
-//     num_layers: 1
-//     num_channels: 32
-//     num_degrees: 2
-//     n_heads: 4
-//     div: 4
-//     l0_in_features: 64
-//     l0_out_features: 64
-//     l1_in_features: 3
-//     l1_out_features: 2
-//     num_edge_features: 64
-//   freeze_track_motif: False
-//   use_motif_timestep: False
-// 
-// diffuser:
-//   T: 50
-//   b_0: 1e-2
-//   b_T: 7e-2
-//   schedule_type: linear
-//   so3_type: igso3
-//   crd_scale: 0.25
-//   partial_T: null    
-//   so3_schedule_type: linear
-//   min_b: 1.5
-//   max_b: 2.5
-//   min_sigma: 0.02
-//   max_sigma: 1.5
-// 
-// denoiser:
-//   noise_scale_ca: 1
-//   final_noise_scale_ca: 1
-//   ca_noise_schedule_type: constant
-//   noise_scale_frame: 1
-//   final_noise_scale_frame: 1
-//   frame_noise_schedule_type: constant
-// 
-// ppi:
-//   hotspot_res: null
-
-// potentials:
-//   guiding_potentials: null 
-//   guide_scale: 10
-//   guide_decay: constant
-//   olig_inter_all : null
-//   olig_intra_all : null
-//   olig_custom_contact : null
-//   substrate: null
-// 
-// contig_settings:
-//   ref_idx: null
-//   hal_idx: null
-//   idx_rf: null
-//   inpaint_seq_tensor: null
-// 
-// preprocess:
-//   sidechain_input: False
-//   motif_sidechain_input: True
-//   d_t1d: 22
-//   d_t2d: 44
-//   prob_self_cond: 0.0
-//   str_self_cond: False
-//   predict_previous: False
-// 
-// logging:
-//   inputs: False
-// 
-// scaffoldguided:
-//   scaffoldguided: False
-//   target_pdb: False
-//   target_path: null
-//   scaffold_list: null
-//   scaffold_dir: null
-//   sampled_insertion: 0
-//   sampled_N: 0
-//   sampled_C: 0
-//   ss_mask: 0
-//   systematic: False
-//   target_ss: null
-//   target_adj: null
-//   mask_loops: True
-//   contig_crop: null
 
 process RunInference {
     label 'predict'
@@ -156,12 +19,13 @@ process RunInference {
     accelerator 1, type: 'nvidia-tesla-a10g'
     publishDir '/mnt/workflow/pubdir'
 
+    // All are optional, because we can pass a yaml file
     input:
-        path model_params
-        path input_pdb
-        val contigs
-        val num_designs
-        // path yaml_file optional true
+        path model_params optional false
+        path input_pdb optional false
+        val contigs optional true
+        val num_designs optional true
+        path yaml_file optional true
 
     container params.container_image
 
@@ -174,9 +38,13 @@ process RunInference {
     mkdir -p output
     export HYDRA_FULL_ERROR=1 
 
-    if [ -f "todo_yaml" ]; then
+    if [ -f "${yaml_file}" ]; then
         # Use the YAML file for configuration
-        python3.9 /app/RFdiffusion/scripts/run_inference.py --config yaml_file
+        python3.9 /app/RFdiffusion/scripts/run_inference.py \
+            inference.output_prefix=output/rfdiffusion \
+            inference.model_directory_path=${model_params} \
+            inference.input_pdb=${input_pdb} \
+            --config ${yaml_file}
     else
         # Use individual arguments
         python3.9 /app/RFdiffusion/scripts/run_inference.py \
@@ -184,11 +52,7 @@ process RunInference {
             inference.model_directory_path=${model_params} \
             inference.input_pdb=${input_pdb} \
             inference.num_designs=${num_designs} \
-            contigmap.contigs=${contigs} \
-            inference.ckpt_override_path=null \
-            inference.symmetry=null \
-            inference.recenter=True \
-            inference.radius=10.0
+            contigmap.contigs=${contigs}
     fi
     """
 }
