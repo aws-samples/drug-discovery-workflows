@@ -42,8 +42,8 @@
 
               # Below checks are recommended disabled
               VALIDATE_BASH_EXEC: false
-              # VALIDATE_GITLEAKS: false   # super-lint bug v7.1
-              # VALIDATE_GROOVY: false     # use NextFlow lint instead
+              VALIDATE_GITLEAKS: false   # super-lint bug v7.1
+              VALIDATE_GROOVY: false     # use NextFlow lint instead
 
               # Below checks are optional
               VALIDATE_JSON_PRETTIER: false
