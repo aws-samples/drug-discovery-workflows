@@ -1,0 +1,19 @@
+name: NextFlow Lint
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  nf-core-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: NF-Core lint
+      uses: maxibor/nf-core-gh-action@master
+      with:
+          nextflow_version: '20.04.1'
+          nfcore_version: '1.9'
+          mode: 'release'
+          GITHUB_COMMENTS_URL: ${{ github.event.pull_request.comments_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_COMMIT: ${{ github.event.pull_request.head.sha }}
+
