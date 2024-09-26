@@ -7,13 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: NF-Core lint
-      uses: nf-core/gh-actions-lint@master
-      with:
-          nextflow_version: '20.04.1'
-          nfcore_version: '1.9'
-          mode: 'release'
-          GITHUB_COMMENTS_URL: ${{ github.event.pull_request.comments_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_PR_COMMIT: ${{ github.event.pull_request.head.sha }}
+      # Nextflow Linting
+    - name: Install Nextflow
+      run: |
+        curl -s https://get.nextflow.io | bash
+        mv nextflow /usr/local/bin/
 
+    - name: Lint Nextflow pipelines
+      run: |
+        find . -type f \( -name 'nextflow.config' -o -name 'main.nf' \) -exec nextflow lint {} \;
