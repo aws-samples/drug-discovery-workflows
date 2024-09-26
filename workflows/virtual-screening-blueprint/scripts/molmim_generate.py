@@ -8,6 +8,7 @@ from rdkit import Chem
 from rdkit.Chem import Descriptors
 from rdkit.Contrib.SA_Score import sascorer
 import networkx as nx
+import uuid
 
 from bionemo.model.core.controlled_generation import ControlledGenerationPerceiverEncoderInferenceWrapper
 from bionemo.model.molecule.molmim.infer import MolMIMInference
@@ -99,9 +100,9 @@ def generate(model, smiles, num_molecules):
     # Configuration parameters
     algorithm="CMA-ES"
     property_type = "QED"
-    sim_threshold = 0.4
+    sim_threshold = 0.6
     minimize = False
-    n_steps = 3
+    n_steps = 10
     radius = 1.0
     scoring_function = PROPERTIES[property_type]
     opt_function = create_oracle(
@@ -144,13 +145,19 @@ def generate(model, smiles, num_molecules):
         {"smiles": smiles_string, "score": score} for smiles_string, score in zip(generated_smiles, scores)
     ]
     output = sorted(scored_output, key=lambda v: v["score"], reverse=not minimize)
+    print(f"### total number of generated molecules: {len(output)}")
     if num_molecules<len(output):
         output = output[:num_molecules]
 
-    for i, s in enumerate(output):
-        m = Chem.MolFromSmiles(s['smiles'])
-        w = Chem.SDWriter(f'{i+1}.sdf')
-        w.write(m)
+    mols_from_gen_smis = []
+    with open(f'{uuid.uuid4().hex}.smi', 'w') as f:
+        f.write('SMILES Score\n')
+        for i, s in enumerate(output):
+            if len(s['smiles'])>1:
+                m = Chem.MolFromSmiles(s['smiles'])
+                if m and m not in mols_from_gen_smis:
+                    mols_from_gen_smis.append(m)
+                    f.write(f"{s['smiles']} {s['score']:.3f}\n")
 
 if __name__ == "__main__":
     nim_cache_path = os.environ.get("NIM_CACHE_PATH")
