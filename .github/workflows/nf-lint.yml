@@ -27,3 +27,19 @@ jobs:
            -report=text:stdout \
            -rulesetfiles=/linter-rules/rulesets/healthomics.xml \
            -includes=**/*.nf
+
+          echo "$output"
+    
+          # Extract P1 violations and count them
+          P1_count=$(echo "$output" | grep -c 'P=1')
+
+          # Colorize output for better visibility
+          echo "$output" | sed 's/P=1/\x1b[31mP=1\x1b[0m/g' | sed 's/P=2/\x1b[33mP=2\x1b[0m/g' | sed 's/P=3/\x1b[32mP=3\x1b[0m/g'
+
+          # Fail if there are any P1 violations
+          if [ "$P1_count" -gt 0 ]; then
+            echo "❌ Lint failed due to $P1_count critical violation(s)."
+            exit 1
+          else
+            echo "✅ No critical violations found."
+          fi
