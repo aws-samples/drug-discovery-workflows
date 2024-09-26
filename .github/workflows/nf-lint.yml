@@ -1,39 +1,38 @@
-name: NextFlow Lint
+name: Lint Nextflow Pipelines
 
-on: [pull_request, workflow_dispatch]
+on: [push, pull_request]
 
 jobs:
-  nf-core-lint:
+  lint:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
-      # Nextflow Linting
-    - name: Install Nextflow
-      run: |
-        curl -s https://get.nextflow.io | bash
-        mv nextflow /usr/local/bin/
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '21'
 
-    - name: Install nf-core/tools
-      run: |
-        pip install nf-core
+      - name: Download CodeNarc and SLF4J
+        run: |
+          wget https://repo1.maven.org/maven2/org/codenarc/CodeNarc/3.3.0/CodeNarc-3.3.0-all.jar
+          wget https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
+          wget https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar
 
-    - name: Lint Nextflow pipelines
-      run: |
-        for wf in $(ls -1 workflows)
-        do
-          if [ -d "workflows/${wf}" ]; then
-            # Add a makeshift .nf-core.yml
-            echo "Linting ${wf}"
-            cd "workflows/${wf}"
-            echo "name: $(basename ${wf})" > .nf-core.yml
-            echo "repository_type: pipeline" >> .nf-core.yml
-            cat .nf-core.yml
-            nf-core lint
-            cd - > /dev/null
-          fi
-        done
+      - name: Build Linter Rules
+        run: |
+          git clone https://github.com/awslabs/linter-rules-for-nextflow.git
+          cd linter-rules-for-nextflow
+          ./gradlew clean build
+
+      - name: Lint Nextflow Pipelines
+        run: |
+          java -Dorg.slf4j.simpleLogger.defaultLogLevel=error \
+           -classpath ../../linter-rules-for-nextflow/linter-rules/build/libs/linter-rules-0.1.jar:../../CodeNarc-3.3.0-all.jar:../../slf4j-api-1.7.36.jar:../../slf4j-simple-1.7.36.jar \
+           org.codenarc.CodeNarc \
+           -report=text:stdout \
+           -rulesetfiles=../../linter-rules-for-nextflow/rulesets/healthomics.xml \
+           -includes=**/*.nf
