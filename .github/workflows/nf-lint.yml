@@ -13,6 +13,15 @@ jobs:
         curl -s https://get.nextflow.io | bash
         mv nextflow /usr/local/bin/
 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install nf-core/tools
+      run: |
+        pip install nf-core
+
     - name: Lint Nextflow pipelines
       run: |
-        find . -type f \( -name 'nextflow.config' -o -name 'main.nf' \) -exec nextflow lint {} \;
+        find . -type f \( -name 'nextflow.config' -o -name 'main.nf' \) -exec nf-core lint {} \;
