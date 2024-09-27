@@ -1,5 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 version: 0.2
 
@@ -13,8 +13,8 @@ phases:
       - echo Installing Mountpoint for Amazon S3
       - wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
       - sudo apt-get install -y ./mount-s3.deb
-      - echo Mounting 
-      - mkdir /s3
+      - mkdir $HOME/s3
+      - echo Mounting $DESTINATION_URI
       - >
         if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
           BUCKET_NAME=${BASH_REMATCH[1]}
@@ -22,9 +22,9 @@ phases:
         else
           echo "Invalid S3 URI"
         fi
-      - mount-s3 $BUCKET_NAME /s3
+      - mount-s3 $BUCKET_NAME $HOME/s3 --write-part-size=104857600
       - >
-        if [[ "$DESTINATION_URI" =~ ^s3?://[^/]+(/.*)/ ]]; then
+        if [[ "$DESTINATION_URI" =~ ^s3?://[^/]+(/.*)/* ]]; then
           KEY=${BASH_REMATCH[1]}
           echo "Key name: $KEY"
         else
@@ -33,10 +33,10 @@ phases:
   build:
     commands:
       - FILENAME=$(basename $SOURCE_URI)
-      - echo Downloading $SOURCE_URI
-      - wget $SOURCE_URI -P /s3$KEY --no-verbose
-      - echo Build completed on `date`
-      
+      - echo Downloading $SOURCE_URI to $HOME/s3$KEY
+      - wget $SOURCE_URI -P /s3$KEY --no-verbose --show-progress --progress=dot:giga
+
   post_build:
     commands:
-      - echo Build completed on `date`
+      - umount $HOME/s3
+      - echo Download completed on `date`

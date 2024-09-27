@@ -1,5 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
@@ -188,3 +188,10 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
+
+Outputs:
+  CodeBuildDownloadProjectName:
+    Description: CodeBuild download project name
+    Value: !Ref CodeBuildDownloadProject
+    Export:
+      Name: !Sub "${StackPrefix}-CodeBuildDownloadProjectName"
