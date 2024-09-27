@@ -36,12 +36,20 @@ fi
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
 # Build and push Docker image to ECR
-docker build \
+output=$(docker build \
     --platform linux/amd64 \
     -t $WORKFLOW_NAME:latest \
-    -f containers/$WORKFLOW_NAME/Dockerfile containers/$WORKFLOW_NAME
-docker tag $WORKFLOW_NAME:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
-docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
+    -f containers/$WORKFLOW_NAME/Dockerfile containers/$WORKFLOW_NAME 2>&1 || true)
+
+# Check if the error message is in the output
+# If it is, fall back to executing the workflows/$WORKFLOW_NAME/build_containers.sh script
+if echo "$output" | grep -q "ERROR: unable to prepare context: path \"containers/$WORKFLOW_NAME\" not found"; then
+  echo "Context not found. Running the build_containers.sh script..."
+  
+  pushd containers
+  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID
+  popd
+fi
 
 # Package the workflow
 mkdir -p tmp/$WORKFLOW_NAME
