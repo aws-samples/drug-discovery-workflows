@@ -123,10 +123,13 @@ Resources:
                   - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildDownload*"
               - Effect: Allow
                 Action:
-                  - s3:GetObject
                   - s3:PutObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject*
+                Resource: "*"
               - Effect: Allow
                 Action:
                   - s3:ListBucket
