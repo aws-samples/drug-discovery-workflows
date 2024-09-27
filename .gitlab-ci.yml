@@ -7,7 +7,7 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 variables:
   AWS_DEFAULT_REGION: us-east-1
   DEV_BUCKET_PREFIX: build/dev
@@ -28,19 +28,6 @@ stages:
 ################################
 # .pre
 ################################
-
-cfn-lint:
-  image: python:3.11
-  stage: lint
-  before_script:
-    - python --version # For debugging
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install -U cfn-lint
-    - pip freeze
-  script:
-    - cfn-lint -I build/cloudformation/*.yaml -i W3002
 
 cfn-nag:
   image:

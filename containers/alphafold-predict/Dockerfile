@@ -1,6 +1,6 @@
 # Original Copyright 2021 DeepMind Technologies Limited
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 # ARG CUDA=11.1.1
 ARG CUDA=11.6.0
