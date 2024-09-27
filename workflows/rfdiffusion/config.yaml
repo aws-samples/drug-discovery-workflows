@@ -19,7 +19,7 @@ parameterTemplate:
     description: "Number of designs to generate"
     optional: true
   yaml_file:
-    description: "Configure with YAML file, if set, no other args are passed"
+    description: "Configure with YAML file, if set, contigs and num_design parameters aren't used"
     optional: true
 storageCapacity: 1200
 tags:

@@ -20,6 +20,7 @@ process RunInference {
     publishDir '/mnt/workflow/pubdir'
 
     // contigs, num_designs, yaml_file are optional, because we can pass a yaml file to set
+    // model_params and input_pdb are always required, to ensure HealthOmics stages files
     input:
         path model_params
         path input_pdb
