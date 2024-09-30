@@ -78,7 +78,7 @@ Resources:
   DownloadBuild:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: download.yaml
+      TemplateURL: data.yaml
       Parameters:
         ApplicationName:
           Ref: ApplicationName

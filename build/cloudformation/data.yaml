@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  download.yaml: Creates resources to download files from the internet and upload to S3
+  data.yaml: Creates resources to download data from the internet and upload to S3
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -64,7 +64,7 @@ Resources:
           - Sid: Enable CodeBuild Encryption
             Effect: Allow
             Principal:
-              AWS: !GetAtt CodeBuildDownloadRole.Arn
+              AWS: !GetAtt CodeBuildDataRole.Arn
             Action:
               [
                 "kms:Encrypt",
@@ -93,10 +93,10 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildDownloadRole:
+  CodeBuildDataRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildDownloadRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildDataRole"
       Description: "Required service policies to support downloadings"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -110,7 +110,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
       Policies:
-        - PolicyName: CodeBuildDownloadPolicy
+        - PolicyName: CodeBuildDataPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -120,7 +120,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildDownload*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildData*"
               - Effect: Allow
                 Action:
                   - s3:PutObject
@@ -148,17 +148,17 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildDownloadProject"
+                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildDataProject"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildDownloadProject:
+  CodeBuildDataProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub "${StackPrefix}-CodeBuildDownloadProject"
+      Name: !Sub "${StackPrefix}-CodeBuildDataProject"
       Artifacts:
         Type: NO_ARTIFACTS
       Description: Download internet data to S3
@@ -180,10 +180,10 @@ Resources:
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildDownloadRole.Arn
-      ServiceRole: !GetAtt CodeBuildDownloadRole.Arn
+      ResourceAccessRole: !GetAtt CodeBuildDataRole.Arn
+      ServiceRole: !GetAtt CodeBuildDataRole.Arn
       Source:
-        BuildSpec: build/buildspec/buildspec_download.yaml
+        BuildSpec: build/buildspec/buildspec_data.yaml
         Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
         Type: S3
       Tags:
@@ -193,8 +193,8 @@ Resources:
           Value: !Ref StackPrefix
 
 Outputs:
-  CodeBuildDownloadProjectName:
-    Description: CodeBuild download project name
-    Value: !Ref CodeBuildDownloadProject
+  CodeBuildDataProjectName:
+    Description: CodeBuild data project name
+    Value: !Ref CodeBuildDataProject
     Export:
-      Name: !Sub "${StackPrefix}-CodeBuildDownloadProjectName"
+      Name: !Sub "${StackPrefix}-CodeBuildDataProjectName"
