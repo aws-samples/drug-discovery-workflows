@@ -53,29 +53,29 @@ Resources:
             ],
           ]
 
-  WorkflowBuild:
-    Type: "AWS::CloudFormation::Stack"
-    Properties:
-      TemplateURL: workflow.yaml
-      Parameters:
-        ApplicationName:
-          Ref: ApplicationName
-        Environment: !Ref Environment
-        S3BucketName: !Ref S3BucketName
-        Timestamp: !Ref Timestamp
-        StackPrefix:
-          !Join [
-            "-",
-            [
-              "aho-dd",
-              !Select [
-                4,
-                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
-              ],
-            ],
-          ]
+  # WorkflowBuild:
+  #   Type: "AWS::CloudFormation::Stack"
+  #   Properties:
+  #     TemplateURL: workflow.yaml
+  #     Parameters:
+  #       ApplicationName:
+  #         Ref: ApplicationName
+  #       Environment: !Ref Environment
+  #       S3BucketName: !Ref S3BucketName
+  #       Timestamp: !Ref Timestamp
+  #       StackPrefix:
+  #         !Join [
+  #           "-",
+  #           [
+  #             "aho-dd",
+  #             !Select [
+  #               4,
+  #               !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+  #             ],
+  #           ],
+  #         ]
 
-  DownloadBuild:
+  DataBuild:
     Type: "AWS::CloudFormation::Stack"
     Properties:
       TemplateURL: data.yaml
@@ -120,6 +120,6 @@ Outputs:
   StackRefDataURI:
     Description: S3 URI for stack reference data
     Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data"]]
-  CodeBuildDownloadProjectName:
+  CodeBuildDataProjectName:
     Description: CodeBuild download project name
-    Value: !GetAtt DownloadBuild.Outputs.CodeBuildDownloadProjectName
+    Value: !GetAtt DataBuild.Outputs.CodeBuildDataProjectName
