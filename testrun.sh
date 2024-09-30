@@ -47,7 +47,7 @@ if echo "$output" | grep -q "ERROR: unable to prepare context: path \"containers
   echo "Context not found. Running the build_containers.sh script..."
   
   pushd containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID
+  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
   popd
 fi
 
