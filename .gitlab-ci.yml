@@ -69,6 +69,7 @@ push-to-s3-dev:
 test_cfn:
   image: python:3.11
   stage: test
+  timeout: 1h
   before_script:
     - python --version # For debugging
     - pip install virtualenv
