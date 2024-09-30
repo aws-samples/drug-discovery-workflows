@@ -4,13 +4,13 @@
 project:
   name: aho-drug-discovery-workflows
   package_lambda: false
-  s3_bucket: aho-drug-discovery-workflows
+  s3_bucket: ddw-deployment-588738610715
   regions:
     - us-east-1
   parameters:
     ApplicationName: "aho-ddw-taskcat"
     Environment: "dev"
-    S3BucketName: "aho-drug-discovery-workflows"
+    S3BucketName: "ddw-deployment-588738610715"
     WaitForContainerBuild: "Y"
 tests:
   default:
