@@ -119,7 +119,7 @@ Outputs:
       ]
   StackRefDataURI:
     Description: S3 URI for stack reference data
-    Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data"]]
+    Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data/"]]
   CodeBuildDataProjectName:
     Description: CodeBuild download project name
     Value: !GetAtt DataBuild.Outputs.CodeBuildDataProjectName

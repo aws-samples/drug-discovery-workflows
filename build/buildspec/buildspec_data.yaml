@@ -21,7 +21,7 @@ phases:
       - >
         if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
           BUCKET_NAME=${BASH_REMATCH[1]}
-          echo "Bucket name: $BUCKET_NAME"
+          echo "Destination Bucket Name: $BUCKET_NAME"
         else
           echo "Invalid S3 URI"
         fi
@@ -29,18 +29,18 @@ phases:
       - >
         if [[ "$DESTINATION_URI" =~ ^s3?://[^/]+(/.*)/* ]]; then
           KEY=${BASH_REMATCH[1]}
-          echo "Key name: $KEY"
+          echo "Destination Key: $KEY"
         else
           KEY=""
         fi
   build:
     commands:
-      - FILENAME=$(basename $SOURCE_URI)
+      # - FILENAME=$(basename $SOURCE_URI)
       - echo Downloading $SOURCE_URI to $DESTINATION_URI
       - >
         if [[ "$SOURCE_SCHEME" == "s3" ]]; then
           aws --version
-          aws s3 cp $SOURCE_URI $DESTINATION_URI/
+          aws s3 cp $SOURCE_URI $DESTINATION_URI
         else
           echo Installing Mountpoint for Amazon S3
           wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
