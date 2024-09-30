@@ -103,7 +103,7 @@ Example run with full argument list:
 -r us-east-1 \
 -o "arn:aws:iam::123456789012:role/healthomics-dev-role" \
 -b mybucket \
--p testparams/rfdiffusion.params.json
+-p file://testparams/rfdiffusion.params.json
 ```
 
 Or create an `.aws/env` file to simplify the arguments:
