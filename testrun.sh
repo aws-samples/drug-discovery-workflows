@@ -35,21 +35,17 @@ fi
 # Login to ECR
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-# Build and push Docker image to ECR
-output=$(docker build \
-    --platform linux/amd64 \
-    -t $WORKFLOW_NAME:develop \
-    -f containers/$WORKFLOW_NAME/Dockerfile containers/$WORKFLOW_NAME 2>&1 || true)
-
-# Check if the error message is in the output
-# If it is, fall back to executing the workflows/$WORKFLOW_NAME/build_containers.sh script
-if echo "$output" | grep -q "ERROR: unable to prepare context: path \"containers/$WORKFLOW_NAME\" not found"; then
-  echo "Context not found. Running the build_containers.sh script..."
-  
+# rfdiffusion is the only workflow name that is 1:1 with container name
+if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
   pushd containers
   bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
   popd
 else
+  docker build \
+    --platform linux/amd64 \
+    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
+    -f containers/$WORKFLOW_NAME/Dockerfile containers/$WORKFLOW_NAME
+
   docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
 fi
 
