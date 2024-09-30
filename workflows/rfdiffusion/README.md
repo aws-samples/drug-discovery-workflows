@@ -97,8 +97,30 @@ Single file:
 
 ```json
 {
-"input_pdb":"s3://mybucket/test_data/rfdiffusion/5TPN.pdb",
+    "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb",
+    "model_params":"s3://mybucket/rfdiffusion/model_parameters/",
+    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest"
 }
+```
+
+With YAML based configuration file:
+
+```json
+{
+    "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb",
+    "model_params":"s3://mybucket/rfdiffusion/model_parameters/",
+    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest",
+    "yaml_file": "s3://mybucket/rfdiffusion/config.yaml"
+}
+```
+
+Sample YAML: 
+https://github.com/RosettaCommons/RFdiffusion/blob/b44206a2a79f219bb1a649ea50603a284c225050/config/inference/base.yaml
+
+Be sure to set `contigmap.contigs` your desired value:
+```yaml
+contigmap:
+  contigs: ["150-150"]
 ```
 
 ### Running the Workflow
