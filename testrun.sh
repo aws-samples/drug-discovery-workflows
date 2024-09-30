@@ -54,15 +54,23 @@ else
 fi
 
 # Package the workflow
-mkdir -p tmp/$WORKFLOW_NAME
-cp -r workflows/$WORKFLOW_NAME/* tmp/$WORKFLOW_NAME
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.nf 2>/dev/null || true
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./tmp/rfdiffusion/*.config tmp/$WORKFLOW_NAME/*.config 2>/dev/null || true
-zip -j -r tmp/$WORKFLOW_NAME/workflow.zip tmp/$WORKFLOW_NAME
+mkdir -p tmp/workflows/$WORKFLOW_NAME tmp/modules
+
+pushd tmp
+
+cp -r ../workflows/$WORKFLOW_NAME/* workflows/$WORKFLOW_NAME
+cp -r ../modules/* modules
+
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+
+zip -r drug-discovery-workflows.zip .
+
+popd
 
 # Create the workflow
-workflow_id=$(aws omics create-workflow --engine NEXTFLOW --name $WORKFLOW_NAME-dev-$TIMESTAMP --region $REGION --cli-input-yaml file://tmp/$WORKFLOW_NAME/config.yaml --definition-zip fileb://tmp/$WORKFLOW_NAME/workflow.zip --query 'id' --output text)
+workflow_id=$(aws omics create-workflow --engine NEXTFLOW --name $WORKFLOW_NAME-dev-$TIMESTAMP --region $REGION --cli-input-yaml file://tmp/workflows/$WORKFLOW_NAME/config.yaml --definition-zip fileb://tmp/drug-discovery-workflows.zip --main workflows/$WORKFLOW_NAME/main.nf --query 'id' --output text)
 aws omics wait workflow-active --region $REGION --id $workflow_id
 
 # Run the workflow
