@@ -10,48 +10,59 @@ phases:
   pre_build:
     commands:
       - echo Build started on `date`
-      
-      - >
-        if [[ "$SOURCE_URI" =~ ^([^:]+) ]]; then
-          SOURCE_SCHEME=${BASH_REMATCH[1]}
-          echo "Source scheme: $SOURCE_SCHEME"
-        else
-          echo "Invalid source URI"
-        fi
-      - >
+      - echo "Processing $BUILD_CONTEXT"
+      - |
         if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
           BUCKET_NAME=${BASH_REMATCH[1]}
           echo "Destination Bucket Name: $BUCKET_NAME"
         else
           echo "Invalid S3 URI"
         fi
-      # - mount-s3 $BUCKET_NAME $HOME/s3 --write-part-size=104857600
-      - >
-        if [[ "$DESTINATION_URI" =~ ^s3?://[^/]+(/.*)/* ]]; then
-          KEY=${BASH_REMATCH[1]}
-          echo "Destination Key: $KEY"
-        else
-          KEY=""
-        fi
+      - echo Installing Mountpoint for Amazon S3
+      - wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
+      - sudo apt-get update && sudo apt-get install -y ./mount-s3.deb git-lfs
+      - git lfs install
+      - mkdir $HOME/s3
+      - echo Mounting $DESTINATION_URI
+      - mount-s3 $BUCKET_NAME $HOME/s3 --allow-delete --allow-overwrite --write-part-size=104857600
   build:
     commands:
-      # - FILENAME=$(basename $SOURCE_URI)
-      - echo Downloading $SOURCE_URI to $DESTINATION_URI
-      - >
-        if [[ "$SOURCE_SCHEME" == "s3" ]]; then
-          aws --version
-          aws s3 cp $SOURCE_URI $DESTINATION_URI
+      - FILENAME="${NAME%.*}"
+      - |
+        if [[ "$DESTINATION_URI" =~ ^s3?://[^/]+/(.*)/* ]]; then
+          KEY="${BASH_REMATCH[1]}/$FILENAME"
+          echo "Destination Key: $KEY"
         else
-          echo Installing Mountpoint for Amazon S3
-          wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
-          sudo apt-get install -y ./mount-s3.deb
-          mkdir $HOME/s3
-          echo Mounting $DESTINATION_URI
-          mount-s3 $BUCKET_NAME $HOME/s3 --write-part-size=104857600
-          wget $SOURCE_URI -P $HOME/s3$KEY --no-verbose --show-progress --progress=dot:giga
-          umount $HOME/s3
+          KEY="ref-data/$FILENAME"
+          echo "Destination Key: $KEY"
         fi
+      - |
+        while read -r SOURCE_URI; do
+          echo $SOURCE_URI;
+          if [[ "$SOURCE_URI" =~ ^([^:]+) ]]; then
+            SOURCE_SCHEME=${BASH_REMATCH[1]}
+            echo "Source scheme: $SOURCE_SCHEME"
+          else
+            echo "Invalid source URI"
+          fi;
+          if [[ "$SOURCE_SCHEME" == "s3" ]]; then
+            aws s3 cp $SOURCE_URI $DESTINATION_URI/$FILENAME/
+          else
+            if [[ "$SOURCE_URI" =~ ^[^/]+/[^/]+ ]]; then
+              git clone https://huggingface.co/$SOURCE_URI $HOME/tmp --depth=1
+              rm -rf $HOME/tmp/.git
+              mkdir -p $HOME/s3/$KEY/$SOURCE_URI
+              cp -r $HOME/tmp/* $HOME/s3/$KEY/$SOURCE_URI
+              rm -rf $HOME/tmp
+            else
+              wget $SOURCE_URI -P $HOME/s3/$KEY --no-verbose --show-progress --progress=dot:giga
+            fi;
+          fi;          
+        done <$BUILD_CONTEXT
 
   post_build:
     commands:
+      - sudo umount $HOME/s3
+      - JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
+      - curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE"
       - echo Download completed on `date`

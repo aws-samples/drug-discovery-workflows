@@ -27,15 +27,15 @@ Parameters:
     Description: Stack-specific prefix for resource naming
     Type: String
     Default: abc-123
-  WaitForContainerBuild:
-    Description: Should CloudFormation wait for all containers?
+  WaitForCodeBuild:
+    Description: Should CloudFormation wait for CodeBuild?
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
 
 Conditions:
-  WaitForContainerBuildCondition:
-    "Fn::Equals": [Ref: "WaitForContainerBuild", "Y"]     
+  WaitForCodeBuildCondition:
+    "Fn::Equals": [Ref: "WaitForCodeBuild", "Y"]     
 
 Resources:
   EncryptionKey:
@@ -186,7 +186,7 @@ Resources:
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
           - Name: WAIT_CONDITION_HANDLE
-            Value: !Ref CodeBuildContainerWaitHandle
+            Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -265,14 +265,14 @@ Resources:
       Timestamp:
         Ref: Timestamp
 
-  CodeBuildContainerWaitHandle:
+  CodeBuildWaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
 
-  CodeBuildContainerWaitCondition:
+  CodeBuildWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
-    Condition: WaitForContainerBuildCondition    
+    Condition: WaitForCodeBuildCondition    
     Properties:
-      Handle: !Ref CodeBuildContainerWaitHandle
+      Handle: !Ref CodeBuildWaitHandle
       Timeout: 3600
       Count: !GetAtt StartCodeBuildContainer.ArtifactCount
 

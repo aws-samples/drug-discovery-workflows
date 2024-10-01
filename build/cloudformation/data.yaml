@@ -27,6 +27,15 @@ Parameters:
     Description: Stack-specific prefix for resource naming
     Type: String
     Default: abc-123
+  WaitForCodeBuild:
+    Description: Should CloudFormation wait for CodeBuild?
+    Type: String
+    Default: "N"
+    AllowedValues: [Y, N]    
+
+Conditions:
+  WaitForCodeBuildCondition:
+    "Fn::Equals": [Ref: "WaitForCodeBuild", "Y"]     
 
 Resources:
   EncryptionKey:
@@ -172,10 +181,10 @@ Resources:
             Value: !Ref "AWS::Region"
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
-          - Name: SOURCE_URI
-            Value: ""
           - Name: DESTINATION_URI
-            Value: ""
+            Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data"]]
+          - Name: WAIT_CONDITION_HANDLE
+            Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -191,6 +200,79 @@ Resources:
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
+
+  CodeBuildDataLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-CodeBuildDataLambdaExecutionRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: StartCodeBuildDataLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                Resource:
+                  - !GetAtt CodeBuildDataProject.Arn
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  StartCodeBuildDataLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildDataLambda"
+      ReservedConcurrentExecutions: 10
+      Code: "../lambda/StartCodeBuildLambda"
+      Description: Start CodeBuildDataProject
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role:
+        Fn::GetAtt: CodeBuildDataLambdaExecutionRole.Arn
+      Runtime: python3.11
+      Timeout: 30
+      Tags:
+        - Key: Application
+          Value: !Ref ApplicationName
+        - Key: StackPrefix
+          Value: !Ref StackPrefix
+
+  StartCodeBuildData:
+    Type: Custom::ResourceForBuildingContainer
+    Properties:
+      ServiceToken:
+        Fn::GetAtt: StartCodeBuildDataLambda.Arn
+      SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
+      SourceSubfolder: "assets/data"
+      ProjectName:
+        Ref: CodeBuildDataProject
+      Timestamp:
+        Ref: Timestamp
+
+  CodeBuildWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+  CodeBuildWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: WaitForCodeBuildCondition    
+    Properties:
+      Handle: !Ref CodeBuildWaitHandle
+      Timeout: 3600
+      Count: !GetAtt StartCodeBuildData.ArtifactCount    
 
 Outputs:
   CodeBuildDataProjectName:
