@@ -19,8 +19,11 @@
 
 FROM nvcr.io/nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04 as github
 
-RUN apt-get update && apt-get install -y git \
-    && git clone https://github.com/RosettaCommons/RFdiffusion.git --depth=1 /tmp/github
+# Main commit on 9/26/24 - john@bioteam.net
+ENV RF_DIFFUSION_VERSION b44206a2a79f219bb1a649ea50603a284c225050
+
+RUN apt-get update && apt-get install -y git
+RUN git clone https://github.com/RosettaCommons/RFdiffusion.git --depth=1 /tmp/github && cd /tmp/github && git checkout ${RF_DIFFUSION_VERSION}
 
 FROM nvcr.io/nvidia/cuda:11.6.2-cudnn8-runtime-ubuntu20.04
 
@@ -41,7 +44,7 @@ RUN apt-get -q update \
   e3nn==0.3.3 \
   wandb==0.12.0 \
   pynvml==11.0.0 \
-  git+https://github.com/NVIDIA/dllogger#egg=dllogger \
+  git+https://github.com/NVIDIA/dllogger@0540a43971f4a8a16693a9de9de73c1072020769#egg=dllogger \
   decorator==5.1.0 \
   hydra-core==1.3.2 \
   pyrsistent==0.19.3 \

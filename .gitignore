@@ -3,3 +3,7 @@
 .venv
 __pycache__
 delete_all_*.py
+.aws/env
+testparams/
+tmp/
+.nextflow*
