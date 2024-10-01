@@ -4,7 +4,7 @@ workflow ESMFoldFlow {
     input {
         File fasta_path
         Int max_records_per_partition = 1
-        String model_parameters = "s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
+        File model_parameters = "s3://{{S3_BUCKET_NAME}}/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
     }
 
     call ShardFastaTask{

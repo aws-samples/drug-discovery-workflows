@@ -53,27 +53,27 @@ Resources:
             ],
           ]
 
-  # WorkflowBuild:
-  #   Type: "AWS::CloudFormation::Stack"
-  #   Properties:
-  #     TemplateURL: workflow.yaml
-  #     Parameters:
-  #       ApplicationName:
-  #         Ref: ApplicationName
-  #       Environment: !Ref Environment
-  #       S3BucketName: !Ref S3BucketName
-  #       Timestamp: !Ref Timestamp
-  #       StackPrefix:
-  #         !Join [
-  #           "-",
-  #           [
-  #             "aho-dd",
-  #             !Select [
-  #               4,
-  #               !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
-  #             ],
-  #           ],
-  #         ]
+  WorkflowBuild:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: workflow.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment: !Ref Environment
+        S3BucketName: !Ref S3BucketName
+        Timestamp: !Ref Timestamp
+        StackPrefix:
+          !Join [
+            "-",
+            [
+              "aho-dd",
+              !Select [
+                4,
+                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+              ],
+            ],
+          ]
 
   DataBuild:
     Type: "AWS::CloudFormation::Stack"
