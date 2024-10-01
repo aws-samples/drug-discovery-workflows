@@ -176,7 +176,7 @@ Resources:
             Value: ""
           - Name: DESTINATION_URI
             Value: ""
-        Image: aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER

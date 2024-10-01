@@ -187,7 +187,7 @@ Resources:
             Value: !Ref StackPrefix
           - Name: WAIT_CONDITION_HANDLE
             Value: !Ref CodeBuildContainerWaitHandle
-        Image: aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
@@ -245,7 +245,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildContainerLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application
@@ -315,7 +315,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application

@@ -248,7 +248,7 @@ Resources:
             Value: !Ref StackPrefix
           - Name: S3_BUCKET_NAME
             Value: !Ref S3BucketName
-        Image: aws/codebuild/standard:6.0
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
         Type: LINUX_CONTAINER
@@ -306,7 +306,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application
@@ -366,7 +366,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application
