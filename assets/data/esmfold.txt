@@ -1,1 +1,1 @@
-s3://aws-hcls-ml/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar
+facebook/esmfold_v1

@@ -3,8 +3,8 @@ version 1.0
 workflow ESM2EmbeddingsFlow {
     input {
         File fasta_path
-        Int max_records_per_partition = 24
-        String pretrained_model_uri = "s3://167428594774-us-east-1-aho/models/esm/esm2_t6_8M_UR50D.tar"
+        Int max_records_per_partition = 24  
+        File pretrained_model_uri = "s3://{{S3_BUCKET_NAME}}/ref-data/esm2/facebook/esm2_t6_8M_UR50D/model.tar"
     }
 
     call ShardFastaTask{

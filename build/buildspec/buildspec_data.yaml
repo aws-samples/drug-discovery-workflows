@@ -52,8 +52,10 @@ phases:
               git clone https://huggingface.co/$SOURCE_URI $HOME/tmp --depth=1
               rm -rf $HOME/tmp/.git
               mkdir -p $HOME/s3/$KEY/$SOURCE_URI
-              cp -r $HOME/tmp/* $HOME/s3/$KEY/$SOURCE_URI
+              tar -cvf $HOME/model.tar -C $HOME/tmp .
+              cp -r $HOME/model.tar $HOME/s3/$KEY/$SOURCE_URI
               rm -rf $HOME/tmp
+              rm $HOME/model.tar
             else
               wget -nc $SOURCE_URI -P $HOME/s3/$KEY --no-verbose --show-progress --progress=dot:giga
             fi;

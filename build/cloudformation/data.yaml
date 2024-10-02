@@ -173,7 +173,7 @@ Resources:
       Description: Download internet data to S3
       EncryptionKey: !Ref EncryptionKey
       Environment:
-        ComputeType: BUILD_GENERAL1_MEDIUM
+        ComputeType: BUILD_GENERAL1_LARGE
         EnvironmentVariables:
           - Name: ACCOUNT_ID
             Value: !Ref "AWS::AccountId"

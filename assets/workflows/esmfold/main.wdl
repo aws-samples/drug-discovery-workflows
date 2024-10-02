@@ -4,7 +4,7 @@ workflow ESMFoldFlow {
     input {
         File fasta_path
         Int max_records_per_partition = 1
-        File model_parameters = "s3://{{S3_BUCKET_NAME}}/public_assets_support_materials/guidance-for-protein-folding/compressed/esmfold_transformers_params.tar"
+        File model_parameters = "s3://{{S3_BUCKET_NAME}}/ref-data/esmfold/facebook/esmfold_v1/model.tar"
     }
 
     call ShardFastaTask{
@@ -63,9 +63,10 @@ task ESMFoldTask {
     }
     command <<<
         set -euxo pipefail
-        tar -xvf ~{model_parameters} -C $(pwd)
+        mkdir $(pwd)/model
+        tar -xvf ~{model_parameters} -C $(pwd)/model
         /opt/conda/bin/python /home/scripts/esmfold_inference.py ~{csv_path} \
-        --output_dir $(pwd) --pretrained_model_name_or_path $(pwd)
+        --output_dir $(pwd) --pretrained_model_name_or_path $(pwd)/model
     >>>
     runtime {
         docker: docker_image,

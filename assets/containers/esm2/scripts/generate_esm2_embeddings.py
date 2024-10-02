@@ -36,8 +36,8 @@ def generate_embeddings(
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
     model = AutoModel.from_pretrained(
-        pretrained_model_name_or_path, device_map="auto", quantization_config=bnb_config
-    )
+        pretrained_model_name_or_path, quantization_config=bnb_config
+    ).to(device)
 
     tmp = []
     logging.info(f"Generating embeddings for {len(text)} sequences")
@@ -50,7 +50,7 @@ def generate_embeddings(
         inputs = tokenizer(
             batch, return_tensors="pt", truncation=True, padding=True, max_length=1024
         ).to(device)
-        with torch.no_grad():
+        with torch.inference_mode():
             predictions = model(**inputs)
         # Return mean embeddings after removing <cls> and <eos> tokens and converting to numpy.
         tmp.append(predictions.last_hidden_state[:, 1:-1, :].cpu().numpy().mean(axis=1))

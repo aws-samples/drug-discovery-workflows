@@ -7,8 +7,8 @@ phases:
   pre_build:
     commands:
       - echo Build started on `date`
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - echo Logging in to AWS Deep Learning Containers ECR...
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com
   build:
     commands:
       - echo "Checking for repository ${NAME}"
@@ -26,6 +26,8 @@ phases:
       - docker tag $NAME $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest
   post_build:
     commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
       - echo Pushing the $NAME image
       - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$NAME:latest
       - JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' )
