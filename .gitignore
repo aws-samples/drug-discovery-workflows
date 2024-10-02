@@ -2,4 +2,5 @@
 .scratch
 .venv
 __pycache__
-delete_all_*.py
+scripts/delete_all_*.py
+stack-outputs.json

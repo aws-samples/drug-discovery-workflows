@@ -1,5 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
@@ -246,7 +246,9 @@ Resources:
             Value: !Ref "AWS::Region"
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
-        Image: aws/codebuild/standard:6.0
+          - Name: S3_BUCKET_NAME
+            Value: !Ref S3BucketName
+        Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: false
         Type: LINUX_CONTAINER
@@ -304,7 +306,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application
@@ -318,7 +320,7 @@ Resources:
       ServiceToken:
         Fn::GetAtt: StartCodeBuildWorkflowLambda.Arn
       SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
-      SourceSubfolder: "workflows"
+      SourceSubfolder: "assets/workflows"
       ProjectName:
         Ref: CodeBuildWorkflowProject
       Timestamp:
@@ -364,7 +366,7 @@ Resources:
       MemorySize: 512
       Role:
         Fn::GetAtt: DeleteWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.10
+      Runtime: python3.11
       Timeout: 30
       Tags:
         - Key: Application

@@ -3,7 +3,7 @@
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  container.yaml: Creates AWS CodeBuild resources for container building.
+  data.yaml: Creates resources to download data from the internet and upload to S3
 Parameters:
   ApplicationName:
     Description: Name of the application, if applicable
@@ -15,7 +15,7 @@ Parameters:
     Default: main
     AllowedValues:
       - main
-      - dev    
+      - dev
   S3BucketName:
     Description: Name of the S3 bucket to use for deployment and run storage
     Type: String
@@ -31,7 +31,7 @@ Parameters:
     Description: Should CloudFormation wait for CodeBuild?
     Type: String
     Default: "N"
-    AllowedValues: [Y, N]
+    AllowedValues: [Y, N]    
 
 Conditions:
   WaitForCodeBuildCondition:
@@ -46,7 +46,7 @@ Resources:
       EnableKeyRotation: true
       KeyPolicy:
         Version: 2012-10-17
-        Id: !Sub "${ApplicationName}-container-build-key"
+        Id: !Sub "${ApplicationName}-download-build-key"
         Statement:
           - Sid: Enable IAM User Permissions
             Effect: Allow
@@ -73,7 +73,7 @@ Resources:
           - Sid: Enable CodeBuild Encryption
             Effect: Allow
             Principal:
-              AWS: !GetAtt CodeBuildContainerRole.Arn
+              AWS: !GetAtt CodeBuildDataRole.Arn
             Action:
               [
                 "kms:Encrypt",
@@ -102,11 +102,11 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildContainerRole:
+  CodeBuildDataRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildContainerRole"
-      Description: "Required service policies to support building containers"
+      RoleName: !Sub "${StackPrefix}-CodeBuildDataRole"
+      Description: "Required service policies to support downloadings"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -119,7 +119,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
       Policies:
-        - PolicyName: CodeBuildContainerPolicy
+        - PolicyName: CodeBuildDataPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -129,13 +129,16 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildContainer*"
+                  - !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${StackPrefix}-CodeBuildData*"
               - Effect: Allow
                 Action:
-                  - s3:GetObject
                   - s3:PutObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - s3:GetObject*
+                Resource: "*"
               - Effect: Allow
                 Action:
                   - s3:ListBucket
@@ -154,27 +157,20 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildContainerProject"
-              - Effect: Allow
-                Action:
-                  - ecr:CreateRepository
-                  - ecr:TagResource
-                  - ecr:SetRepositoryPolicy
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+                  - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildDataProject"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildContainerProject:
+  CodeBuildDataProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: !Sub "${StackPrefix}-CodeBuildContainerProject"
+      Name: !Sub "${StackPrefix}-CodeBuildDataProject"
       Artifacts:
         Type: NO_ARTIFACTS
-      Description: Build Docker container
+      Description: Download internet data to S3
       EncryptionKey: !Ref EncryptionKey
       Environment:
         ComputeType: BUILD_GENERAL1_LARGE
@@ -185,16 +181,18 @@ Resources:
             Value: !Ref "AWS::Region"
           - Name: STACK_PREFIX
             Value: !Ref StackPrefix
+          - Name: DESTINATION_URI
+            Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data"]]
           - Name: WAIT_CONDITION_HANDLE
             Value: !Ref CodeBuildWaitHandle
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
         Type: LINUX_CONTAINER
-      ResourceAccessRole: !GetAtt CodeBuildContainerRole.Arn
-      ServiceRole: !GetAtt CodeBuildContainerRole.Arn
+      ResourceAccessRole: !GetAtt CodeBuildDataRole.Arn
+      ServiceRole: !GetAtt CodeBuildDataRole.Arn
       Source:
-        BuildSpec: build/buildspec/buildspec_container.yaml
+        BuildSpec: build/buildspec/buildspec_data.yaml
         Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
         Type: S3
       Tags:
@@ -203,10 +201,10 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  CodeBuildContainerLambdaExecutionRole:
+  CodeBuildDataLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildContainerLambdaExecutionRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildDataLambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -217,7 +215,7 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Policies:
-        - PolicyName: StartCodeBuildContainerLambdaPolicy
+        - PolicyName: StartCodeBuildDataLambdaPolicy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -225,7 +223,7 @@ Resources:
                 Action:
                   - codebuild:StartBuild
                 Resource:
-                  - !GetAtt CodeBuildContainerProject.Arn
+                  - !GetAtt CodeBuildDataProject.Arn
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -234,17 +232,17 @@ Resources:
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
-  StartCodeBuildContainerLambda:
+  StartCodeBuildDataLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${StackPrefix}-StartCodeBuildContainerLambda"
+      FunctionName: !Sub "${StackPrefix}-StartCodeBuildDataLambda"
       ReservedConcurrentExecutions: 10
       Code: "../lambda/StartCodeBuildLambda"
-      Description: Start CodeBuildContainerProject
+      Description: Start CodeBuildDataProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
-        Fn::GetAtt: CodeBuildContainerLambdaExecutionRole.Arn
+        Fn::GetAtt: CodeBuildDataLambdaExecutionRole.Arn
       Runtime: python3.11
       Timeout: 30
       Tags:
@@ -253,15 +251,15 @@ Resources:
         - Key: StackPrefix
           Value: !Ref StackPrefix
 
-  StartCodeBuildContainer:
+  StartCodeBuildData:
     Type: Custom::ResourceForBuildingContainer
     Properties:
       ServiceToken:
-        Fn::GetAtt: StartCodeBuildContainerLambda.Arn
+        Fn::GetAtt: StartCodeBuildDataLambda.Arn
       SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
-      SourceSubfolder: "assets/containers"
+      SourceSubfolder: "assets/data"
       ProjectName:
-        Ref: CodeBuildContainerProject
+        Ref: CodeBuildDataProject
       Timestamp:
         Ref: Timestamp
 
@@ -274,59 +272,11 @@ Resources:
     Properties:
       Handle: !Ref CodeBuildWaitHandle
       Timeout: 3600
-      Count: !GetAtt StartCodeBuildContainer.ArtifactCount
+      Count: !GetAtt StartCodeBuildData.ArtifactCount    
 
-  DeleteContainerRepoLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${StackPrefix}-DeleteContainerRepoLambdaExecutionRole"
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: DeleteContainerRepoLambdaPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecr:DescribeRepositories
-                  - ecr:DeleteRepository
-                  - ecr:ListTagsForResource
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-
-  DeleteContainerRepoLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "${StackPrefix}-DeleteContainerRepoLambda"
-      ReservedConcurrentExecutions: 10
-      Code: "../lambda/DeleteContainerRepoLambda"
-      Description: Delete ECR repositories
-      Handler: index.lambda_handler
-      MemorySize: 512
-      Role:
-        Fn::GetAtt: DeleteContainerRepoLambdaExecutionRole.Arn
-      Runtime: python3.11
-      Timeout: 30
-      Tags:
-        - Key: Application
-          Value: !Ref ApplicationName
-        - Key: StackPrefix
-          Value: !Ref StackPrefix
-
-  DeleteContainerRepositories:
-    Type: Custom::ResourceForDeletingContainerRepo
-    Properties:
-      ServiceToken:
-        Fn::GetAtt: DeleteContainerRepoLambda.Arn
-      StackPrefix:
-        Ref: StackPrefix
+Outputs:
+  CodeBuildDataProjectName:
+    Description: CodeBuild data project name
+    Value: !Ref CodeBuildDataProject
+    Export:
+      Name: !Sub "${StackPrefix}-CodeBuildDataProjectName"
