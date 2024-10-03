@@ -33,7 +33,7 @@ process ShardFastaTask {
     script:
     """
     set -euxo pipefail
-    /opt/venv/bin/python /home/scripts/split_fasta.py $fasta_path \
+    /opt/venv/bin/python /home/putils/src/putils/split_fasta.py $fasta_path \
         --max_records_per_partition=$max_records_per_partition \
         --save_csv
     """
