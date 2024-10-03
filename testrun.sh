@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# usage: ./testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS
+# usage: ./testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS [-g RUN_GROUP_ID]
 
 set -ex
-unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS
+unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS RUN_GROUP_ID
 
 TIMESTAMP=$(date +%s)
 
@@ -13,7 +13,7 @@ if [ -f ".aws/env" ]; then
 fi
 
 # Set variables from arguments if they are not already set
-while getopts 'w:a:r:o:b:p:' OPTION; do
+while getopts 'w:a:r:o:b:p:g:' OPTION; do
   case "$OPTION" in
   w) WORKFLOW_NAME="$OPTARG" ;;
   a) [ -z "$ACCOUNT_ID" ] && ACCOUNT_ID="$OPTARG" ;;
@@ -21,6 +21,7 @@ while getopts 'w:a:r:o:b:p:' OPTION; do
   o) [ -z "$OMICS_EXECUTION_ROLE" ] && OMICS_EXECUTION_ROLE="$OPTARG" ;;
   b) [ -z "$OUTPUT_BUCKET" ] && OUTPUT_BUCKET="$OPTARG" ;;
   p) PARAMETERS="$OPTARG" ;;
+  g) [ -z "$RUN_GROUP_ID" ] && RUN_GROUP_ID="$OPTARG" ;;
   *) exit 1 ;;
   esac
 done
@@ -70,15 +71,23 @@ workflow_id=$(aws omics create-workflow --engine NEXTFLOW --name $WORKFLOW_NAME-
 aws omics wait workflow-active --region $REGION --id $workflow_id
 
 # Run the workflow
-aws omics start-run \
+start_run_command="aws omics start-run \
     --retention-mode REMOVE \
     --storage-type DYNAMIC \
     --workflow-id $workflow_id \
     --name $WORKFLOW_NAME-dev-$TIMESTAMP \
-    --role-arn "$OMICS_EXECUTION_ROLE" \
-    --parameters "$PARAMETERS" \
+    --role-arn \"$OMICS_EXECUTION_ROLE\" \
+    --parameters \"$PARAMETERS\" \
     --region $REGION \
-    --output-uri s3://$OUTPUT_BUCKET/out
+    --output-uri s3://$OUTPUT_BUCKET/out"
+
+# Add run-group-id if provided
+if [ -n "$RUN_GROUP_ID" ]; then
+  start_run_command+=" --run-group-id $RUN_GROUP_ID"
+fi
+
+# Execute the start-run command
+eval $start_run_command
 
 # Cleanup
 rm -rf tmp
