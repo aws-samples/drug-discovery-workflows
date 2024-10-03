@@ -47,7 +47,7 @@ process ShardFastaTask {
 
 process ESMFoldTask {
     container '{{esm2:latest}}'
-    cpus 8
+    cpus 4
     memory '16 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
 
