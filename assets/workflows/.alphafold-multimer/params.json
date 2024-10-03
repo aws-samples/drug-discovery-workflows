@@ -1,4 +1,0 @@
-{
-    "fasta_path":"s3://mybucket/test_data/multimer/7unl.fasta",
-    "target_id": "7unl"
-}

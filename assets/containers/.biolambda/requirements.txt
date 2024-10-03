@@ -1,5 +1,0 @@
-pandas==2.2.1
-numpy==1.26.4
-biopython==1.83
-pyfastx==2.1.0
-tqdm==4.66.3
