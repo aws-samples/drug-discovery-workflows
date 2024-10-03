@@ -23,4 +23,4 @@ WORKDIR /home/scripts
 
 ENV TMPDIR="/tmp"
 
-ENTRYPOINT [ "python" ]
+ENTRYPOINT []

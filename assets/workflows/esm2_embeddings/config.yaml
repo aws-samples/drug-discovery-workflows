@@ -1,7 +1,7 @@
 name: ESM2 Embeddings
 description: "This workflow generates numerical embeddings for one or more protein amino acid sequences using the ESM-2 protein language model."
-engine: WDL
-main: main.wdl
+engine: NEXTFLOW
+main: main.nf
 parameterTemplate:
   fasta_path:
     description: "Input file in FASTA format. Only single-chain inputs are supported at this time."

@@ -58,7 +58,7 @@ task ESMFoldTask {
         File csv_path
         File model_parameters
         String memory = "16 GiB"
-        Int cpu = 8
+        Int cpu = 4
         String docker_image = "{{esmfold}}"
     }
     command <<<
@@ -72,7 +72,7 @@ task ESMFoldTask {
         docker: docker_image,
         memory: memory,
         acceleratorCount: 1,
-        acceleratorType: "nvidia-tesla-t4-a10g",
+        acceleratorType: "nvidia-tesla-a10g",
         cpu: cpu
         }
     output {
