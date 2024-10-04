@@ -46,10 +46,10 @@ while getopts 'b:e:n:r:w:' OPTION; do
   esac
 done
 
-[ -z "$ENVIRONMENT" ] && { ENVIRONMENT="dev"; }
+[ -z "$ENVIRONMENT" ] && { ENVIRONMENT="main"; }
 [ -z "$STACK_NAME" ] && { STACK_NAME="aho-ddw"; }
 [ -z "$REGION" ] && { REGION="us-east-1"; }
-[ -z "$WAITFORCODEBUILD" ] && { WAITFORCODEBUILD="N"; }
+[ -z "$WAITFORCODEBUILD" ] && { WAITFORCODEBUILD="Y"; }
 
 zip -r build/code.zip build assets -x .\*/\* -x tests
 aws s3 cp build/code.zip s3://$BUCKET_NAME/build/$ENVIRONMENT/code/code.zip

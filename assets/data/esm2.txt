@@ -1,1 +1,1 @@
-facebook/esm2_t6_8M_UR50D
+facebook/esm2_t33_650M_UR50D

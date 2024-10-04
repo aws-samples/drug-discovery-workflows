@@ -3,8 +3,8 @@
 nextflow.enable.dsl = 2
 
 params.fasta_path
-params.max_records_per_partition = 1
-params.model_parameters = 's3://{{S3_BUCKET_NAME}}//ref-data/esm2/facebook/esm2_t6_8M_UR50D/model.tar'
+params.max_records_per_partition = 8
+params.model_parameters = 's3://{{S3_BUCKET_NAME}}//ref-data/esm2/facebook/esm2_t33_650M_UR50D/model.tar'
 
 workflow {
     fasta_ch = Channel.fromPath(params.fasta_path)
@@ -41,8 +41,8 @@ process ShardFastaTask {
 
 process ESM2EmbeddingsTask {
     container '{{esm2:latest}}'
-    cpus 4
-    memory '16 GB'
+    cpus 8
+    memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
 
     input:

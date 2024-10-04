@@ -14,7 +14,7 @@ RUN yum update \
   wget-1.21.3 \
   && python3.11 -m venv /opt/venv \
   && source /opt/venv/bin/activate \
-  %% pip install -U pip \
+  && pip install -U pip \
   && pip install -q --no-cache-dir -r /home/requirements.txt \
   && pip install -q --no-cache-dir /home/putils \
   && yum autoremove -y \
@@ -23,3 +23,5 @@ RUN yum update \
 
 ENV VIRTUAL_ENV="/opt/venv"
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+ENTRYPOINT []

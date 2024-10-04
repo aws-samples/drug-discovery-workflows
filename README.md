@@ -22,9 +22,7 @@ desired stack name, and region:
   -r "us-east-1"
 ```
 
-The CloudFormation deployment should finish in about 3 minutes. It will take another 30 minutes to build the algorithm containers and download the necessary data.
-
-Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
+The CloudFormation deployment and asset build steps should finish in about 15 minutes. Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
 
 ## Development
 
