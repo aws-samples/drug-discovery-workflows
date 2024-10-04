@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2024-10-04
+
+### 2.0.0 Added
+
+- Major changes to deployment process
+- Add data download process
+- Convert all workflow scrpts to NextFlow
+- Update ESM-2 and ESMFold workflows (more coming soon)
+
+---
+
 ## [1.2.0] - 2024-06-25
 
 ### 1.2.0 Added
