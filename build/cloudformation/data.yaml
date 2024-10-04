@@ -275,8 +275,6 @@ Resources:
       Count: !GetAtt StartCodeBuildData.ArtifactCount    
 
 Outputs:
-  CodeBuildDataProjectName:
-    Description: CodeBuild data project name
+  CodeBuildDataProject:
+    Description: CodeBuild Project for downloading data
     Value: !Ref CodeBuildDataProject
-    Export:
-      Name: !Sub "${StackPrefix}-CodeBuildDataProjectName"

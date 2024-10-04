@@ -2,7 +2,7 @@
 
 nextflow.enable.dsl = 2
 
-params.fasta_path = 's3://{{S3_BUCKET_NAME}}//tests/inputs/1utn.fasta'
+params.fasta_path
 params.max_records_per_partition = 1
 params.model_parameters = 's3://{{S3_BUCKET_NAME}}//ref-data/esm2/facebook/esm2_t6_8M_UR50D/model.tar'
 
