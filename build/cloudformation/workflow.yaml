@@ -381,3 +381,11 @@ Resources:
         Fn::GetAtt: DeleteWorkflowLambda.Arn
       StackPrefix:
         Ref: StackPrefix
+
+Outputs:
+  CodeBuildWorkflowProject:
+    Description: CodeBuild Project for building workflows
+    Value: !Ref CodeBuildWorkflowProject
+  OmicsWorkflowRole:
+    Description: IAM role for submitting HealthOmics workflow runs.
+    Value: !Ref OmicsWorkflowRole

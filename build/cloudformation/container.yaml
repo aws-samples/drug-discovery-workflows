@@ -330,3 +330,8 @@ Resources:
         Fn::GetAtt: DeleteContainerRepoLambda.Arn
       StackPrefix:
         Ref: StackPrefix
+
+Outputs:
+  CodeBuildContainerProject:
+    Description: CodeBuild Project for building containers
+    Value: !Ref CodeBuildContainerProject

@@ -1,0 +1,18 @@
+name: ESMFold
+description: "This workflow predicts the 3D structures for one or more protein amino acid sequences using the ESMFold protein language model."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+  max_records_per_partition:
+    description: "Number of partitions to shard the input fasta file into"
+    optional: true
+  model_parameters:
+    description: "S3 URL for a .tar file containing ESMFold model weights "
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "ESMFold"
+accelerators: GPU
