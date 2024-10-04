@@ -1,4 +1,4 @@
-# ESM-2 Embeddings Generation Workflow
+# Generate Protein Sequence Embeddings With ESM-2
 
 ## Summary
 

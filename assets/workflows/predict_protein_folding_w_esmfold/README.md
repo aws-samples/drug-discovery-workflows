@@ -1,4 +1,4 @@
-# ESMFold Workflow
+# Predict Protein Structure with ESMFold
 
 ## Summary
 
