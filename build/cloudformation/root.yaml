@@ -28,10 +28,31 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
+  DeployContainer:
+    Description: Should CloudFormation deploy the containers?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+  DeployWorkflow:
+    Description: Should CloudFormation deploy the workflows?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+  DeployData:
+    Description: Should CloudFormation deploy the data?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+
+Conditions:
+  DoContainerBuild: !Equals [!Ref DeployContainer, "Y"]
+  DoWorkflowBuild: !Equals [!Ref DeployWorkflow, "Y"]
+  DoDataBuild: !Equals [!Ref DeployData, "Y"]
 
 Resources:
   ContainerBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoContainerBuild
     Properties:
       TemplateURL: container.yaml
       Parameters:
@@ -55,6 +76,7 @@ Resources:
 
   WorkflowBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoWorkflowBuild
     Properties:
       TemplateURL: workflow.yaml
       Parameters:
@@ -77,6 +99,7 @@ Resources:
 
   DataBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoDataBuild
     Properties:
       TemplateURL: data.yaml
       Parameters:

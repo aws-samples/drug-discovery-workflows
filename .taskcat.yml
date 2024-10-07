@@ -12,6 +12,7 @@ project:
     Environment: "dev"
     S3BucketName: "ddw-deployment-588738610715"
     WaitForContainerBuild: "Y"
+    DeployData: "N"
 tests:
   default:
     template: build/cloudformation/packaged.yaml
