@@ -6,7 +6,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Build started on `date`
+      - echo Build started on `date` for $NAME
   build:
     commands:
       - echo Updating ECR URIs in workflow files

@@ -9,7 +9,7 @@ env:
 phases:
   pre_build:
     commands:
-      - echo Build started on `date`
+      - echo Build started on `date` for $NAME
       - echo "Processing $BUILD_CONTEXT"
       - |
         if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
