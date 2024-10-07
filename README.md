@@ -6,7 +6,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 
 ## Deployment
 
-For individual deployments, you also can navigate to the README in `workflows/<workflow-name>`.
+For individual deployments, you also can navigate to the README in `assets/workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
 
 ### Quick Start
 
@@ -24,12 +24,23 @@ desired stack name, and region:
 
 The CloudFormation deployment and asset build steps should finish in about 15 minutes. Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
 
-## Development
+Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK. You may re-run the `./deploy.sh` script with the same arguments to update the CloudFormation stacks after code modifications to NextFlow scripts, Dockerfiles, or container build context directories are saved. This will trigger a rebuild and push of containers to ECR with the `latest` tag, and create new versions of the HealthOmics workflows.
 
 To add a new module add the necessary files to the `assets` folder. There are three main components:
 
-* **Containers:** contains Dockerfiles and supporting files required to run workflow tasks.
-* **Data:** contains links to parameters and other reference data used by workflow models
+Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
+
+### Infrastructure Diagram
+
+<!-- Not final form yet -->
+<img src="./img/infra-diagram.png" />
+
+## Development (WIP)
+
+To add a new module, fork the repository. There are three main components:
+
+* **Containers:** contains the required information/data to build Docker images for specific tasks
+* **Modules:** common packages, such as MSA search/unpacking data that multiple algorithms may use
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
 ```txt
@@ -52,6 +63,58 @@ assets/
 The `containers` folder contains Dockerfiles and supporting files to build docker containers. The deployment process will attempt to use every subfolder here as a Docker build context without any further configuration. Right now, there are two types of containers provided by default.
 
 The `data` folder contains `.txt` files that specify uris to download during stack creation. The deployment workflow will save the contents of each file in the following S3 locations:
+
+### Linting
+
+You can lint this repositories NextFlow code using the AWS provided tool [awslabs/linter-rules-for-nextflow](https://github.com/awslabs/linter-rules-for-nextflow), which has been been integrated with `make`:
+
+```bash
+make lint
+```
+
+Also see [.github/workflows](./.github/workflows/) for other linting tools that have been setup as GitHub Actions workflows.
+
+### Development Test Script
+
+The `testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
+
+Prerequisites:
+- S3 bucket with input data
+- S3 bucket to store outputs, can be the same as the input bucket
+- HealthOmics execution role with access to the buckets
+
+
+`testparams/rfdiffusion.params.json`:
+```sh
+{
+  "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb"
+}
+```
+
+Example run with full argument list:
+
+```sh
+./testrun.sh \
+-w rfdiffusion \
+-a 123456789012 \
+-r us-east-1 \
+-o "arn:aws:iam::123456789012:role/healthomics-dev-role" \
+-b mybucket \
+-p file://testparams/rfdiffusion.params.json
+```
+
+Or create an `.aws/env` file to simplify the arguments:
+```sh
+ACCOUNT_ID=123456789012
+REGION=us-east-1
+OMICS_EXECUTION_ROLE=arn:aws:iam::123456789012:role/healthomics-dev-role
+OUTPUT_BUCKET=mybucket
+```
+
+and then:
+```sh
+./testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
+```
 
 `s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
 
