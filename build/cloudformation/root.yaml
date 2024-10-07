@@ -147,12 +147,16 @@ Outputs:
   CodeBuildContainerProject:
     Description: CodeBuild Project for building containers
     Value: !GetAtt ContainerBuild.Outputs.CodeBuildContainerProject
+    Condition: DoContainerBuild
   CodeBuildDataProject:
     Description: CodeBuild Project for downloading data
     Value: !GetAtt DataBuild.Outputs.CodeBuildDataProject
+    Condition: DoDataBuild
   CodeBuildWorkflowProject:
     Description: CodeBuild Project for building workflows
     Value: !GetAtt WorkflowBuild.Outputs.CodeBuildWorkflowProject
+    Condition: DoWorkflowBuild
   OmicsWorkflowRole:
     Description: IAM role for submitting HealthOmics workflow runs.
     Value: !GetAtt WorkflowBuild.Outputs.OmicsWorkflowRole
+    Condition: DoWorkflowBuild
