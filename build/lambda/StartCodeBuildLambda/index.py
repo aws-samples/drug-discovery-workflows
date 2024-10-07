@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import logging
 import cfnresponse
 import boto3
@@ -34,7 +37,7 @@ def get_zipfile_subfolders(zipdata: BytesIO, subfolder: str) -> list:
     subfolder = os.path.join(subfolder, "")
 
     return [
-        path.name for path in zipfile.Path(zipdata, subfolder).iterdir() if path.is_dir
+        path.name for path in zipfile.Path(zipdata, subfolder).iterdir() if path.is_dir and not path.name.startswith('.')
     ]
 
 

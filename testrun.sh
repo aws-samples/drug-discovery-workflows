@@ -38,36 +38,36 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 
 # rfdiffusion is the only workflow name that is 1:1 with container name
 if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
-  pushd containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
+  pushd assets/containers
+  bash ../../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
   popd
 else
   docker build \
     --platform linux/amd64 \
     -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
-    -f containers/$WORKFLOW_NAME/Dockerfile containers/$WORKFLOW_NAME
+    -f assets/containers/$WORKFLOW_NAME/Dockerfile assets/containers/$WORKFLOW_NAME
 
   docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
 fi
 
 # Package the workflow
-mkdir -p tmp/workflows/$WORKFLOW_NAME tmp/modules
+mkdir -p tmp/assets/workflows/$WORKFLOW_NAME tmp/assets/modules
 
 pushd tmp
 
-cp -r ../workflows/$WORKFLOW_NAME/* workflows/$WORKFLOW_NAME
-cp -r ../modules/* modules
+cp -r ../assets/workflows/$WORKFLOW_NAME/* assets/workflows/$WORKFLOW_NAME
+cp -r ../assets/modules/* assets/modules
 
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
-sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./workflows/$WORKFLOW_NAME/*.config workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
+sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
 
 zip -r drug-discovery-workflows.zip .
 
 popd
 
 # Create the workflow
-workflow_id=$(aws omics create-workflow --engine NEXTFLOW --name $WORKFLOW_NAME-dev-$TIMESTAMP --region $REGION --cli-input-yaml file://tmp/workflows/$WORKFLOW_NAME/config.yaml --definition-zip fileb://tmp/drug-discovery-workflows.zip --main workflows/$WORKFLOW_NAME/main.nf --query 'id' --output text)
+workflow_id=$(aws omics create-workflow --engine NEXTFLOW --name $WORKFLOW_NAME-dev-$TIMESTAMP --region $REGION --cli-input-yaml file://tmp/assets/workflows/$WORKFLOW_NAME/config.yaml --definition-zip fileb://tmp/drug-discovery-workflows.zip --main assets/workflows/$WORKFLOW_NAME/main.nf --query 'id' --output text)
 aws omics wait workflow-active --region $REGION --id $workflow_id
 
 # Run the workflow

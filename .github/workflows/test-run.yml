@@ -1,0 +1,53 @@
+name: Workflow Test Run
+
+on: 
+  workflow_dispatch:  # Manual deploy from Github Actions interface
+    inputs:
+      choice:
+        description: 'Select a container to build'
+        required: true
+        type: choice
+        options:
+          - alphafold-data
+          - alphafold-predict
+          - biolamda
+          - esm2
+          - esm3
+          - protein-utils
+          - proteinmpnn
+          - rfdiffusion
+      json_input:
+        description: 'params.json'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::"${{ secrets.AWS_ACCOUNT_ID }}":role/"${{ secrets.GH_OIDC_ROLE_NAME }}"
+          aws-region: us-east-1
+
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+          sudo installer -pkg AWSCLIV2.pkg -target /
+          
+      - name: Build Docker image
+        run: |
+          REGION="us-east-1"
+          ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
+          OMICS_EXECUTION_ROLE="${{ secrets.OMICS_EXECUTION_ROLE }}"
+          OUTPUT_BUCKET=" ${{ vars.OUTPUT_BUCKET }}"
+          
+          echo "You selected the ${{ github.event.inputs.choice }} workflow"
+          echo "Your params.json file is:" 
+          echo "${{ github.event.inputs.json_input }}"
+          
+          ./testrun.sh -w "${{ github.event.inputs.choice }}" -p "${{ github.event.inputs.json_input }}"

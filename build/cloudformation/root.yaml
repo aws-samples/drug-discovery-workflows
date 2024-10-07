@@ -1,5 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
@@ -23,8 +23,8 @@ Parameters:
     Description: Timestamp for the cfn deployment
     Type: Number
     Default: 9999999999
-  WaitForContainerBuild:
-    Description: Should CloudFormation wait for all containers?
+  WaitForCodeBuild:
+    Description: Should CloudFormation wait for CodeBuild?
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
@@ -40,7 +40,7 @@ Resources:
         Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
-        WaitForContainerBuild: !Ref WaitForContainerBuild
+        WaitForCodeBuild: !Ref WaitForCodeBuild
         StackPrefix:
           !Join [
             "-",
@@ -74,4 +74,62 @@ Resources:
               ],
             ],
           ]
-# Outputs:
+
+  DataBuild:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: data.yaml
+      Parameters:
+        ApplicationName:
+          Ref: ApplicationName
+        Environment: !Ref Environment
+        S3BucketName: !Ref S3BucketName
+        Timestamp: !Ref Timestamp
+        WaitForCodeBuild: !Ref WaitForCodeBuild
+        StackPrefix:
+          !Join [
+            "-",
+            [
+              "aho-dd",
+              !Select [
+                4,
+                !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+              ],
+            ],
+          ]
+
+Outputs:
+  ApplicationName:
+    Description: The name of the application
+    Value: !Ref ApplicationName
+  S3BucketName:
+    Description: The name of the S3 bucket
+    Value: !Ref S3BucketName
+  StackPrefix:
+    Description: The stack prefix for all resources created by this stack
+    Value:
+      !Join [
+        "-",
+        [
+          "aho-dd",
+          !Select [
+            4,
+            !Split ["-", !Select [2, !Split ["/", !Ref "AWS::StackId"]]],
+          ],
+        ],
+      ]
+  StackRefDataURI:
+    Description: S3 URI for stack reference data
+    Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data/"]]
+  CodeBuildContainerProject:
+    Description: CodeBuild Project for building containers
+    Value: !GetAtt ContainerBuild.Outputs.CodeBuildContainerProject
+  CodeBuildDataProject:
+    Description: CodeBuild Project for downloading data
+    Value: !GetAtt DataBuild.Outputs.CodeBuildDataProject
+  CodeBuildWorkflowProject:
+    Description: CodeBuild Project for building workflows
+    Value: !GetAtt WorkflowBuild.Outputs.CodeBuildWorkflowProject
+  OmicsWorkflowRole:
+    Description: IAM role for submitting HealthOmics workflow runs.
+    Value: !GetAtt WorkflowBuild.Outputs.OmicsWorkflowRole

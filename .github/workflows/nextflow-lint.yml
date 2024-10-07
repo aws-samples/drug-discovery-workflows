@@ -1,0 +1,15 @@
+name: Lint Nextflow Pipelines
+
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Lint Nextflow pipelines
+        run: |
+          docker run --rm --platform linux/amd64 -v ${{ github.workspace }}:/data public.ecr.aws/aws-genomics/linter-rules-for-nextflow:v0.1

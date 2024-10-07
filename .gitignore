@@ -5,3 +5,7 @@ __pycache__
 delete_all_*.py
 .aws/env
 testparams/
+tmp/
+.nextflow*
+
+stack-outputs.json

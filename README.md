@@ -4,13 +4,9 @@
 
 A collection of AWS HealthOmics workflows to accelerate drug discovery.
 
-## News
-
-AWS HealthOmics Drug Discovery Workflows now supports the [ESM3](https://huggingface.co/EvolutionaryScale/esm3-sm-open-v1) model by [EvolutionaryScale](https://www.evolutionaryscale.ai/)! Please see the `README` file at `workflows/protein_annotation/` for more information.
-
 ## Deployment
 
-For individual deployments, you also can navigate to the README in `workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
+For individual deployments, you also can navigate to the README in `assets/workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
 
 ### Quick Start
 
@@ -26,11 +22,11 @@ desired stack name, and region:
   -r "us-east-1"
 ```
 
-The CloudFormation deployment should finish in about 3 minutes. It will take another 30 minutes to build the algorithm containers.
+The CloudFormation deployment and asset build steps should finish in about 15 minutes. Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK.
 
 Once the deployment has finished, you can create a private workflow run using the Amazon HealthOmics console, CLI, or SDK. You may re-run the `./deploy.sh` script with the same arguments to update the CloudFormation stacks after code modifications to NextFlow scripts, Dockerfiles, or container build context directories are saved. This will trigger a rebuild and push of containers to ECR with the `latest` tag, and create new versions of the HealthOmics workflows.
 
-### Data
+To add a new module add the necessary files to the `assets` folder. There are three main components:
 
 Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
 
@@ -48,24 +44,34 @@ To add a new module, fork the repository. There are three main components:
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
 ```txt
-containers/
+assets/containers/
 ├── alphafold
 ├── biolambda
 └── ...
-modules/
+assets/modules/
 ├── alphafold2/
 ├── alphafold-multimer/
 ├── unpack.nf
 └── ...
-workflows/
+assets/workflows/
 ├── alphafold2/
 ├── alphafold-multimer/
 └── ...
 ```
 
-The `containers` folder contains Dockerfiles and supporting files to build docker containers. The deployment process will attempt to use every subfolder here as a Docker build context without any further configuration. Right now, there are two types of containers provided by default. "Framework" containers like "biolambda" and "transformers" provide general-purpose ML environments to run custom scripts (passed in during container build via the "scripts" folder). "Algorithm" containers like "alphafold", on the other hand, contain dependencies and scripts for spoecific models, in many cases lightly adapted from open source repositories. These are meant to be used as-is, without much customization.
+The `containers` folder contains Dockerfiles and supporting files to build docker containers. The deployment process will attempt to use every subfolder here as a Docker build context without any further configuration. Right now, there are two types of containers provided by default.
 
-Similarly, the `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}.
+The `data` folder contains `.txt` files that specify uris to download during stack creation. The deployment workflow will save the contents of each file in the following S3 locations:
+
+### Linting
+
+You can lint this repositories NextFlow code using the AWS provided tool [awslabs/linter-rules-for-nextflow](https://github.com/awslabs/linter-rules-for-nextflow), which has been been integrated with `make`:
+
+```bash
+make lint
+```
+
+Also see [.github/workflows](./.github/workflows/) for other linting tools that have been setup as GitHub Actions workflows.
 
 ### Development Test Script
 
@@ -108,3 +114,13 @@ and then:
 ```sh
 ./testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
 ```
+
+`s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
+
+We currently support three types of data sources:
+
+- s3: Records that begin with `s3` will be downloaded using the AWS CLI.
+- HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
+- Other: All other records will be downloaded using `wget` to an s3 mountpoint.
+
+The `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}. You can also reference your deployment S3 bucket with {{S3_BUCKET_NAME}} to access data downloaded during stack creation.
