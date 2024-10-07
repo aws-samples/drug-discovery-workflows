@@ -16,7 +16,7 @@ For individual deployments, you also can navigate to the README in `workflows/<w
 desired stack name, and region:
 
 ```bash
-./deploy.sh \
+bash scripts/deploy.sh \
   -b "my-deployment-bucket" \
   -n "my-aho-ddw-stack" \
   -r "us-east-1"
