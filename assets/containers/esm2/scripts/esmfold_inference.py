@@ -1,6 +1,6 @@
 # Original Copyright 2022 Facebook, Inc. and its affiliates.
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT-0
 
 import argparse
 import json
@@ -44,8 +44,8 @@ def predict_structures(
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
-    model = EsmForProteinFolding.from_pretrained(
-        pretrained_model_name_or_path, device_map="auto"
+    model = EsmForProteinFolding.from_pretrained(pretrained_model_name_or_path).to(
+        device
     )
 
     logging.info(f"Predicting structures for {len(seqs)} sequences")
@@ -53,12 +53,12 @@ def predict_structures(
         enumerate(seqs),
         desc=f"Generating structures",
     ):
-        logging.info(f"Sequence {n+1} of {len(seqs)+1}")
+        logging.info(f"Sequence {n+1} of {len(seqs)}")
         metrics = {"sequence": seq, "sequence_length": len(seq)}
         inputs = tokenizer(seq, return_tensors="pt", add_special_tokens=False).to(
             device
         )
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = model(**inputs)
 
         output = {key: value.cpu() for key, value in outputs.items()}

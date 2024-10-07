@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Based off https://github.com/aws/deep-learning-containers/blob/master/pytorch/inference/docker/2.1/py3/cu118/Dockerfile.gpu
 
 ARG PYTHON=python3
@@ -208,6 +209,17 @@ RUN pip install --no-cache-dir -U \
 RUN mkdir -p /etc/pki/tls/certs && cp /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
 
 RUN curl -o /license.txt  https://aws-dlc-licenses.s3.amazonaws.com/pytorch-2.1/license.txt
+=======
+ARG AWS_DEFAULT_REGION=us-east-1
+
+FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.4.0-gpu-py311-cu124-ubuntu22.04-ec2
+
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+>>>>>>> main
 
 # Install additional dependencies from requirements.txt file
 COPY requirements.txt /tmp/requirements.txt
@@ -224,4 +236,8 @@ WORKDIR /home/scripts
 
 ENV TMPDIR="/tmp"
 
+<<<<<<< HEAD
 ENTRYPOINT [ "python" ]
+=======
+ENTRYPOINT []
+>>>>>>> main
