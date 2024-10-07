@@ -40,6 +40,7 @@ Many of the workflows in this repository require additional model weights or ref
 To add a new module, fork the repository. There are three main components:
 
 * **Containers:** contains the required information/data to build Docker images for specific tasks
+* **Data:** contains links to parameters and other reference data used by workflow models
 * **Modules:** common packages, such as MSA search/unpacking data that multiple algorithms may use
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
@@ -50,6 +51,11 @@ assets/
     ├── biolambda
     └── ...
     data/
+    ├── esm2.txt
+    ├── esmfold.txt
+    ├── rfdiffusion.txt
+    └── ...
+    modules/
     ├── alphafold2/
     ├── alphafold-multimer/
     ├── unpack.nf
