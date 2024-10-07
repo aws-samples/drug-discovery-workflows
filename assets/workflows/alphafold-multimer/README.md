@@ -1,8 +1,8 @@
-# AlphaFold2
+# AlphaFold Multimer
 
-This repository helps you set up and run AlphaFold2 Monomer on AWS HealthOmics. At the end of the configuration, you should be able to run a full end-to-end inference.
+This repository helps you set up and run AlphaFold Multimer on AWS HealthOmics. At the end of the configuration, you should be able to run a full end-to-end inference.
 
-AlphaFold2 requires several steps: at a high level they bundle into:
+AlphaFold-Multimer requires several steps: at a high level they bundle into:
 1. Download and prepare the data
 2. Multisequence alignment (MSA) 
 3. Inference
@@ -13,12 +13,12 @@ The following setup steps below assume you are starting from scratch and prefer 
 
 ## Containers
 
-### Step 1: Create ECR Repositories (if not done previously)
+### Step 1: Create ECR Repositories
 
 There are three containers used: `protein-utils`, `alphafold-data`, `alphafold-predict` in ECR. Feel free to use your preferred method of choice to create the ECR respositories and set the appropriate policies. The below is an example using AWS-owned keys for encryption.
 
 ```
-cd containers
+cd assets/containers
 for repo in protein-utils alphafold-data alphafold-predict
 do
 
@@ -30,7 +30,7 @@ sleep 1
 done
 ```
 
-### Step 2: Build containers (if not done previously)
+### Step 2: Build containers
 
 Add your AWS account and region to the below. The rest is encapsulated in `build_containers.sh`. This assumes you've completed **Step 1** and are still in the `containers` directory.
 
@@ -51,21 +51,21 @@ Now that your Docker images are created, let's create the workflow. In HealthOmi
 Assuming you still have your region/account environment variables, you can do the following in the root directory of the repository:
 
 ```
-sed -i 's/123456789012/'$ACCOUNT'/' workflows/alphafold2/nextflow.config
-sed -i 's/us-east-1/'$REGION'/' workflows/alphafold2/nextflow.config
+sed -i 's/123456789012/'$ACCOUNT'/' assets/workflows/alphafold-multimer/nextflow.config
+sed -i 's/us-east-1/'$REGION'/' assets/workflows/alphafold-multimer/nextflow.config
 ```
 
 ### Step 4: Create Workflow
 
 You can now zip and create your workflow. Feel free to also use your favorite infrastructure as code tool, but also you can do the following from the command line. Ensure you're in the root directory of the repository.
 
- Since this repository contains multiple workflows, you want to set your main entry to `workflows/alphafold2/main.nf`. Before deploying, be sure to replace your Docker image locations in your `workflows/alphafold2/nextflow.config` as described previously.
+ Since this repository contains multiple workflows, you want to set your main entry to `assets/workflows/alphafold-multimer/main.nf`. Before deploying, be sure to replace your Docker image locations in your `assets/workflows/alphafold-multimer/nextflow.config` as described previously.
 
 ```
 ENGINE=NEXTFLOW
 rm ../drug-discovery-workflows.zip; zip -r ../drug-discovery-workflows.zip .
 
-aws omics create-workflow --engine $ENGINE --definition-zip fileb://../drug-discovery-workflows.zip --main workflows/alphafold2/main.nf --name alphafold-monomer --parameter-template file://workflows/alphafold2/parameter-template.json --storage-capacity 4800
+aws omics create-workflow --engine $ENGINE --definition-zip fileb://../drug-discovery-workflows.zip --main assets/workflows/alphafold-multimer/main.nf --name alphafold-multimer --parameter-template file://assets/workflows/alphafold-multimer/parameter-template.json --storage-capacity 4800
 ```
 
 Note the workflow ID you get in the response
@@ -75,22 +75,15 @@ Pick your favorite small fasta file to run your fist end-to-end test. The follow
 
 ### Inputs
 
-This workflow supports both single-FASTA inference as well as batch inference, which would only stage reference data once for many predictions.
+`target_id`: The ID of the target you wish to predict
+`fasta_path`: S3 URI to a single FASTA file that is in multi-FASTA format. Currently supports 1-chain per record.
 
-`fasta_path`: S3 URI to a single FASTA file OR a directory that contains multiple fasta files.
 
 ### Example params.json
-Single file:
 ```
 {
-    "fasta_path":"s3://mybucket/input/monomer/my.fasta",
-}
-```
-
-FASTA directory:
-```
-{
-    "fasta_path":"s3://mybucket/input/monomer/fasta_files",
+    "fasta_path":"s3://mybucket/input/multimer/7unl.fasta",
+    "target_id": "7unl"
 }
 ```
 
@@ -104,13 +97,13 @@ ROLEARN=arn:aws:iam::0123456789012:role/omics-workflow-role-0123456789012-us-eas
 OUTPUTLOC=s3://mybuckets/run_outputs/alphafold
 PARAMS=./params.json
 
-aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUTLOC --storage-type STATIC --storage-capacity 4800 --parameters file://$PARAMS --name alphafold2-monomer
+aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUTLOC --storage-type STATIC --storage-capacity 4800 --parameters file://$PARAMS --name alphafold-multimer
 ```
 
 All results are written to a location defined within `$OUTPUTLOC` above. To get to the root directory of the ouputs, you can use the `GetRun` API, which provides the path as `runOutputUri`. Alternatively, this location is available in the console.
 
 ## Citation
-AlphaFold2 was developed by DeepMind. The original source code can be found [here](https://github.com/google-deepmind/alphafold). The algorithm is presented in the following papers.
+AlphaFold Multimer was developed by DeepMind. The original source code can be found [here](https://github.com/google-deepmind/alphafold). The algorithm is presented in the following papers.
 
 ```
 @Article{AlphaFold2021,
@@ -122,5 +115,18 @@ AlphaFold2 was developed by DeepMind. The original source code can be found [her
   number  = {7873},
   pages   = {583--589},
   doi     = {10.1038/s41586-021-03819-2}
+}
+```
+
+```
+@article {AlphaFold-Multimer2021,
+  author       = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v{Z}}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
+  journal      = {bioRxiv},
+  title        = {Protein complex prediction with AlphaFold-Multimer},
+  year         = {2021},
+  elocation-id = {2021.10.04.463034},
+  doi          = {10.1101/2021.10.04.463034},
+  URL          = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034},
+  eprint       = {https://www.biorxiv.org/content/early/2021/10/04/2021.10.04.463034.full.pdf},
 }
 ```

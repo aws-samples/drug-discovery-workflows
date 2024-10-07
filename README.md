@@ -10,7 +10,7 @@ AWS HealthOmics Drug Discovery Workflows now supports the [ESM3](https://hugging
 
 ## Deployment
 
-For individual deployments, you also can navigate to the README in `workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
+For individual deployments, you also can navigate to the README in `assets/workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
 
 ### Quick Start
 
@@ -48,16 +48,16 @@ To add a new module, fork the repository. There are three main components:
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
 ```txt
-containers/
+assets/containers/
 ├── alphafold
 ├── biolambda
 └── ...
-modules/
+assets/modules/
 ├── alphafold2/
 ├── alphafold-multimer/
 ├── unpack.nf
 └── ...
-workflows/
+assets/workflows/
 ├── alphafold2/
 ├── alphafold-multimer/
 └── ...
