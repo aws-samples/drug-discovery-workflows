@@ -4,7 +4,7 @@ nextflow.enable.dsl = 2
 
 params.fasta_path
 params.max_records_per_partition = 8
-params.model_parameters = 's3://{{S3_BUCKET_NAME}}//ref-data/esm2/facebook/esm2_t33_650M_UR50D/model.tar'
+params.model_parameters = 's3://{{S3_BUCKET_NAME}}/ref-data/esm2/facebook/esm2_t33_650M_UR50D/model.tar'
 
 workflow {
     fasta_ch = Channel.fromPath(params.fasta_path)
