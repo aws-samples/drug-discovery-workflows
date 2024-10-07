@@ -1,0 +1,18 @@
+name: ESM2 Embeddings
+description: "This workflow generates numerical embeddings for one or more protein amino acid sequences using the ESM-2 protein language model."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+  max_records_per_partition:
+    description: "Number of partitions to shard the input fasta file into"
+    optional: true
+  pretrained_model_uri:
+    description: "S3 URL for a .tar file containing ESM-2 model weights "
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "ESM2 Embeddings"
+accelerators: GPU

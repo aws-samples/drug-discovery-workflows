@@ -7,3 +7,5 @@ delete_all_*.py
 testparams/
 tmp/
 .nextflow*
+
+stack-outputs.json
