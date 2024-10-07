@@ -13,7 +13,7 @@ Much of this information (and much more!) can be found at the [RosettaCommons Gi
 There is one container used: `rfdiffusion` in ECR. Feel free to use your preferred method of choice to create the ECR respositories and set the appropriate policies. The below is an example using AWS-owned keys for encryption.
 
 ```bash
-cd containers
+cd assets/containers
 for repo in rfdiffusion
 do
 aws ecr create-repository --repository-name $repo --encryption-configuration encryptionType=AES256
