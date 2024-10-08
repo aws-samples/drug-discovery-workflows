@@ -102,10 +102,10 @@ if __name__ == "__main__":
             for i, rs in enumerate(result['status']):
                 if rs=='success':
                     for j, v in enumerate(result['ligand_positions'][i]):
-                        with open(f"{sys.argv[1].split('.')[0]}-{sys.argv[2].split('.')[0]}-{i}-{j}-score{result['position_confidence'][i][j]}.json", 'w') as fh:
+                        with open(f"{sys.argv[1].split('.')[0]}-{sys.argv[2].split('.')[0]}-{i}-{j}-score{result['position_confidence'][i][j]}.sdf", 'w') as fh:
                             fh.write(v)
         else:
             if result['status']=='success':
                 for i, v in enumerate(result['ligand_positions']):
-                    with open(f"{sys.argv[1].split('.')[0]}-{sys.argv[2].split('.')[0]}-score{result['position_confidence'][i]}.json", 'w') as fh:
+                    with open(f"{sys.argv[1].split('.')[0]}-{sys.argv[2].split('.')[0]}-score{result['position_confidence'][i]}.sdf", 'w') as fh:
                         fh.write(v)

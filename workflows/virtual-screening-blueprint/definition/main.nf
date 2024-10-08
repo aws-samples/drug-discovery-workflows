@@ -35,11 +35,12 @@ workflow {
         params.num_molecules
     )
 
+    smiles_pdbs = RunMolMIMGenerate.out.smiles.combine(RunAlphaFold2.out.pdbs)
+
     RunDiffdock(
         params.diffdock_script,
         params.diffdock_model,
-        RunMolMIMGenerate.out.smiles,
-        RunAlphaFold2.out.pdbs,
+        smiles_pdbs,
         params.num_poses
     )
 }
@@ -114,8 +115,7 @@ process RunDiffdock {
     input:
         path executable
         path model_parameters
-        path ligand_file
-        path protein_file
+        val smiles_pdbs
         val num_poses
 
     output:
@@ -131,7 +131,7 @@ process RunDiffdock {
     Triton_PID=\$!
     sleep 120
 
-    /usr/bin/python3 ${executable} ${protein_file} ${ligand_file} ${num_poses}
+    /usr/bin/python3 ${executable} ${smiles_pdbs[1]} ${smiles_pdbs[0]} ${num_poses}
     sleep 1
     echo "shutting down TritonServe"
     kill \$Triton_PID

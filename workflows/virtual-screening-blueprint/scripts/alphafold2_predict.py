@@ -156,6 +156,7 @@ def nim_api_post_call_protein_structure_alphafold2_predict_structure_from_sequen
         relax_prediction=body.relax_prediction
     )
     
+    st = time.time()
     print(f"Folding started at: {st}")
     structs = nim_api_post_call_protein_structure_alphafold2_predict_structure_from_msa_post(struct_query)
     et = time.time()
