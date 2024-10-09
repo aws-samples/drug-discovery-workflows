@@ -197,6 +197,7 @@ Resources:
         BuildSpec: build/buildspec/buildspec_container.yaml
         Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
         Type: S3
+      TimeoutInMinutes: 480
       Tags:
         - Key: Application
           Value: !Ref ApplicationName

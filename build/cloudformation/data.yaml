@@ -138,6 +138,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:GetObject*
+                  - s3:ListBucket*
                 Resource: "*"
               - Effect: Allow
                 Action:
@@ -195,6 +196,7 @@ Resources:
         BuildSpec: build/buildspec/buildspec_data.yaml
         Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
         Type: S3
+      TimeoutInMinutes: 480
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
