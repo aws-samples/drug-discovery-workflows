@@ -34,9 +34,9 @@ Create the following S3 buckets and folders:
 
 First upload python scripts (in `scripts` folder) to run inside NIM containers, including `molmim_generate.py`, `alphafold2_predict.py`, and `run_diffdock.py` to S3 path `s3://{mybucket}/nim/scripts/`. 
 
-Secondly, upload sample SMILES and FASTA files in the `input` folder to s3:
-* `s3://{mybucket}/molmim/input/sampleinput.smi`
-* `s3://{mybucket}/alphafold2/input/mysequence.fasta`
+Secondly, upload sample SMILES and FASTA files in the `input` folder to s3, like:
+* `s3://{mybucket}/molmim/input/compound1.smi`
+* `s3://{mybucket}/alphafold2/input/sarscov2protease.fasta`
 
 Lastly, upload the model weights to S3. Run your NIM containers on EC2 instance following the quickstart instructions one-by-one: [molmim](https://docs.nvidia.com/nim/bionemo/molmim/latest/quickstart-guide.html), [alphafold2](https://docs.nvidia.com/nim/bionemo/alphafold2/latest/quickstart-guide.html), and [diffdock](https://docs.nvidia.com/nim/bionemo/diffdock/latest/getting-started.html). During the container runtime, each container will first download the model weights to a predefined path, set up by a container environment variable `NIM_CACHE_PATH`. You can login each container using command line like `docker exec -u root -it <containerid> sh`, [download and install AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html), and go to `NIM_CACHE_PATH` folder and sync the local model weights inside the container to the s3 paths created earlier. You S3 model weights should looks like:
 * `s3://{mybucket}/molmim/models/molmim_v1.3/`

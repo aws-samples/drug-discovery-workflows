@@ -17,10 +17,8 @@ workflow {
 
 
     sequences = Channel.fromPath(fasta_path)
-        .collectFile(name: 'temp.fasta')
         .splitFasta(record: [id: true, seqString: true])
-        .map { record -> "${record.id}zzzz${record.seqString} " }
-        .collectFile(name: 'combined_seqs.txt')
+        .map { record -> "${record.id}zzzz${record.seqString}" }
 
     RunAlphaFold2(
         params.alphafold2_model,
@@ -29,7 +27,6 @@ workflow {
     )
 
     smiles = Channel.fromPath(smi_input_path)
-        .collectFile(name: 'smi_input.smi')
 
     RunMolMIMGenerate(
         params.molmim_script,
@@ -38,11 +35,12 @@ workflow {
         params.num_molecules
     )
 
+    smiles_pdbs = RunMolMIMGenerate.out.smiles.combine(RunAlphaFold2.out.pdbs)
+
     RunDiffdock(
         params.diffdock_script,
         params.diffdock_model,
-        RunMolMIMGenerate.out.sdfs,
-        RunAlphaFold2.out.pdbs,
+        smiles_pdbs,
         params.num_poses
     )
 }
@@ -50,8 +48,8 @@ workflow {
 process RunAlphaFold2 {
     label 'alphafold2'
     errorStrategy 'retry'
-    cpus { 4 * Math.pow(2, task.attempt) }
-    memory { 16.GB * Math.pow(2, task.attempt) }
+    cpus { 2 * Math.pow(2, task.attempt) }
+    memory { 8.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
     maxRetries params.max_retries
     publishDir "/mnt/workflow/pubdir/alphafold2/"
@@ -59,7 +57,7 @@ process RunAlphaFold2 {
     input:
         path model_parameters
         path executable
-        path sequences
+        val sequences
 
     output:
         path "*.pdb", emit: pdbs
@@ -70,10 +68,8 @@ process RunAlphaFold2 {
     cp /opt/*.py .
     export PYTHONPATH="${PYTHONPATH}:/opt/:./"
     export NIM_CACHE_PATH=${model_parameters}
-    for seq in `cat ${sequences}`
-    do
-        python ${executable} \$seq
-    done
+
+    python ${executable} ${sequences}
     """
 }
 
@@ -94,7 +90,7 @@ process RunMolMIMGenerate {
         val num_molecules
 
     output:
-        path "*.sdf", emit: sdfs
+        path "*.smi", emit: smiles
     script:
     """
     set -ex
@@ -119,12 +115,11 @@ process RunDiffdock {
     input:
         path executable
         path model_parameters
-        path ligand_file
-        path protein_file
+        val smiles_pdbs
         val num_poses
 
     output:
-        path "*.json", emit: dockingposes
+        path "*.sdf", emit: dockingposes
     script:
     """
     set -ex
@@ -136,15 +131,8 @@ process RunDiffdock {
     Triton_PID=\$!
     sleep 120
 
-
-    for pro in ${protein_file}
-    do
-        for lig in ${ligand_file}
-        do
-            /usr/bin/python3 ${executable} \$pro \$lig ${num_poses}
-            sleep 1
-        done
-    done
+    /usr/bin/python3 ${executable} ${smiles_pdbs[1]} ${smiles_pdbs[0]} ${num_poses}
+    sleep 1
     echo "shutting down TritonServe"
     kill \$Triton_PID
     sleep 5

@@ -1,7 +1,7 @@
 {
     "smi_input_path":"s3://hodgkin-spt-data-us-east-1/static_data/bionemo/molmim/input/",
     "fasta_path":"s3://hodgkin-spt-data-us-east-1/static_data/bionemo/alphafold/input/",
-    "num_molecules": 5,
-    "num_poses": 3,
+    "num_molecules": 10,
+    "num_poses": 5,
     "max_retries": 2
 }

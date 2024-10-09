@@ -35,6 +35,7 @@ from alphafold.common import protein
 
 NIM_CACHE_PATH="/mnt/workflow"
 
+
 def check_file_exists(filepath, fail_on_missing=True, silent=True):
     if not os.path.isfile(filepath):
         print(f"File not found: {filepath}")
@@ -141,7 +142,12 @@ def nim_api_post_call_protein_structure_alphafold2_predict_structure_from_sequen
         max_msa_sequences=body.max_msa_sequences
     )
     
+    st = time.time()
+    print(f"MSA started at: {st}")
     alignments_and_templates = nim_api_post_call_protein_structure_alphafold2_predict_msa_from_sequence_post(msa_request_body)
+    et = time.time()
+    elapsed_time = et - st
+    print(f"MSA ended at: {et}; it took: {elapsed_time}")
     templates = [dataclasses.asdict(x) for x in alignments_and_templates["templates"]]
     struct_query: AlphaFold2MSAToStructInputs = AlphaFold2MSAToStructInputs(
         alignments=alignments_and_templates["alignments"],
@@ -150,7 +156,12 @@ def nim_api_post_call_protein_structure_alphafold2_predict_structure_from_sequen
         relax_prediction=body.relax_prediction
     )
     
+    st = time.time()
+    print(f"Folding started at: {st}")
     structs = nim_api_post_call_protein_structure_alphafold2_predict_structure_from_msa_post(struct_query)
+    et = time.time()
+    elapsed_time = et - st
+    print(f"Folding ended at: {et}; it took: {elapsed_time}")
     
     return structs
 
@@ -347,10 +358,10 @@ if __name__ == "__main__":
     setup_mmseqs()
     # inputdata=json.loads(open("input.json"), object_hook=lambda d: SimpleNamespace(**d))
     proteinId, proteinSeq = sys.argv[1].split('zzzz')
+    print(f"sequence length: {len(proteinSeq)}")
     body = AlphaFold2SeqToStructInputs(
-    	sequence = proteinSeq
+        sequence = proteinSeq
     )
     structs = nim_api_post_call_protein_structure_alphafold2_predict_structure_from_sequence_post(body)
-    for i, p in enumerate(structs):
-        with open(f'{proteinId}_{i}.pdb', 'w') as fh:
-            fh.write(p)
+    with open(f'{proteinId}.pdb', 'w') as fh:
+        fh.write(structs[0])  ## just return the best predicted structure
