@@ -1,0 +1,1 @@
+s3://omics-{{REGION}}/alphafold_multimer/alphafold_params_2022-12-06.tar
