@@ -61,22 +61,11 @@ wget http://files.ipd.uw.edu/pub/RFdiffusion/f572d396fae9206628714fb2ce00f72e/Co
 aws s3 cp --recursive ./ s3://${BUCKET}/${MODEL_PREFIX}/
 ```
 
-### Step 4: Update Nextflow config with repository locations
-
-Now that your Docker images are created, let's create the workflow. In HealthOmics, this is as simple as creating a zip file and uploading the workflow. Before we do that, though, let's modify the `nextflow.config` to make sure the right instances are referenced. Update your repositories appropriately.
-
-Assuming you still have your region/account environment variables, you can do the following in the root directory of the repository:
-
-```bash
-sed -i 's/123456789012/'$ACCOUNT'/' assets/workflows/rfdiffusion/nextflow.config
-sed -i 's/us-east-1/'$REGION'/' assets/workflows/rfdiffusion/nextflow.config
-```
-
-### Step 5: Create Workflow
+### Step 4: Create Workflow
 
 You can now zip and create your workflow. Feel free to also use your favorite infrastructure as code tool, but also you can do the following from the command line. Ensure you're in the root directory of the repository.
 
- Since this repository contains multiple workflows, you want to set your main entry to `assets/workflows/rfdiffusion/main.nf`. Before deploying, be sure to replace your Docker image locations in your `assets/workflows/rfdiffusion/nextflow.config` as described previously.
+Since this repository contains multiple workflows, you want to set your main entry to `assets/workflows/rfdiffusion/main.nf`.
 
 ```bash
 ENGINE=NEXTFLOW
@@ -87,7 +76,7 @@ aws omics create-workflow --engine $ENGINE --definition-zip fileb://../drug-disc
 
 Note the workflow ID you get in the response.
 
-### Step 6: Run a workflow
+### Step 5: Run a workflow
 
 Pick your favorite small pdb file to run your fist end-to-end test. The following command can be done from the terminal or you can navigate to the AWS console. Note that RFDiffusion likely will work best using `DYNAMIC` run storage due to low data volumes and faster startup times.
 
