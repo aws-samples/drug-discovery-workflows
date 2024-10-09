@@ -1,0 +1,26 @@
+name: RFDiffusion
+description: "Generate 3D protein structures"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_pdb: 
+    description: "Input PDB file for scaffolding."
+    optional: false
+  model_params: 
+    description: "S3 path of RFdiffusion model files"
+    optional: false
+  contigs:
+    description: "Contigs"
+    optional: true
+  container_image: 
+    description: "Container image"
+    optional: false
+  num_designs:
+    description: "Number of designs to generate"
+    optional: true
+  yaml_file:
+    description: "Configure with YAML file, if set, contigs and num_design parameters aren't used"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "RFDiffusion"
