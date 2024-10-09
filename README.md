@@ -82,7 +82,7 @@ Also see [.github/workflows](./.github/workflows/) for other linting tools that 
 
 ### Development Test Script
 
-The `testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
+The `scripts/testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
 
 Prerequisites:
 - S3 bucket with input data
@@ -100,7 +100,7 @@ Prerequisites:
 Example run with full argument list:
 
 ```sh
-./testrun.sh \
+./scripts/testrun.sh \
 -w rfdiffusion \
 -a 123456789012 \
 -r us-east-1 \
@@ -119,7 +119,7 @@ OUTPUT_BUCKET=mybucket
 
 and then:
 ```sh
-./testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
+./scripts/testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
 ```
 
 `s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
