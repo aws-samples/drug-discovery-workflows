@@ -119,7 +119,7 @@ process RunDiffdock {
         val num_poses
 
     output:
-        path "*.json", emit: dockingposes
+        path "*.sdf", emit: dockingposes
     script:
     """
     set -ex
