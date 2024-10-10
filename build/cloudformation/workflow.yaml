@@ -9,13 +9,6 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: Amazon HealthOmics Drug Discovery Workflows
-  Environment:
-    Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
-    Type: String
-    Default: main
-    AllowedValues:
-      - main
-      - dev    
   S3BucketName:
     Description: Name of the S3 bucket to use for deployment and run storage
     Type: String
@@ -256,8 +249,9 @@ Resources:
       ServiceRole: !GetAtt CodeBuildWorkflowRole.Arn
       Source:
         BuildSpec: build/buildspec/buildspec_workflow.yaml
-        Location: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
+        Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
+      TimeoutInMinutes: 60
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -292,6 +286,11 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/"                  
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -319,7 +318,7 @@ Resources:
     Properties:
       ServiceToken:
         Fn::GetAtt: StartCodeBuildWorkflowLambda.Arn
-      SourceS3URI: !Sub "${S3BucketName}/build/${Environment}/code/code.zip"
+      SourceS3URI: !Sub "${S3BucketName}/build/code/code.zip"
       SourceSubfolder: "assets/workflows"
       ProjectName:
         Ref: CodeBuildWorkflowProject

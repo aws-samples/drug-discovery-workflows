@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2024-10-10
+
+### 2.1.0 Added
+
+- AlphaFold2-Monomer workflow
+- AlphaFold2-Multimer workflow
+- RFDiffusion workflow
+
+---
+
 ## [2.0.0] - 2024-10-04
 
 ### 2.0.0 Added

@@ -1,0 +1,11 @@
+name: AlphaFold2
+description: "Predict single-chain protein structures with AlphaFold2"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path: 
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+storageCapacity: 4800
+tags:
+  Name: "AlphaFold2"

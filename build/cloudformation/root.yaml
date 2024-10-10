@@ -9,13 +9,6 @@ Parameters:
     Description: Name of the application, if applicable
     Type: String
     Default: Amazon HealthOmics Drug Discovery Workflows
-  Environment:
-    Description: Leave this as "main" unless you are testing a pre-release versions of this architecture.
-    Type: String
-    Default: main
-    AllowedValues:
-      - main
-      - dev
   S3BucketName:
     Description: Name of the S3 bucket to use for deployment and run storage
     Type: String
@@ -28,16 +21,36 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
+  DeployContainer:
+    Description: Should CloudFormation deploy the containers?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+  DeployWorkflow:
+    Description: Should CloudFormation deploy the workflows?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+  DeployData:
+    Description: Should CloudFormation deploy the data?
+    Type: String
+    Default: "Y"
+    AllowedValues: [Y, N]
+
+Conditions:
+  DoContainerBuild: !Equals [!Ref DeployContainer, "Y"]
+  DoWorkflowBuild: !Equals [!Ref DeployWorkflow, "Y"]
+  DoDataBuild: !Equals [!Ref DeployData, "Y"]
 
 Resources:
   ContainerBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoContainerBuild
     Properties:
       TemplateURL: container.yaml
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
         WaitForCodeBuild: !Ref WaitForCodeBuild
@@ -55,12 +68,12 @@ Resources:
 
   WorkflowBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoWorkflowBuild
     Properties:
       TemplateURL: workflow.yaml
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
         StackPrefix:
@@ -77,12 +90,12 @@ Resources:
 
   DataBuild:
     Type: "AWS::CloudFormation::Stack"
+    Condition: DoDataBuild
     Properties:
       TemplateURL: data.yaml
       Parameters:
         ApplicationName:
           Ref: ApplicationName
-        Environment: !Ref Environment
         S3BucketName: !Ref S3BucketName
         Timestamp: !Ref Timestamp
         WaitForCodeBuild: !Ref WaitForCodeBuild
@@ -124,12 +137,16 @@ Outputs:
   CodeBuildContainerProject:
     Description: CodeBuild Project for building containers
     Value: !GetAtt ContainerBuild.Outputs.CodeBuildContainerProject
+    Condition: DoContainerBuild
   CodeBuildDataProject:
     Description: CodeBuild Project for downloading data
     Value: !GetAtt DataBuild.Outputs.CodeBuildDataProject
+    Condition: DoDataBuild
   CodeBuildWorkflowProject:
     Description: CodeBuild Project for building workflows
     Value: !GetAtt WorkflowBuild.Outputs.CodeBuildWorkflowProject
+    Condition: DoWorkflowBuild
   OmicsWorkflowRole:
     Description: IAM role for submitting HealthOmics workflow runs.
     Value: !GetAtt WorkflowBuild.Outputs.OmicsWorkflowRole
+    Condition: DoWorkflowBuild

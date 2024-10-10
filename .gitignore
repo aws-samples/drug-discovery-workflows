@@ -2,5 +2,9 @@
 .scratch
 .venv
 __pycache__
-scripts/delete_all_*.py
+delete_all_*.py
+.aws/env
+testparams/
+tmp/
+.nextflow*
 stack-outputs.json

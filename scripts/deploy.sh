@@ -11,7 +11,10 @@
 # -b S3 bucket name to use for deployment staging
 # -n CloudFormation stack name
 # -r Deployment region
-# -w Wait for container build to complete before deployment?
+# -w Wait for CodeBuild to complete before ending deployment?
+# -c Should CloudFormation deploy the containers?
+# -o Should CloudFormation deploy the workflows?
+# -d Should CloudFormation deploy the data?
 #
 # Example CMD
 # ./deploy.sh \
@@ -21,7 +24,7 @@
 #   -w "Y"
 
 set -e
-unset -v BUCKET_NAME ENVIRONMENT STACK_NAME REGION TIMESTAMP WAITFORCODEBUILD
+unset -v BUCKET_NAME STACK_NAME REGION TIMESTAMP WAITFORCODEBUILD
 
 TIMESTAMP=$(date +%s)
 
@@ -35,24 +38,28 @@ if ! command -v jq &>/dev/null; then
   exit 1
 fi
 
-while getopts 'b:e:n:r:w:' OPTION; do
+while getopts 'b:e:n:r:w:c:o:d:' OPTION; do
   case "$OPTION" in
   b) BUCKET_NAME="$OPTARG" ;;
-  e) ENVIRONMENT="$OPTARG" ;;
   n) STACK_NAME="$OPTARG" ;;
   r) REGION="$OPTARG" ;;
   w) WAITFORCODEBUILD="$OPTARG" ;;
+  c) DEPLOYCONTAINERS="$OPTARG" ;;
+  o) DEPLOYWORKFLOWS="$OPTARG" ;;
+  d) DEPLOYDATA="$OPTARG" ;;
   *) exit 1 ;;
   esac
 done
 
-[ -z "$ENVIRONMENT" ] && { ENVIRONMENT="main"; }
 [ -z "$STACK_NAME" ] && { STACK_NAME="aho-ddw"; }
 [ -z "$REGION" ] && { REGION="us-east-1"; }
 [ -z "$WAITFORCODEBUILD" ] && { WAITFORCODEBUILD="Y"; }
+[ -z "$DEPLOYCONTAINERS" ] && { DEPLOYCONTAINERS="Y"; }
+[ -z "$DEPLOYWORKFLOWS" ] && { DEPLOYWORKFLOWS="Y"; }
+[ -z "$DEPLOYDATA" ] && { DEPLOYDATA="Y"; }
 
 zip -r build/code.zip build assets -x .\*/\* -x tests
-aws s3 cp build/code.zip s3://$BUCKET_NAME/build/$ENVIRONMENT/code/code.zip
+aws s3 cp build/code.zip s3://$BUCKET_NAME/build/code/code.zip
 rm build/code.zip
 
 aws cloudformation package --template-file build/cloudformation/root.yaml \
@@ -61,7 +68,8 @@ aws cloudformation package --template-file build/cloudformation/root.yaml \
 aws cloudformation deploy --template-file build/cloudformation/packaged.yaml \
   --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP \
-  WaitForCodeBuild=$WAITFORCODEBUILD Environment=$ENVIRONMENT
+  WaitForCodeBuild=$WAITFORCODEBUILD Environment=$ENVIRONMENT \
+  DeployContainers=$DEPLOYCONTAINERS DeployWorkflows=$DEPLOYWORKFLOWS DeployData=$DEPLOYDATA
 aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION |
   jq -r '.Stacks[0].Outputs' |
   tee stack-outputs.json |
