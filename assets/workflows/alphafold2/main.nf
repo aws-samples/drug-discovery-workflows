@@ -1,29 +1,29 @@
 nextflow.enable.dsl = 2
 
 include {
-    SearchUniref90;
-    SearchMgnify;
-    SearchBFD;
-    SearchTemplatesTask;
-} from '../../modules/alphafold2/searches'
+    SearchUniref90
+    SearchMgnify
+    SearchBFD
+    SearchTemplatesTask
+} from './searches'
 
 include {
-    UnpackBFD;
-    UnpackPdb70nSeqres;
-    UnpackMMCIF;
-} from '../../modules/unpack'
+    UnpackBFD
+    UnpackPdb70nSeqres
+    UnpackMMCIF
+} from './unpack'
 
 workflow {
     //Convert to files
-    if (params.fasta_path[-1] == "/") {
-        fasta_path = params.fasta_path + "*"
+    if (params.fasta_path[-1] == '/') {
+        fasta_path = params.fasta_path + '*'
     } else {
         fasta_path = params.fasta_path
     }
-    
+
     fasta_files = Channel
                   .fromPath(fasta_path)
-                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
+                  .map { filename -> tuple(filename.toString().split('/')[-1].split('.fasta')[0], filename) }
 
     uniref30 = Channel.fromPath(params.uniref30_database_src).first()
     alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
@@ -35,15 +35,15 @@ workflow {
               params.bfd_database_hhm_ffdata,
               params.bfd_database_hhm_ffindex)
     UnpackPdb70nSeqres(params.pdb70_src, params.pdb_seqres_src, params.db_pathname)
-    UnpackMMCIF(params.pdb_mmcif_src1, 
-                params.pdb_mmcif_src2, 
-                params.pdb_mmcif_src3, 
-                params.pdb_mmcif_src4, 
-                params.pdb_mmcif_src5, 
-                params.pdb_mmcif_src6, 
-                params.pdb_mmcif_src7, 
-                params.pdb_mmcif_src8, 
-                params.pdb_mmcif_src9, 
+    UnpackMMCIF(params.pdb_mmcif_src1,
+                params.pdb_mmcif_src2,
+                params.pdb_mmcif_src3,
+                params.pdb_mmcif_src4,
+                params.pdb_mmcif_src5,
+                params.pdb_mmcif_src6,
+                params.pdb_mmcif_src7,
+                params.pdb_mmcif_src8,
+                params.pdb_mmcif_src9,
                 params.pdb_mmcif_obsolete)
 
     SearchUniref90(fasta_files, params.uniref90_database_src)
@@ -59,19 +59,19 @@ workflow {
                  .join(SearchTemplatesTask.out.pdb_hits)
 
     GenerateFeaturesTask(msa_tuples,
-                         UnpackMMCIF.out.db_folder, 
+                         UnpackMMCIF.out.db_folder,
                          UnpackMMCIF.out.db_obsolete)
 
-    model_nums = Channel.of(0,1,2,3,4)
+    model_nums = Channel.of(0, 1, 2, 3, 4)
     features = GenerateFeaturesTask.out.features.combine(model_nums)
     AlphaFoldInference(features, alphafold_model_parameters, params.random_seed, params.run_relax)
-    
+
     MergeRankings(AlphaFoldInference.out.results.groupTuple(by: 0))
 }
 
 process GenerateFeaturesTask {
     tag "${id}"
-    label "data"
+    label 'data'
     cpus 2
     memory '8 GB'
     publishDir "/mnt/workflow/pubdir/${id}/features"
@@ -82,8 +82,8 @@ process GenerateFeaturesTask {
         path mmcif_obsolete_path
 
     output:
-        tuple val(id), path ("output/features.pkl"), emit: features
-        path "output/metrics.json", emit: metrics
+        tuple val(id), path('output/features.pkl'), emit: features
+        path 'output/metrics.json', emit: metrics
 
     script:
     """
@@ -107,7 +107,7 @@ process GenerateFeaturesTask {
       --template_hits=$template_hits \
       --model_preset=monomer_ptm \
       --output_dir=output \
-      --max_template_date=2023-01-01       
+      --max_template_date=2023-01-01
     """
 }
 
@@ -122,7 +122,7 @@ process AlphaFoldInference {
     publishDir "/mnt/workflow/pubdir/${id}"
 
     input:
-        tuple val(id), path (features), val(modelnum)
+        tuple val(id), path(features), val(modelnum)
         path alphafold_model_parameters
         val random_seed
         val run_relax
@@ -158,9 +158,9 @@ process MergeRankings {
     tuple val(id), path(results)
 
     output:
-    path "rankings.json", emit: rankings
-    path "top_hit*", emit: top_hit
-    
+    path 'rankings.json', emit: rankings
+    path 'top_hit*', emit: top_hit
+
     script:
     """
     mkdir -p output
