@@ -11,7 +11,9 @@ project:
     ApplicationName: "aho-ddw-taskcat"
     Environment: "dev"
     S3BucketName: "ddw-deployment-588738610715"
-    WaitForContainerBuild: "Y"
+    WaitForCodeBuild: "Y"
+    DeployContainer: "Y"
+    DeployWorkflow: "Y"
     DeployData: "N"
 tests:
   default:
