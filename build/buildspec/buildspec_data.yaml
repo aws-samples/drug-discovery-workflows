@@ -11,6 +11,8 @@ phases:
     commands:
       - echo Build started on `date` for $NAME
       - echo "Processing $BUILD_CONTEXT"
+      - echo "Replacing REGION placeholders"
+      - sed -i='' "s/{{REGION}}/$REGION/g" $BUILD_CONTEXT 2>/dev/null || true
       - |
         if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
           BUCKET_NAME=${BASH_REMATCH[1]}
@@ -46,7 +48,13 @@ phases:
             echo "Invalid source URI"
           fi;
           if [[ "$SOURCE_SCHEME" == "s3" ]]; then
-            aws s3 cp $SOURCE_URI $DESTINATION_URI/$FILENAME/
+            if [[ "$SOURCE_URI" =~ .*\/$ ]]; then
+              echo "Recursive file sync from $SOURCE_URI"
+              aws s3 sync $SOURCE_URI $DESTINATION_URI/$FILENAME/
+            else
+              echo "Single file download from $SOURCE_URI"
+              aws s3 cp $SOURCE_URI $DESTINATION_URI/$FILENAME/
+            fi
           else
             if [[ "$SOURCE_URI" =~ ^[^/]+/[^/]+ ]]; then
               git clone https://huggingface.co/$SOURCE_URI $HOME/tmp --depth=1

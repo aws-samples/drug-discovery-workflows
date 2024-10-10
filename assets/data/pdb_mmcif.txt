@@ -1,0 +1,1 @@
+s3://omics-{{REGION}}/alphafold_multimer/pdb_mmcif/

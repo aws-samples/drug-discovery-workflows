@@ -4,7 +4,6 @@ nextflow.enable.dsl = 2
 
 params.fasta_path
 params.max_records_per_partition = 1
-params.model_parameters = 's3://{{S3_BUCKET_NAME}}/ref-data/esmfold/facebook/esmfold_v1/model.tar'
 
 workflow {
     fasta_ch = Channel.fromPath(params.fasta_path)
@@ -25,7 +24,7 @@ workflow {
 }
 
 process ShardFastaTask {
-    container '{{protein-utils:latest}}'
+    label 'protutils'
     cpus 2
     memory '4 GB'
 
@@ -46,7 +45,7 @@ process ShardFastaTask {
 }
 
 process ESMFoldTask {
-    container '{{esm2:latest}}'
+    label 'esm2'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
