@@ -10,7 +10,7 @@
 # SPDX-License-Identifier: MIT-0
 variables:
   AWS_DEFAULT_REGION: us-east-1
-  DEV_BUCKET_PREFIX: build/dev
+  DEV_BUCKET_PREFIX: build
 
 default:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/amazonlinux:latest
