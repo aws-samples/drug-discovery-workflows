@@ -21,7 +21,7 @@
 #   -w "Y"
 
 set -e
-unset -v BUCKET_NAME ENVIRONMENT STACK_NAME REGION TIMESTAMP WAITFORCODEBUILD
+unset -v BUCKET_NAME STACK_NAME REGION TIMESTAMP WAITFORCODEBUILD
 
 TIMESTAMP=$(date +%s)
 
@@ -35,10 +35,9 @@ if ! command -v jq &>/dev/null; then
   exit 1
 fi
 
-while getopts 'b:e:n:r:w:' OPTION; do
+while getopts 'b:n:r:w:' OPTION; do
   case "$OPTION" in
   b) BUCKET_NAME="$OPTARG" ;;
-  e) ENVIRONMENT="$OPTARG" ;;
   n) STACK_NAME="$OPTARG" ;;
   r) REGION="$OPTARG" ;;
   w) WAITFORCODEBUILD="$OPTARG" ;;
@@ -46,13 +45,12 @@ while getopts 'b:e:n:r:w:' OPTION; do
   esac
 done
 
-[ -z "$ENVIRONMENT" ] && { ENVIRONMENT="main"; }
 [ -z "$STACK_NAME" ] && { STACK_NAME="aho-ddw"; }
 [ -z "$REGION" ] && { REGION="us-east-1"; }
 [ -z "$WAITFORCODEBUILD" ] && { WAITFORCODEBUILD="Y"; }
 
 zip -r build/code.zip build assets -x .\*/\* -x tests
-aws s3 cp build/code.zip s3://$BUCKET_NAME/build/$ENVIRONMENT/code/code.zip
+aws s3 cp build/code.zip s3://$BUCKET_NAME/build/code/code.zip
 rm build/code.zip
 
 aws cloudformation package --template-file build/cloudformation/root.yaml \
@@ -61,7 +59,7 @@ aws cloudformation package --template-file build/cloudformation/root.yaml \
 aws cloudformation deploy --template-file build/cloudformation/packaged.yaml \
   --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP \
-  WaitForCodeBuild=$WAITFORCODEBUILD Environment=$ENVIRONMENT
+  WaitForCodeBuild=$WAITFORCODEBUILD
 aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION |
   jq -r '.Stacks[0].Outputs' |
   tee stack-outputs.json |

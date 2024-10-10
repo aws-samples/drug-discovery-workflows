@@ -9,7 +9,6 @@ project:
     - us-east-1
   parameters:
     ApplicationName: "aho-ddw-taskcat"
-    Environment: "dev"
     S3BucketName: "ddw-deployment-588738610715"
     WaitForCodeBuild: "Y"
     DeployContainer: "Y"
