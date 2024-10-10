@@ -100,7 +100,7 @@ process CheckAndValidateInputsTask {
     set -euxo pipefail
     ls -alR
     /opt/venv/bin/python \
-    /opt/venv/lib/python3.8/site-packages/putils/check_and_validate_inputs.py \
+    /home/putils/src/putils/check_and_validate_inputs.py \
     --target_id=$target_id --fasta_path=$fasta_path
     """
 }
