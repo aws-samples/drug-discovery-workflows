@@ -19,52 +19,26 @@ RUN yum upgrade -y \
   wget \
   zstd \
   && yum clean all \
-  && rm -rf /var/cache/yum
-
-# ADD hh-suite.tar.gz /tmp/hh-suite
-# RUN pushd /tmp/hh-suite \
-#   && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite . \
-#   && make && make install \
-#   && popd
-RUN pushd /tmp && \
-git clone https://github.com/soedinglab/hh-suite.git && \
-cd hh-suite && mkdir build && cd build && \
-cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. && \
-make -j 4 && make install && \
-popd
-
-# ADD kalign.tar.gz /tmp/kalign-3.4.3
-# RUN pushd /tmp/kalign2 \
-#   && ./configure \
-#   && make && make install \
-#   && popd
-# RUN pushd /tmp && \
-# wget https://github.com/TimoLassmann/kalign/archive/refs/tags/v3.4.0.tar.gz && \
-# tar -xvzf v3.4.0.tar.gz && \
-# cd kalign-3.4.0 && \
-# mkdir build && \
-# cd build && \
-# cmake3 .. && \
-# make -j 4 && make test && \
-# make install && \
-# popd
-
-# Compile kalign2 from source
-RUN pushd /tmp && \
-wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz --no-check-certificate \
-&& mkdir -p /tmp/kalign2/build \
-&& tar -xvzf current.tar.gz -C /tmp/kalign2 \
-&& pushd /tmp/kalign2 \
-&& ./configure \
-&& make && make install \
-&& popd \
-&& rm -rf /tmp/kalign2 && \
-popd
-
-# ADD hmmer.tar.gz /tmp/hmmer
-RUN mkdir -p /tmp/hmmer && wget -O hmmer.tar.gz  http://eddylab.org/software/hmmer/hmmer-3.4.tar.gz \
-&& tar xvzf hmmer.tar.gz -C /tmp/hmmer
-RUN pushd /tmp/hmmer/hmmer-* \
+  && rm -rf /var/cache/yum \
+  && pushd /tmp \
+  && git clone https://github.com/soedinglab/hh-suite.git \
+  && cd hh-suite && mkdir build && cd build \
+  && cmake -DCMAKE_INSTALL_PREFIX=/opt/hhsuite .. \
+  && make -j 4 && make install \
+  && popd \
+  && pushd /tmp \
+  && wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz --no-check-certificate \
+  && mkdir -p /tmp/kalign2/build \
+  && tar -xvzf current.tar.gz -C /tmp/kalign2 \
+  && pushd /tmp/kalign2 \
+  && ./configure \
+  && make && make install \
+  && popd \
+  && rm -rf /tmp/kalign2 \
+  && popd \
+  && mkdir -p /tmp/hmmer && wget -O hmmer.tar.gz  http://eddylab.org/software/hmmer/hmmer-3.4.tar.gz \
+  && tar xvzf hmmer.tar.gz -C /tmp/hmmer \
+  && pushd /tmp/hmmer/hmmer-* \
   && ./configure \
   && make && make install \
   && popd
