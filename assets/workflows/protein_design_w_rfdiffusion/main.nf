@@ -2,11 +2,18 @@ nextflow.enable.dsl = 2
 
 // static data files are in nextflow.config
 workflow {
-    RunInference(params.model_params, 
+    RunInference(
                  params.input_pdb,
-                 params.contigs,
-                 params.num_designs,
-                 params.yaml_file)
+                 params.config_file,
+                 params.base_ckpt,
+                 params.complex_base_ckpt,
+                 params.complex_Fold_base_ckpt,
+                 params.inpaintSeq_ckpt,
+                 params.inpaintSeq_Fold_ckpt,
+                 params.activeSite_ckpt,
+                 params.base_epoch8_ckpt,
+                 params.complex_beta_ckpt
+                 )
 }
 
 // Configuration options
@@ -19,16 +26,17 @@ process RunInference {
     accelerator 1, type: 'nvidia-tesla-a10g'
     publishDir '/mnt/workflow/pubdir'
 
-    // contigs, num_designs, yaml_file are optional, because we can pass a yaml file to set
-    // model_params and input_pdb are always required, to ensure HealthOmics stages files
     input:
-        path model_params
         path input_pdb
-        val contigs
-        val num_designs
-        path yaml_file
-
-    container params.container_image
+        path config_file
+        path base_ckpt
+        path complex_base_ckpt
+        path complex_Fold_base_ckpt
+        path inpaintSeq_ckpt
+        path inpaintSeq_Fold_ckpt
+        path activeSite_ckpt
+        path base_epoch8_ckpt
+        path complex_beta_ckpt
 
     output:
         path 'output/*', emit: results
@@ -36,25 +44,20 @@ process RunInference {
     script:
     """
     set -euxo pipefail
-    mkdir -p output
-    export HYDRA_FULL_ERROR=1 
+    mkdir output model config
+    export HYDRA_FULL_ERROR=1
 
-    if [ -f "${yaml_file}" ]; then
-        # Use the YAML file for configuration
-        python3.9 /app/RFdiffusion/scripts/run_inference.py \
-            --config-dir . \
-            --config-name ${yaml_file.baseName} \
-            inference.output_prefix=output/rfdiffusion \
-            inference.model_directory_path=${model_params} \
-            inference.input_pdb=${input_pdb}
-    else
-        # Use individual arguments
-        python3.9 /app/RFdiffusion/scripts/run_inference.py \
-            inference.output_prefix=output/rfdiffusion \
-            inference.model_directory_path=${model_params} \
-            inference.input_pdb=${input_pdb} \
-            inference.num_designs=${num_designs} \
-            contigmap.contigs=${contigs}
-    fi
+    cp ${config_file} config
+    cp ${base_ckpt} ${complex_base_ckpt} \
+      ${complex_Fold_base_ckpt} ${inpaintSeq_ckpt} \
+      ${inpaintSeq_Fold_ckpt} ${activeSite_ckpt} \
+      ${base_epoch8_ckpt} ${complex_beta_ckpt} model
+
+    /opt/conda/bin/python3 /opt/module/scripts/run_inference.py \
+        --config-dir config \
+        --config-name ${config_file.baseName} \
+        inference.output_prefix=output/rfdiffusion \
+        inference.model_directory_path=model \
+        inference.input_pdb=${input_pdb}
     """
 }
