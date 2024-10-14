@@ -1,0 +1,9 @@
+e3nn
+wandb
+pynvml
+git+https://github.com/NVIDIA/dllogger@0540a43971f4a8a16693a9de9de73c1072020769#egg=dllogger
+decorator
+hydra-core
+pydantic
+pyrsistent
+numpy
