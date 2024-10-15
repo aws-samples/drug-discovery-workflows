@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] - 2024-10-15
+
+### 2.1.1 Changed
+
+- Updated RFDiffusion dependencies
+
+### 2.1.1 Fixed
+
+- Fixed typo in Cfn options
+- Increased data download timeout
+
+---
+
 ## [2.1.0] - 2024-10-10
 
 ### 2.1.0 Added
