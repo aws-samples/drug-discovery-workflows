@@ -63,7 +63,17 @@ aws s3 cp --recursive ./ s3://${BUCKET}/${MODEL_PREFIX}/
 
 ### Step 4: Create Workflow
 
-You can now zip and create your workflow. Feel free to also use your favorite infrastructure as code tool, but also you can do the following from the command line. Ensure you're in the root directory of the repository.
+You can now zip and create your workflow. Feel free to also use your favorite infrastructure as code tool, but also you can do the following from the command line. Ensure you're in the root directory of the repository. You must also run these `sed` commands (replace variables with your desired values) to ensure your workflow is configured to use the correct S3 bucket and ECR repo image.
+
+```sh
+export REGION=us-east-1
+export ACCOUNT_ID=123456789012
+export S3_BUCKET_NAME=my-bucket
+
+
+sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" assets/workflows/*/*.config
+sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" assets/workflows/*/*.config 2>/dev/null
+```
 
 Since this repository contains multiple workflows, you want to set your main entry to `assets/workflows/rfdiffusion/main.nf`.
 
@@ -82,35 +92,15 @@ Pick your favorite small pdb file to run your fist end-to-end test. The followin
 
 ### Example params.json
 
-Single file:
-
 ```json
 {
     "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb",
-    "model_params":"s3://mybucket/rfdiffusion/model_parameters/",
-    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest"
+    "config_file":"s3://mybucket/rfdiffusion/config.yaml"
 }
 ```
 
-With YAML based configuration file:
-
-```json
-{
-    "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb",
-    "model_params":"s3://mybucket/rfdiffusion/model_parameters/",
-    "container_image":"123456789012.dkr.ecr.us-east-1.amazonaws.com/rfdiffusion:latest",
-    "yaml_file": "s3://mybucket/rfdiffusion/config.yaml"
-}
-```
-
-Sample YAML: 
+Sample YAML config file: 
 https://github.com/RosettaCommons/RFdiffusion/blob/b44206a2a79f219bb1a649ea50603a284c225050/config/inference/base.yaml
-
-Be sure to set `contigmap.contigs` your desired value:
-```yaml
-contigmap:
-  contigs: ["150-150"]
-```
 
 ### Running the Workflow
 
