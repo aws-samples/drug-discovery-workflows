@@ -77,6 +77,10 @@ RUN pip3 install --upgrade pip --no-cache-dir \
 RUN pip3 install --upgrade --no-cache-dir \
       matplotlib==3.9.2
 
+# Apply OpenMM patch.
+# WORKDIR /opt/conda/lib/python3.9/site-packages
+# RUN patch -p0 < /app/alphafold/docker/openmm.patch
+
 # Add SETUID bit to the ldconfig binary so that non-root users can run it.
 RUN chmod u+s /sbin/ldconfig.real
 

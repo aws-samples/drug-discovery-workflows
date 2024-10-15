@@ -4,20 +4,20 @@ This repository helps you set up and run AlphaFold Multimer on AWS HealthOmics. 
 
 AlphaFold-Multimer requires several steps: at a high level they bundle into:
 1. Download and prepare the data
-2. Multisequence alignment (MSA) 
+2. Multisequence alignment (MSA)
 3. Inference
 
 Traditionally, the download and prepare data stage will download `tar.gz` files and unpack. This workflow has a series of optimizations that are designed to improve data staging times and reduce the time and cost of inference while improving scale (>2500 residues). All corresponding reference data is hosted by AWS HealthOmics, so there is no charge to customers to host that data.
 
 The following setup steps below assume you are starting from scratch and prefer to use the command line. This repository will also have 1-click build capabilities at the root of the repo.
 
-## Containers
+## Getting Started
 
-### Step 1: Create ECR Repositories
+### Step 1: Set up ECR
 
 There are three containers used: `protein-utils`, `alphafold-data`, `alphafold-predict` in ECR. Feel free to use your preferred method of choice to create the ECR respositories and set the appropriate policies. The below is an example using AWS-owned keys for encryption.
 
-```
+```bash
 cd assets/containers
 for repo in protein-utils alphafold-data alphafold-predict
 do
@@ -34,7 +34,7 @@ done
 
 Add your AWS account and region to the below. The rest is encapsulated in `build_containers.sh`. This assumes you've completed **Step 1** and are still in the `containers` directory.
 
-```
+```bash
 REGION=<fill_in>
 ACCOUNT=<fill_in>
 cd alphafold
@@ -50,7 +50,7 @@ Now that your Docker images are created, let's create the workflow. In HealthOmi
 
 Assuming you still have your region/account environment variables, you can do the following in the root directory of the repository:
 
-```
+```bash
 sed -i 's/123456789012/'$ACCOUNT'/' assets/workflows/alphafold-multimer/nextflow.config
 sed -i 's/us-east-1/'$REGION'/' assets/workflows/alphafold-multimer/nextflow.config
 ```
@@ -61,7 +61,7 @@ You can now zip and create your workflow. Feel free to also use your favorite in
 
  Since this repository contains multiple workflows, you want to set your main entry to `assets/workflows/alphafold-multimer/main.nf`. Before deploying, be sure to replace your Docker image locations in your `assets/workflows/alphafold-multimer/nextflow.config` as described previously.
 
-```
+```bash
 ENGINE=NEXTFLOW
 rm ../drug-discovery-workflows.zip; zip -r ../drug-discovery-workflows.zip .
 
@@ -71,6 +71,7 @@ aws omics create-workflow --engine $ENGINE --definition-zip fileb://../drug-disc
 Note the workflow ID you get in the response
 
 ### Step 5: Run a workflow
+
 Pick your favorite small fasta file to run your fist end-to-end test. The following command can be done from the terminal or you can navigate to the AWS console.
 
 ### Inputs
@@ -80,7 +81,8 @@ Pick your favorite small fasta file to run your fist end-to-end test. The follow
 
 
 ### Example params.json
-```
+
+```bash
 {
     "fasta_path":"s3://mybucket/input/multimer/7unl.fasta",
     "target_id": "7unl"
@@ -91,7 +93,7 @@ Pick your favorite small fasta file to run your fist end-to-end test. The follow
 
 Replace `$ROLEARN`, `$OUTPUTLOC`, `$PARAMS`, `$WFID` as appropriate. Also modify the `params.json` to point to where your FASTA resides.
 
-```
+```bash
 WFID=1234567
 ROLEARN=arn:aws:iam::0123456789012:role/omics-workflow-role-0123456789012-us-east-1
 OUTPUTLOC=s3://mybuckets/run_outputs/alphafold
@@ -103,6 +105,7 @@ aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUT
 All results are written to a location defined within `$OUTPUTLOC` above. To get to the root directory of the ouputs, you can use the `GetRun` API, which provides the path as `runOutputUri`. Alternatively, this location is available in the console.
 
 ## Citation
+
 AlphaFold Multimer was developed by DeepMind. The original source code can be found [here](https://github.com/google-deepmind/alphafold). The algorithm is presented in the following papers.
 
 ```
