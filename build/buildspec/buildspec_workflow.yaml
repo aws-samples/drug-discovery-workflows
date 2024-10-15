@@ -10,12 +10,8 @@ phases:
   build:
     commands:
       - echo Updating ECR URIs in workflow configs
-      # - sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.wdl 2>/dev/null || true
-      # - sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.nf 2>/dev/null || true
       - sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
       - echo Updating S3 BucketName in workflow configs
-      # - sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" $BUILD_CONTEXT/*.wdl 2>/dev/null || true
-      # - sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" $BUILD_CONTEXT/*.nf 2>/dev/null || true
       - sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
       - echo Creating workflow $NAME
       - zip -j -r workflow.zip $BUILD_CONTEXT
