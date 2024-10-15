@@ -21,12 +21,12 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
-  DeployContainer:
+  DeployContainers:
     Description: Should CloudFormation deploy the containers?
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
-  DeployWorkflow:
+  DeployWorkflows:
     Description: Should CloudFormation deploy the workflows?
     Type: String
     Default: "Y"
@@ -38,8 +38,8 @@ Parameters:
     AllowedValues: [Y, N]
 
 Conditions:
-  DoContainerBuild: !Equals [!Ref DeployContainer, "Y"]
-  DoWorkflowBuild: !Equals [!Ref DeployWorkflow, "Y"]
+  DoContainerBuild: !Equals [!Ref DeployContainers, "Y"]
+  DoWorkflowBuild: !Equals [!Ref DeployWorkflows, "Y"]
   DoDataBuild: !Equals [!Ref DeployData, "Y"]
 
 Resources:
