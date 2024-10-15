@@ -271,7 +271,7 @@ Resources:
     Condition: WaitForCodeBuildCondition    
     Properties:
       Handle: !Ref CodeBuildWaitHandle
-      Timeout: 3600
+      Timeout: 28800
       Count: !GetAtt StartCodeBuildData.ArtifactCount    
 
 Outputs:

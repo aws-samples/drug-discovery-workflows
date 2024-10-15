@@ -4,23 +4,11 @@ engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
   input_pdb: 
-    description: "Input PDB file for scaffolding."
+    description: "S3 URI of input PDB file."
     optional: false
-  model_params: 
-    description: "S3 path of RFdiffusion model files"
+  config_file:
+    description: "S3 URI of hydra config file"
     optional: false
-  contigs:
-    description: "Contigs"
-    optional: true
-  container_image: 
-    description: "Container image"
-    optional: false
-  num_designs:
-    description: "Number of designs to generate"
-    optional: true
-  yaml_file:
-    description: "Configure with YAML file, if set, contigs and num_design parameters aren't used"
-    optional: true
 storageCapacity: 1200
 tags:
   Name: "RFDiffusion"
