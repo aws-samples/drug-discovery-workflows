@@ -53,11 +53,23 @@ process RunInference {
       ${inpaintSeq_Fold_ckpt} ${activeSite_ckpt} \
       ${base_epoch8_ckpt} ${complex_beta_ckpt} model
 
-    /opt/conda/bin/python3 /opt/module/scripts/run_inference.py \
+    /opt/conda/bin/python3 /opt/rfdiffusion/scripts/run_inference.py \
         --config-dir config \
         --config-name ${config_file.baseName} \
         inference.output_prefix=output/rfdiffusion \
-        inference.model_directory_path=model \
+        inference.model_directory_path=rfdiffusion/model \
         inference.input_pdb=${input_pdb}
+
+    for input_filename in output/*.pdb; do
+        filename=$(basename ${input_filename})
+        echo ${filename}
+        python3 proteinmpnn/protein_mpnn_run.py \
+        --path_to_model_weights="proteinmpnn/vanilla_model_weights" \
+        --num_seq_per_target=8 \
+        --pdb_path=${input_filename} \
+        --save_score=1 \
+        --out_folder="output/${filename%%.*}"
+        mv ${input_filename} output/${filename%%.*}
+    done
     """
 }
