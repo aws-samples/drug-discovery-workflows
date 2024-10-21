@@ -8,3 +8,4 @@ testparams/
 tmp/
 .nextflow*
 stack-outputs.json
+test_data

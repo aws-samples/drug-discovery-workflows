@@ -1,7 +1,8 @@
 ARG AWS_DEFAULT_REGION=us-east-1
 FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.4.0-gpu-py311-cu124-ubuntu22.04-ec2
 
-ARG RFDIFFUSION_COMMIT="b44206a2a79f219bb1a649ea50603a284c225050"
+# ARG RFDIFFUSION_COMMIT="b44206a2a79f219bb1a649ea50603a284c225050"
+ARG RFDIFFUSION_COMMIT="142930960dd5905403b0d6fd90696fe40650a128"
 ARG PROTEINMPNN_COMMIT="8907e6671bfbfc92303b5f79c4b5e6ce47cdef57"
 
 COPY requirements.txt /opt
@@ -18,7 +19,8 @@ RUN apt-get update \
   && mv /tmp/ProteinMPNN-${PROTEINMPNN_COMMIT}/* /opt/proteinmpnn \
   && mkdir -p /opt/proteinmpnn/output \
 # Install RFDiffusion
-  && wget -q -P /tmp "https://github.com/RosettaCommons/RFdiffusion/archive/${RFDIFFUSION_COMMIT}.zip" \
+  # && wget -q -P /tmp "https://github.com/RosettaCommons/RFdiffusion/archive/${RFDIFFUSION_COMMIT}.zip" \
+  && wget -q -P /tmp "https://github.com/brianloyal/RFdiffusion/archive/${RFDIFFUSION_COMMIT}.zip" \
   && mkdir -p /opt/rfdiffusion \
   && unzip /tmp/${RFDIFFUSION_COMMIT}.zip -d /tmp \
   && mv /tmp/RFdiffusion-${RFDIFFUSION_COMMIT}/* /opt/rfdiffusion \
