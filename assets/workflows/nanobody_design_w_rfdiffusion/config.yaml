@@ -1,0 +1,29 @@
+name: NanobodyDesign
+description: "Generate nanobodies to a target of interest."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  target_pdb: 
+    description: "S3 URI of target PDB file."
+    optional: false
+  scaffold_pdb:
+    description: "S3 URI of scaffold PDB file."
+    optional: false
+  hotspot_residues:
+    description: "RFDiffusion hotspot residues indices. See https://github.com/RosettaCommons/RFdiffusion/tree/main?tab=readme-ov-file#binder-design for more information."
+    optional: false
+  num_str_designs_per_target:
+    description: "Number of protein backbone designs per input target."
+    optional: true
+  num_seq_designs_per_str:
+    description: "Number of protein sequence designs per backbone design."
+    optional: true
+  complex_Fold_base_ckpt:
+    description: "S3 URI of RFDIffusion complex fold model weights"
+    optional: true
+  abmpnn_ckpt:
+    description: "S3 URI of AbMPNN model weights"
+    optional: true        
+storageCapacity: 1200
+tags:
+  Name: "RFDiffusion"
