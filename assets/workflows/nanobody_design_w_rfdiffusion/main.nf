@@ -2,15 +2,31 @@ nextflow.enable.dsl = 2
 
 // static data files are in nextflow.config
 workflow {
+    target_ch = Channel.fromPath(params.target_pdb)
+    scaffold_ch = Channel.fromPath(params.scaffold_pdb)
+    rfdiffusion_params_ch = Channel.fromPath(params.complex_Fold_base_ckpt)
+    proteinmpnn_params_ch = Channel.fromPath(params.proteinmpnn_ckpt)
+
     RunInference(
-                 params.target_pdb,
-                 params.scaffold_pdb,
+                 target_ch,
+                 scaffold_ch,
                  params.hotspot_residues,
                  params.num_str_designs_per_target,
                  params.num_seq_designs_per_str,
-                 params.complex_Fold_base_ckpt,
-                 params.proteinmpnn_ckpt
+                 rfdiffusion_params_ch,
+                 proteinmpnn_params_ch
                  )
+
+    RunInference.out.seq_results.collect().set { seq_results_ch }
+    RunInference.out.str_results.collect().set { str_results_ch }
+    RunInference.out.score_results.collect().set { score_results_ch }
+    RunInference.out.misc_results.collect().set { misc_results_ch }
+
+    emit:
+    seq_results = seq_results_ch
+    str_results = str_results_ch
+    score_results = score_results_ch
+    misc_results = misc_results_ch
 }
 
 process RunInference {
@@ -33,6 +49,7 @@ process RunInference {
         path 'str', emit: str_results
         path 'scores', emit: score_results
         path 'misc', emit: misc_results
+        path 'generated_sequences.jsonl', emit: generated_sequences
 
     script:
     """
@@ -91,9 +108,15 @@ process RunInference {
         --model_name="abmpnn" \
         --num_seq_per_target=${num_seq_designs_per_str} \
         --save_score=1 \
-        --out_folder "output" \
+        --out_folder "." \
         --sampling_temp "0.1" \
         --batch_size 4
+
+    /opt/conda/bin/python3 /opt/scripts/collect_designs.py \
+        --scaffold_pdb=${scaffold_pdb} \
+        --design_only_positions=\$design_only_positions \
+        --seq_dir="seqs" \
+        --output_path="generated_sequences.jsonl"
     """
 
     stub:

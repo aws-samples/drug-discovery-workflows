@@ -6,6 +6,7 @@ ARG RFDIFFUSION_COMMIT="142930960dd5905403b0d6fd90696fe40650a128"
 ARG PROTEINMPNN_COMMIT="8907e6671bfbfc92303b5f79c4b5e6ce47cdef57"
 
 COPY requirements.txt /opt
+COPY scripts /opt/scripts
 
 RUN apt-get update \
   && apt-get upgrade -y \
