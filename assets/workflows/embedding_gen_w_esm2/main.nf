@@ -15,7 +15,7 @@ workflow {
         .set { fasta_ch }
 
     fasta_ch.view(part -> "Created FASTA partition $part ")
-    ESM2EmbeddingsTask(fasta_ch file(params.model_parameters))
+    ESM2EmbeddingsTask(fasta_ch, file(params.model_parameters))
 
     ESM2EmbeddingsTask.out.embeddings.collect().set { embeddings_ch }
 
