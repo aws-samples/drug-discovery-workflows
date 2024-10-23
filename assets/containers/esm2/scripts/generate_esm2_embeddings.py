@@ -2,7 +2,7 @@ from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
 import torch
 import numpy as np
 import argparse
-import csv
+import pyfastx
 import logging
 from tqdm import tqdm
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_file", help="Path to input CSV file with sequences to process", type=str
+        "input_file", help="Path to input fasta file with sequences to process", type=str
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -93,9 +93,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    with open(args.input_file, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        seqs = [row["text"] for row in reader]
+    seqs = [i.seq for i in pyfastx.Fasta(args.input_file)]
+
 
     generate_embeddings(
         seqs,

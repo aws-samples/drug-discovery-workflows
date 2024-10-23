@@ -6,10 +6,16 @@ params.fasta_path
 params.max_records_per_partition = 1
 
 workflow {
-    fasta_ch = Channel.fromPath(params.fasta_path)
+    Channel
+        .fromPath(params.fasta_path)
+        .splitFasta(
+            by: params.max_records_per_partition,
+            file: true
+            )
+        .set { fasta_ch }
 
-    ShardFastaTask(fasta_ch, params.max_records_per_partition)
-    ESMFoldTask(ShardFastaTask.out.csvs.flatten(), file(params.model_parameters))
+    fasta_ch.view(part -> "Created FASTA partition $part ")
+    ESMFoldTask(fasta_ch, file(params.model_parameters))
 
     ESMFoldTask.out.pdb.collect().set { pdb_ch }
     ESMFoldTask.out.metrics.collect().set { metrics_ch }
@@ -23,35 +29,14 @@ workflow {
     outputs = outputs_ch
 }
 
-process ShardFastaTask {
-    label 'protutils'
-    cpus 2
-    memory '4 GB'
-
-    input:
-    path fasta_path
-    val max_records_per_partition
-
-    output:
-    path '*.csv', emit: csvs
-
-    script:
-    """
-    set -euxo pipefail
-    /opt/venv/bin/python /home/putils/src/putils/split_fasta.py $fasta_path \
-        --max_records_per_partition=$max_records_per_partition \
-        --save_csv
-    """
-}
-
 process ESMFoldTask {
     label 'esm2'
     cpus 8
-    memory '32 GB'
+    memory '24 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
 
     input:
-    path csv_path
+    path fasta_file
     path model_parameters
 
     output:
@@ -65,7 +50,7 @@ process ESMFoldTask {
     set -euxo pipefail
     mkdir model
     tar -xvf $model_parameters -C model
-    /opt/conda/bin/python /home/scripts/esmfold_inference.py $csv_path \
+    /opt/conda/bin/python /home/scripts/esmfold_inference.py $fasta_file \
         --output_dir . \
         --pretrained_model_name_or_path model
     """

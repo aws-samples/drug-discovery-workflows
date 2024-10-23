@@ -4,15 +4,16 @@
 
 import argparse
 import json
-
 import logging
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
-import torch
-import csv
-from transformers import AutoTokenizer, EsmForProteinFolding
 import os
+import pyfastx
+import torch
+from transformers import AutoTokenizer, EsmForProteinFolding
 from tqdm import tqdm
+
+
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -94,7 +95,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_file", help="Path to input CSV file with sequences to process", type=str
+        "input_file", help="Path to input fasta file with sequences to process", type=str
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -110,9 +111,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    with open(args.input_file, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        seqs = [row["text"] for row in reader]
+    seqs = [i.seq for i in pyfastx.Fasta(args.input_file)]
 
     predict_structures(
         seqs,
