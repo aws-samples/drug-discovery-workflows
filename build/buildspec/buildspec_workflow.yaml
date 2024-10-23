@@ -15,7 +15,7 @@ phases:
       - sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
       - echo Creating workflow $NAME
       - zip -j -r workflow.zip $BUILD_CONTEXT
-      - aws omics create-workflow --cli-input-yaml file://$BUILD_CONTEXT/config.yaml --definition-zip fileb://workflow.zip --tags StackPrefix=$STACK_PREFIX
+      - aws omics create-workflow --cli-input-yaml file://assets/workflows/$BUILD_CONTEXT/config.yaml --definition-zip fileb://workflow.zip --main assets/workflows/$BUILD_CONTEXT/main.nf --tags StackPrefix=$STACK_PREFIX
   post_build:
     commands:
       - echo Build completed on `date`
