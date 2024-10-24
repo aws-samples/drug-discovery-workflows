@@ -59,15 +59,15 @@ process GenerateCandidates {
 
     /opt/conda/bin/python3 /opt/rfdiffusion/scripts/run_inference.py \
         inference.output_prefix=output/backbone \
-        inference.model_directory_path='.' \
+        inference.model_directory_path='/opt/data' \
         inference.input_pdb=${target_pdb} \
-        'ppi.hotspot_res=${hotspot_residues}' \
+        'ppi.hotspot_res=[E492, E493, E494, E495, E496, E497]' \
         scaffoldguided.scaffoldguided=True \
         scaffoldguided.mask_loops=False \
         scaffoldguided.target_path=${target_pdb} \
         scaffoldguided.target_pdb=True \
-        scaffoldguided.target_ss=output/${target_pdb.baseName}_ss.pt \
-        scaffoldguided.target_adj=output/${target_pdb.baseName}_adj.pt \
+        scaffoldguided.target_ss=output/6m0j_ss.pt \
+        scaffoldguided.target_adj=output/6m0j_adj.pt \
         scaffoldguided.scaffold_dir=output \
         inference.num_designs=${num_str_designs_per_target} \
         denoiser.noise_scale_ca=0.5 \
@@ -85,18 +85,18 @@ process GenerateCandidates {
     design_only_positions="26 27 28 29 30 31 32 33 34 35 55 56 57 58 59 60 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117"
 
     /opt/conda/bin/python3 /opt/proteinmpnn/helper_scripts/parse_multiple_chains.py \
-        --input_path=\$folder_with_pdbs --output_path=\$path_for_parsed_chains
+        --input_path=$folder_with_pdbs --output_path=$path_for_parsed_chains
     /opt/conda/bin/python3 /opt/proteinmpnn/helper_scripts/assign_fixed_chains.py \
-        --input_path=\$path_for_parsed_chains --output_path=\$path_for_assigned_chains \
-        --chain_list \$chains_to_design
+        --input_path=$path_for_parsed_chains --output_path=$path_for_assigned_chains \
+        --chain_list $chains_to_design
     /opt/conda/bin/python3 /opt/proteinmpnn/helper_scripts/make_fixed_positions_dict.py \
-        --input_path=\$path_for_parsed_chains --output_path=\$path_for_fixed_positions \
-        --chain_list "\$chains_to_design" --position_list "\$design_only_positions" --specify_non_fixed
+        --input_path=$path_for_parsed_chains --output_path=$path_for_fixed_positions \
+        --chain_list "$chains_to_design" --position_list "$design_only_positions" --specify_non_fixed
 
     /opt/conda/bin/python3 /opt/proteinmpnn/protein_mpnn_run.py \
-        --jsonl_path \$path_for_parsed_chains \
-        --chain_id_jsonl \$path_for_assigned_chains \
-        --fixed_positions_jsonl \$path_for_fixed_positions \
+        --jsonl_path $path_for_parsed_chains \
+        --chain_id_jsonl $path_for_assigned_chains \
+        --fixed_positions_jsonl $path_for_fixed_positions \
         --model_name ${proteinmpnn_model_name} \
         --num_seq_per_target=${num_seq_designs_per_str} \
         --out_folder "output" \
@@ -105,9 +105,9 @@ process GenerateCandidates {
 
     /opt/conda/bin/python3 /opt/scripts/collect_designs.py \
         --scaffold_pdb=${scaffold_pdb} \
-        --design_only_positions="\$design_only_positions" \
+        --design_only_positions="$design_only_positions" \
         --seq_dir="output/seqs" \
-        --output_path="output/generated_sequences"
+        --output_path="generated_sequences"
     """
 
     stub:

@@ -22,6 +22,11 @@ workflow GenerateEmbeddings {
 
 process GenerateEmbeddingsTask {
     label 'generate_embeddings'
+    cpus 8
+    memory '32 GB'
+    maxRetries 2
+    accelerator 1, type: 'nvidia-tesla-a10g'
+    publishDir '/mnt/workflow/pubdir'
 
     input:
     path fasta_file

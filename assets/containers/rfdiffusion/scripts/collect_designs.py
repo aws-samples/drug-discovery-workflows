@@ -9,6 +9,8 @@ import os
 import biotite
 from biotite.structure.io import load_structure
 from biotite.sequence.io import load_sequences
+import biotite.sequence as seq
+import biotite.sequence.io.fasta as fasta
 import uuid
 
 logging.basicConfig(
@@ -20,17 +22,33 @@ logging.basicConfig(
 
 def merge_seqs(scaffold_seq, generated_seq, design_only_indices):
     new_seq = scaffold_seq
-    # mask_seq = list("-"*len(scaffold_seq))
     for idx in design_only_indices:
         new_seq[idx] = generated_seq[idx]
-        # mask_seq[idx] = generated_seq[idx]
-    # return new_seq, ''.join(mask_seq)
     return str(new_seq)
 
 
 def parse_seq_label(generated_label):
     labels = generated_label.split(", ")
     return {j[0]: float(j[1]) for j in [label.split("=") for label in labels]}
+
+
+def write_seqs_to_jsonlines(seqs) -> None:
+    with jsonlines.open(args.output_path + ".jsonl", mode="w") as writer:
+        writer.write_all(seqs)
+    return None
+
+
+def write_seqs_to_fasta(seqs) -> None:
+    fasta_file = fasta.FastaFile()
+    for record in seqs:
+        sequence = seq.ProteinSequence(record["sequence"])
+        header = ",".join(
+            [f"{i[0]}={i[1]}" for i in record.items() if i[0] != "sequence"]
+        )
+        fasta.set_sequence(fasta_file, sequence, header=header)
+    print(fasta_file)
+    fasta_file.write(args.output_path + ".fa")
+    return None
 
 
 def main(args):
@@ -53,11 +71,13 @@ def main(args):
                     )
                     seq_dict["backbone_src"] = f.path
                     seq_dict["scaffold_src"] = args.scaffold_pdb
-                    seq_dict["uuid"] = uuid.uuid4().hex
+                    seq_dict["id"] = uuid.uuid4().hex
                     output.append(seq_dict)
+            logging.info(f"Processed {i} sequences")
 
-    with jsonlines.open(args.output_path, mode="w") as writer:
-        writer.write_all(output)
+
+    write_seqs_to_jsonlines(output)
+    write_seqs_to_fasta(output)
 
     return None
 
@@ -67,12 +87,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "scaffold_pdb",
+        "--scaffold_pdb",
         help="Path to scaffold pdb file.",
         type=str,
     )
     parser.add_argument(
-        "design_only_positions",
+        "--design_only_positions",
         help="List residue ids (1-index) for generated residues.",
         type=str,
     )
@@ -84,9 +104,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--output_path",
-        help="Jsonlines output path.",
+        help="Output file name (without extension)",
         type=str,
-        default="output.jsonl",
+        default="output",
     )
 
     args = parser.parse_args()
