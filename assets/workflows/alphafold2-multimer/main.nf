@@ -20,7 +20,7 @@ include {
     UnpackMMCIF
 } from './unpack'
 
-workflow {
+workflow AlphaFold2Multimer {
     CheckAndValidateInputsTask(params.target_id, params.fasta_path)
 
     // split fasta run parallel searches (Scatter)
@@ -205,4 +205,8 @@ process MergeRankings {
     mv output/top_hit* .
     mv output/rankings.json .
     """
+}
+
+workflow {
+    AlphaFold2Multimer()
 }

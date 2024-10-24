@@ -13,7 +13,7 @@ include {
     UnpackMMCIF
 } from './unpack'
 
-workflow {
+workflow AlphaFold2Monomer {
     //Convert to files
     if (params.fasta_path[-1] == '/') {
         fasta_path = params.fasta_path + '*'
@@ -170,4 +170,8 @@ process MergeRankings {
     mv output/top_hit* .
     mv output/rankings.json .
     """
+}
+
+workflow {
+    AlphaFold2Monomer()
 }

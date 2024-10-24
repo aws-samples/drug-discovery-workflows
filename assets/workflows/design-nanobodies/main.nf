@@ -84,6 +84,8 @@ process RunInference {
 
     echo "Generating sequence candidates with proteinmpnn"
 
+    cp ${proteinmpnn_ckpt} /opt/proteinmpnn/vanilla_model_weights
+
     folder_with_pdbs="str"
     path_for_parsed_chains="misc/parsed_pdbs.jsonl"
     path_for_assigned_chains="misc/assigned_pdbs.jsonl"
@@ -104,7 +106,7 @@ process RunInference {
         --jsonl_path \$path_for_parsed_chains \
         --chain_id_jsonl \$path_for_assigned_chains \
         --fixed_positions_jsonl \$path_for_fixed_positions \
-        --path_to_model_weights="." \
+        // --path_to_model_weights="." \
         --model_name="abmpnn" \
         --num_seq_per_target=${num_seq_designs_per_str} \
         --save_score=1 \

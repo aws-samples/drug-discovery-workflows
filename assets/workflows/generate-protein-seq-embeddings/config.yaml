@@ -1,5 +1,5 @@
-name: ESMFold
-description: "This workflow predicts the 3D structures for one or more protein amino acid sequences using the ESMFold protein language model."
+name: pLM Embeddings
+description: "This workflow generates numerical embeddings for one or more protein amino acid sequences using a protein language model like ESM."
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
@@ -9,7 +9,10 @@ parameterTemplate:
   max_records_per_partition:
     description: "Number of partitions to shard the input fasta file into"
     optional: true
+  model_parameters:
+    description: "S3 URI for the model parameter file."
+    optional: true
 storageCapacity: 1200
 tags:
-  Name: "ESMFold"
+  Name: "PLM Embeddings"
 accelerators: GPU
