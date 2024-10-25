@@ -39,7 +39,7 @@ def write_seqs_to_jsonlines(seqs) -> None:
 
 
 def write_seqs_to_fasta(seqs) -> None:
-    fasta_file = fasta.FastaFile()
+    fasta_file = fasta.FastaFile(chars_per_line=150)
     for record in seqs:
         sequence = seq.ProteinSequence(record["sequence"])
         header = ",".join(

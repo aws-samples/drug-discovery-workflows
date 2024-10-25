@@ -13,8 +13,6 @@ import torch
 from transformers import AutoTokenizer, EsmForProteinFolding
 from tqdm import tqdm
 
-
-
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%m/%d/%Y %H:%M:%S",
@@ -65,10 +63,7 @@ def predict_structures(
 
         output = {key: value.cpu() for key, value in outputs.items()}
         pdb_string = model.output_to_pdb(output)[0]
-        if n > 1:
-            output_dir = os.path.join(args.output_dir, str(n))
-        else:
-            output_dir = args.output_dir
+        output_dir = os.path.join(args.output_dir, str(n))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
@@ -96,7 +91,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_file", help="Path to input fasta file with sequences to process", type=str
+        "input_file",
+        help="Path to input fasta file with sequences to process",
+        type=str,
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",

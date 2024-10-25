@@ -26,18 +26,18 @@ workflow DesignNanobodies {
                  params.proteinmpnn_model_name
                  )
 
-    GenerateCandidatesTask.out.output.collect().set { output_ch }
-    // GenerateCandidatesTask.out.backbones.collect().set { backbone_ch }
+    GenerateCandidatesTask.out.backbones.collect().set { backbone_ch }
     GenerateCandidatesTask.out.generated_fasta.collect().set { fasta_ch }
     GenerateCandidatesTask.out.generated_jsonl.collect().set { jsonl_ch }
 
     ESMFoldTask(fasta_ch, esmfold_params_ch)
-
     ESMFoldTask.out.output.collect().set { esmfold_ch }
 
     emit:
-    generated_output = output_ch
-    esmfold_output = esmfold_ch
+    backbone_structures = backbone_ch
+    generated_fasta = fasta_ch
+    generated_jsonline = jsonl_ch
+    esmfold_structures = esmfold_ch
 }
 
 workflow {

@@ -22,10 +22,10 @@ workflow ESMFold {
 process ESMFoldTask {
     label 'esmfold'
     cpus 8
-    memory '32 GB'
+    memory '30 GB'
     maxRetries 2
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir '/mnt/workflow/pubdir/esmfold'
 
     input:
     path fasta_file

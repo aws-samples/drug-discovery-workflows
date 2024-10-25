@@ -16,13 +16,11 @@ workflow RFDiffusionProteinMPNN {
                  proteinmpnn_params_ch,
                  params.proteinmpnn_model_name
                  )
-    GenerateCandidatesTask.out.output.collect().set { output_ch }
     GenerateCandidatesTask.out.backbones.collect().set { backbone_ch }
     GenerateCandidatesTask.out.generated_fasta.collect().set { fasta_ch }
     GenerateCandidatesTask.out.generated_jsonl.collect().set { jsonl_ch }
 
     emit:
-    output = output_ch
     backbone = backbone_ch
     fasta = fasta_ch
     jsonl = jsonl_ch
@@ -31,9 +29,9 @@ workflow RFDiffusionProteinMPNN {
 process GenerateCandidatesTask {
     label 'rfdiffusion'
     cpus 8
-    memory '24 GB'
+    memory '30 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir '/mnt/workflow/pubdir/rfdiffusion'
 
     input:
         path target_pdb
@@ -46,7 +44,6 @@ process GenerateCandidatesTask {
         val proteinmpnn_model_name
 
     output:
-        path 'output', emit: output
         path 'output/backbones', emit: backbones
         path 'output/generated_sequences.fa', emit: generated_fasta
         path 'output/generated_sequences.jsonl', emit: generated_jsonl
