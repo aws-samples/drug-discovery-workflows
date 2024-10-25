@@ -41,7 +41,7 @@ process GenerateCandidatesTask {
     publishDir '/mnt/workflow/pubdir/rfdiffusion'
 
     input:
-        val parallel_generation_ch
+        each parallel_generation_ch
         path target_pdb
         path scaffold_pdb
         val hotspot_residues
