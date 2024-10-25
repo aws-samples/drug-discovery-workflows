@@ -33,6 +33,7 @@ process GenerateCandidatesTask {
     cpus 8
     memory '24 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
+    publishDir '/mnt/workflow/pubdir'
 
     input:
         path target_pdb
