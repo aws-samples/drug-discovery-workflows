@@ -33,6 +33,7 @@ def plot_pae(pae, output) -> None:
     ax.set_xlabel("Scored residue")
     ax.set_ylabel("Aligned residue")
     fig.savefig(output)
+    plt.close(fig)
     return None
 
 
