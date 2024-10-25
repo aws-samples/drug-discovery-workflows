@@ -1,5 +1,5 @@
-name: NanobodyDesign
-description: "Generate nanobodies to a target of interest."
+name: RFDiffusion
+description: "Generate proteins with the RFDiffusion+ProteinMPNN algorithms."
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
@@ -18,15 +18,12 @@ parameterTemplate:
   num_seq_designs_per_str:
     description: "Number of protein sequence designs per backbone design."
     optional: true
-  rfdiffusion_model_parameters:
-    description: "S3 URI of RFDIffusion model parameter file"
+  complex_Fold_base_ckpt:
+    description: "S3 URI of RFDIffusion complex fold model weights"
     optional: true
-  proteinmpnn_model_parameters:
-    description: "S3 URI of ProteinMPNN model parameter file"
+  abmpnn_ckpt:
+    description: "S3 URI of AbMPNN model weights"
     optional: true        
-  esmfold_model_parameters:
-    description: "S3 URI of ESMFold model parameter file"
-    optional: true            
 storageCapacity: 1200
 tags:
-  Name: "Nanobody"
+  Name: "RFDiffusion"
