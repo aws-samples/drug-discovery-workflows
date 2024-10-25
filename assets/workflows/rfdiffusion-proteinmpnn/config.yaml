@@ -18,6 +18,9 @@ parameterTemplate:
   num_seq_designs_per_str:
     description: "Number of protein sequence designs per backbone design."
     optional: true
+  num_parallel_workflows:
+    description: "Number of generation workflows to run in parallel."
+    optional: true    
   complex_Fold_base_ckpt:
     description: "S3 URI of RFDIffusion complex fold model weights"
     optional: true

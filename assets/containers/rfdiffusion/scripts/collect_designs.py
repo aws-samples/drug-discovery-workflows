@@ -29,7 +29,8 @@ def merge_seqs(scaffold_seq, generated_seq, design_only_indices):
 
 def parse_seq_label(generated_label):
     labels = generated_label.split(", ")
-    return {j[0]: float(j[1]) for j in [label.split("=") for label in labels]}
+    label_dict = {j[0]: float(j[1]) for j in [label.split("=") for label in labels]}
+    return label_dict
 
 
 def write_seqs_to_jsonlines(seqs) -> None:
@@ -42,9 +43,7 @@ def write_seqs_to_fasta(seqs) -> None:
     fasta_file = fasta.FastaFile(chars_per_line=150)
     for record in seqs:
         sequence = seq.ProteinSequence(record["sequence"])
-        header = ",".join(
-            [f"{i[0]}={i[1]}" for i in record.items() if i[0] != "sequence"]
-        )
+        header = record["id"]
         fasta.set_sequence(fasta_file, sequence, header=header)
     print(fasta_file)
     fasta_file.write(args.output_path + ".fa")
@@ -69,7 +68,7 @@ def main(args):
                     seq_dict["sequence"] = merge_seqs(
                         scaffold_seq, generated_seq[1], design_only_indices
                     )
-                    seq_dict["backbone_src"] = f.path
+                    seq_dict["backbone_src"] = f.name.replace(".fa", ".pdb")
                     seq_dict["scaffold_src"] = args.scaffold_pdb
                     seq_dict["id"] = uuid.uuid4().hex
                     output.append(seq_dict)

@@ -1,26 +1,33 @@
 nextflow.enable.dsl = 2
 
 workflow RFDiffusionProteinMPNN {
+    parallel_generation_ch = Channel.of(1..params.num_parallel_workflows)
     target_ch = Channel.fromPath(params.target_pdb)
     scaffold_ch = Channel.fromPath(params.scaffold_pdb)
     rfdiffusion_params_ch = Channel.fromPath(params.complex_Fold_base_ckpt)
     proteinmpnn_params_ch = Channel.fromPath(params.proteinmpnn_ckpt)
 
     GenerateCandidatesTask(
-                 target_ch,
-                 scaffold_ch,
-                 params.hotspot_residues,
-                 params.num_str_designs_per_target,
-                 params.num_seq_designs_per_str,
-                 rfdiffusion_params_ch,
-                 proteinmpnn_params_ch,
-                 params.proteinmpnn_model_name
-                 )
+        parallel_generation_ch,
+        target_ch,
+        scaffold_ch,
+        params.hotspot_residues,
+        params.num_str_designs_per_target,
+        params.num_seq_designs_per_str,
+        rfdiffusion_params_ch,
+        proteinmpnn_params_ch,
+        params.proteinmpnn_model_name
+        )
+    GenerateCandidatesTask.out.target_pdb.collect().set { target_ch }
+    GenerateCandidatesTask.out.scaffold_pdb.collect().set { scaffold_ch }
+
     GenerateCandidatesTask.out.backbones.collect().set { backbone_ch }
     GenerateCandidatesTask.out.generated_fasta.collect().set { fasta_ch }
     GenerateCandidatesTask.out.generated_jsonl.collect().set { jsonl_ch }
 
     emit:
+    target = target_ch
+    scaffold = scaffold_ch
     backbone = backbone_ch
     fasta = fasta_ch
     jsonl = jsonl_ch
@@ -34,6 +41,7 @@ process GenerateCandidatesTask {
     publishDir '/mnt/workflow/pubdir/rfdiffusion'
 
     input:
+        val parallel_generation_ch
         path target_pdb
         path scaffold_pdb
         val hotspot_residues
@@ -44,7 +52,9 @@ process GenerateCandidatesTask {
         val proteinmpnn_model_name
 
     output:
-        path 'output/backbones', emit: backbones
+        path 'output/target.pdb', emit: target_pdb
+        path 'output/scaffold.pdb', emit: scaffold_pdb
+        path 'output/backbones/', emit: backbones
         path 'output/generated_sequences.fa', emit: generated_fasta
         path 'output/generated_sequences.jsonl', emit: generated_jsonl
 
@@ -52,7 +62,12 @@ process GenerateCandidatesTask {
     """
     set -euxo pipefail
     mkdir output
+    cp ${target_pdb} output/target.pdb
+    cp ${scaffold_pdb} output/scaffold.pdb
+
     export HYDRA_FULL_ERROR=1
+
+    echo "Parallel generation ${parallel_generation_ch}"
 
     echo "Generating secondary structure and adjacency inputs for fold conditioning"
 

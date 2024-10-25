@@ -54,8 +54,8 @@ def predict_structures(
         desc=f"Generating structures",
     ):
         logging.info(f"Sequence {n+1} of {len(seqs)}")
-        metrics = {"sequence": seq, "sequence_length": len(seq)}
-        inputs = tokenizer(seq, return_tensors="pt", add_special_tokens=False).to(
+        metrics = {"name": seq.name, "sequence": seq.seq, "sequence_length": len(seq.seq)}
+        inputs = tokenizer(seq.seq, return_tensors="pt", add_special_tokens=False).to(
             device
         )
         with torch.inference_mode():
@@ -67,9 +67,10 @@ def predict_structures(
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_file = os.path.join(output_dir, "prediction.pdb")
-
+        output_file = os.path.join(output_dir, seq.name + ".pdb")
+        header_str = f"REMARK 1\t{seq.name}\n"
         with open(output_file, "w") as f:
+            f.write(header_str)
             f.write(pdb_string)
         metrics.update(
             {
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    seqs = [i.seq for i in pyfastx.Fasta(args.input_file)]
+    seqs = [seq for seq in pyfastx.Fasta(args.input_file)]
 
     predict_structures(
         seqs,

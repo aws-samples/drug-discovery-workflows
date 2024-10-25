@@ -1,4 +1,4 @@
-name: NanobodyDesign
+name: Nanobody Design
 description: "Generate nanobodies to a target of interest."
 engine: NEXTFLOW
 main: main.nf
@@ -13,19 +13,22 @@ parameterTemplate:
     description: "RFDiffusion hotspot residues indices. See https://github.com/RosettaCommons/RFdiffusion/tree/main?tab=readme-ov-file#binder-design for more information."
     optional: false
   num_str_designs_per_target:
-    description: "Number of protein backbone designs per input target."
+    description: "(Optional) Number of protein backbone designs per input target."
     optional: true
   num_seq_designs_per_str:
-    description: "Number of protein sequence designs per backbone design."
+    description: "(Optional) Number of protein sequence designs per backbone design."
+    optional: true
+  num_parallel_workflows:
+    description: "(Optional) Number of generation workflows to run in parallel."
     optional: true
   rfdiffusion_model_parameters:
-    description: "S3 URI of RFDIffusion model parameter file"
+    description: "(Optional) S3 URI of RFDIffusion model parameter file"
     optional: true
   proteinmpnn_model_parameters:
-    description: "S3 URI of ProteinMPNN model parameter file"
+    description: "(Optional) S3 URI of ProteinMPNN model parameter file"
     optional: true        
   esmfold_model_parameters:
-    description: "S3 URI of ESMFold model parameter file"
+    description: "(Optional) S3 URI of ESMFold model parameter file"
     optional: true            
 storageCapacity: 1200
 tags:
