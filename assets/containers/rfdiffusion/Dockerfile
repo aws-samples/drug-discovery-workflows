@@ -10,6 +10,7 @@ COPY scripts /opt/scripts
 
 RUN apt-get update \
   && apt-get upgrade -y \
+  && apt-get install uuid -y \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \

@@ -81,11 +81,12 @@ def predict_structures(
                 ),
             }
         )
-        torch.save(output, os.path.join(output_dir, "outputs.pt"))
+        torch.save(output, os.path.join(output_dir, seq.name + ".pt"))
         pae = output["predicted_aligned_error"]
-        plot_pae(pae[0], os.path.join(output_dir, "pae.png"))
-        with open(os.path.join(output_dir, "metrics.json"), "w") as f:
+        plot_pae(pae[0], os.path.join(output_dir, seq.name + ".png"))
+        with open(os.path.join(output_dir, seq.name + ".json"), "w") as f:
             json.dump(metrics, f)
+            f.write("\n")
 
 
 if __name__ == "__main__":

@@ -15,20 +15,25 @@ def get_collected_results(args):
     logging.info(f"Loading generation results from {args.generation_results}")
 
     esm = {}
-    for root, _, files in os.walk(args.esmfold_results):
-        for f in files:
-            if f == "metrics.json":
-                path = os.path.join(root, f)
-                logging.info(f"Processing {path}")
-                esmfold_results = json.load(open(path, "r"))
-                esmfold_results.pop("sequence", None)
-                esmfold_results.pop("sequence_length", None)
-                esmfold_results.pop("max_predicted_aligned_error", None)
-                esmfold_results["esmfold_structure"] = os.path.join(
-                    root, esmfold_results["name"] + ".pdb"
-                )
-                logging.info(esmfold_results)
-                esm[esmfold_results["name"]] = esmfold_results
+    # for root, _, files in os.walk(args.esmfold_results):
+        # for f in files:
+            # logging.info(f"Found {f}")
+            # if f == "metrics.json":
+    # path = os.path.join(root, f)
+    path  = args.esmfold_results
+    logging.info(f"Processing {path}")
+    with jsonlines.open(args.esmfold_results, "r") as reader:
+        for obj in reader:
+            logging.info(obj)
+            esmfold_results = obj
+            esmfold_results.pop("sequence", None)
+            esmfold_results.pop("sequence_length", None)
+            esmfold_results.pop("max_predicted_aligned_error", None)
+            esmfold_results["esmfold_structure"] = os.path.join(
+                # root, esmfold_results["name"] + ".pdb"
+                esmfold_results["name"] + ".pdb"
+            )
+            esm[esmfold_results["name"]] = esmfold_results
 
     collected_results = []
     with jsonlines.open(args.generation_results, "r") as reader:
@@ -47,7 +52,8 @@ def get_collected_results(args):
                     "esmfold.structure": os.path.join("esmfold", esmfold_record["esmfold_structure"]),
                 }
             )
-
+    logging.info(f"Collected {len(collected_results)} results")
+    logging.info(collected_results)
     return collected_results
 
 
@@ -60,7 +66,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--esmfold_results",
-        help="Path to folder containiner ESMFold results.",
+        help="Path to folder containing ESMFold results.",
         type=str,
     )
     parser.add_argument(

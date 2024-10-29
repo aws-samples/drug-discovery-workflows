@@ -1,52 +1,70 @@
 nextflow.enable.dsl = 2
 
 include {
-    ESMFoldTask
-} from '../esmfold'
+    RFDiffusionProteinMPNN
+} from '../rfdiffusion-proteinmpnn/main'
 
 include {
-    GenerateCandidatesTask
-} from '../rfdiffusion-proteinmpnn'
+    ESMFold
+} from '../esmfold/main'
 
 workflow DesignNanobodies {
-    parallel_generation_ch = Channel.of(1..params.num_parallel_workflows)
-    target_ch = Channel.fromPath(params.target_pdb)
-    scaffold_ch = Channel.fromPath(params.scaffold_pdb)
-    rfdiffusion_params_ch = Channel.fromPath(params.rfdiffusion_model_parameters)
-    proteinmpnn_params_ch = Channel.fromPath(params.proteinmpnn_model_parameters)
-    esmfold_params_ch = Channel.fromPath(params.esmfold_model_parameters)
+    take:
+    target_pdb
+    hotspot_residues
+    parallel_iteration
+    num_bb_designs_per_target
+    num_seq_designs_per_bb
+    proteinmpnn_sampling_temp
+    scaffold_pdb
+    scaffold_design_chain
+    scaffold_design_positions
+    rfdiffusion_params
+    proteinmpnn_params
+    proteinmpnn_model_name
+    esmfold_max_records_per_partition
+    esmfold_model_parameters
 
-    GenerateCandidatesTask(
-        parallel_generation_ch,
-        target_ch,
-        scaffold_ch,
-        params.hotspot_residues,
-        params.num_str_designs_per_target,
-        params.num_seq_designs_per_str,
-        rfdiffusion_params_ch,
-        proteinmpnn_params_ch,
-        params.proteinmpnn_model_name
+    main:
+    RFDiffusionProteinMPNN(
+        target_pdb,
+        hotspot_residues,
+        parallel_iteration,
+        num_bb_designs_per_target,
+        num_seq_designs_per_bb,
+        proteinmpnn_sampling_temp,
+        scaffold_pdb,
+        scaffold_design_chain,
+        scaffold_design_positions,
+        rfdiffusion_params,
+        proteinmpnn_params,
+        proteinmpnn_model_name
         )
-    GenerateCandidatesTask.out.target_pdb.collect().set { target_ch }
-    GenerateCandidatesTask.out.scaffold_pdb.collect().set { scaffold_ch }
-    GenerateCandidatesTask.out.backbones.collect().set { backbone_ch }
-    GenerateCandidatesTask.out.generated_fasta.collect().set { fasta_ch }
-    GenerateCandidatesTask.out.generated_jsonl.collect().set { jsonl_ch }
 
-    ESMFoldTask(fasta_ch, esmfold_params_ch)
-    ESMFoldTask.out.output.collect().set { esmfold_ch }
+    RFDiffusionProteinMPNN.out.backbone_pdb.collect().set { generated_backbone }
+    RFDiffusionProteinMPNN.out.generated_fasta.collect().set { generated_fasta }
+    RFDiffusionProteinMPNN.out.generated_jsonl.collect().set { generated_jsonl }
+    generated_jsonl.view()
+    generated_fasta.view()
 
-    CollectResultsTask(jsonl_ch, esmfold_ch)
-    CollectResultsTask.out.results.collect().set { results_ch }
+    // ESMFold(
+    //     generated_fasta,
+    //     esmfold_max_records_per_partition,
+    //     esmfold_model_parameters
+    //     )
 
-    emit:
-    target_pdb = target_ch
-    scaffold_pdb = scaffold_ch
-    backbone_structures = backbone_ch
-    generated_fasta = fasta_ch
-    generated_jsonline = jsonl_ch
-    esmfold_structures = esmfold_ch
-    results = results_ch
+    // ESMFold.out.pdb.collect().set { esmfold_pdb }
+    // ESMFold.out.tensors.collect().set { esmfold_tensors }
+    // ESMFold.out.pae_plot.collect().set { esmfold_pae_plots }
+    // ESMFold.out.metrics.collect().set { esmfold_metrics }
+    // ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
+
+    // CollectResultsTask(generated_jsonl, combined_esmfold_metrics)
+    // CollectResultsTask.out.results.collect().set { results_ch }
+    // results_ch.view()
+
+    // emit:
+    // results_ch
 }
 
 process CollectResultsTask {
@@ -54,7 +72,7 @@ process CollectResultsTask {
     cpus 4
     memory '14 GB'
     maxRetries 2
-    publishDir '/mnt/workflow/pubdir'
+    publishDir "/mnt/workflow/pubdir/${task.process.replace(':', '/')}/${task.index}"
 
     input:
     path generation_results
@@ -66,6 +84,8 @@ process CollectResultsTask {
     script:
     """
     set -euxo pipefail
+    echo ${generation_results}
+    echo ${esmfold_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
         --generation_results ${generation_results} \
         --esmfold_results ${esmfold_results}
@@ -73,5 +93,20 @@ process CollectResultsTask {
 }
 
 workflow {
-    DesignNanobodies()
+    DesignNanobodies(
+        Channel.fromPath(params.target_pdb),
+        Channel.value(params.hotspot_residues),
+        Channel.of(1..params.num_parallel_workflows),
+        Channel.value(params.num_bb_designs_per_target),
+        Channel.value(params.num_seq_designs_per_bb),
+        Channel.value(params.proteinmpnn_sampling_temp),
+        Channel.fromPath(params.scaffold_pdb),
+        Channel.value(params.scaffold_design_chain),
+        Channel.value(params.scaffold_design_positions),
+        Channel.fromPath(params.rfdiffusion_params),
+        Channel.fromPath(params.proteinmpnn_params),
+        Channel.value(params.proteinmpnn_model_name),
+        Channel.value(params.esmfold_max_records_per_partition),
+        Channel.fromPath(params.esmfold_model_parameters)
+    )
 }
