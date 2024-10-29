@@ -15,11 +15,6 @@ def get_collected_results(args):
     logging.info(f"Loading generation results from {args.generation_results}")
 
     esm = {}
-    # for root, _, files in os.walk(args.esmfold_results):
-        # for f in files:
-            # logging.info(f"Found {f}")
-            # if f == "metrics.json":
-    # path = os.path.join(root, f)
     path  = args.esmfold_results
     logging.info(f"Processing {path}")
     with jsonlines.open(args.esmfold_results, "r") as reader:
@@ -30,7 +25,6 @@ def get_collected_results(args):
             esmfold_results.pop("sequence_length", None)
             esmfold_results.pop("max_predicted_aligned_error", None)
             esmfold_results["esmfold_structure"] = os.path.join(
-                # root, esmfold_results["name"] + ".pdb"
                 esmfold_results["name"] + ".pdb"
             )
             esm[esmfold_results["name"]] = esmfold_results
@@ -43,13 +37,13 @@ def get_collected_results(args):
                 {
                     "id": obj["id"],
                     "sequence": obj["sequence"],
-                    "rfdiffusion.backbone_pdb": os.path.join("rfdiffusion", "output", "backbones", obj["backbone_src"]),
+                    "rfdiffusion.backbone_pdb": obj["backbone_src"],
                     "proteinmpnn.score": obj["score"],
                     "proteinmpnn.global_score": obj["global_score"],
                     "proteinmpnn.seq_recovery": obj["seq_recovery"],
                     "esmfold.mean_plddt": esmfold_record["mean_plddt"],
                     "esmfold.ptm": esmfold_record["ptm"],
-                    "esmfold.structure": os.path.join("esmfold", esmfold_record["esmfold_structure"]),
+                    "esmfold.structure": esmfold_record["esmfold_structure"],
                 }
             )
     logging.info(f"Collected {len(collected_results)} results")
