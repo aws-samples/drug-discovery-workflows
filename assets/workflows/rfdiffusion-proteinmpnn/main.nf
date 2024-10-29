@@ -4,7 +4,6 @@ workflow RFDiffusionProteinMPNN {
     take:
     target_pdb
     hotspot_residues
-    parallel_iteration
     num_bb_designs_per_target
     num_seq_designs_per_bb
     proteinmpnn_sampling_temp
@@ -19,7 +18,6 @@ workflow RFDiffusionProteinMPNN {
     GenerateCandidatesTask(
         target_pdb,
         hotspot_residues,
-        parallel_iteration,
         num_bb_designs_per_target,
         num_seq_designs_per_bb,
         proteinmpnn_sampling_temp,
@@ -44,15 +42,14 @@ workflow RFDiffusionProteinMPNN {
 
 process GenerateCandidatesTask {
     label 'rfdiffusion'
-    cpus 8
-    memory '30 GB'
+    cpus 4
+    memory '16 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir/${task.process.replace(':', '/')}/${task.index}"
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path target_pdb
         val hotspot_residues
-        each parallel_iteration
         val num_bb_designs_per_target
         val num_seq_designs_per_bb
         val proteinmpnn_sampling_temp
@@ -64,11 +61,9 @@ process GenerateCandidatesTask {
         val proteinmpnn_model_name
 
     output:
-        path target_pdb, emit: target_pdb
-        path scaffold_pdb, emit: scaffold_pdb
-        path 'backbones/bb*.pdb', emit: backbones
-        path 'seq*.fa', emit: generated_fasta
-        path 'seq*.jsonl', emit: generated_jsonl
+        path 'backbones/*.pdb', emit: backbones
+        path '*.fa', emit: generated_fasta
+        path '*.jsonl', emit: generated_jsonl
 
     script:
     """
@@ -78,6 +73,9 @@ process GenerateCandidatesTask {
 
     echo "Task id ${task.index}"
     echo "Task process ${task.process}"
+
+    EXECUTION_ID=\$(uuid -v4)
+    echo "Unique execution id \${EXECUTION_ID}"
 
     echo "Generating secondary structure and adjacency inputs for fold conditioning"
 
@@ -91,7 +89,7 @@ process GenerateCandidatesTask {
     BB_PDB_DIR="backbones"
 
     /opt/conda/bin/python3 /opt/rfdiffusion/scripts/run_inference.py \
-        inference.output_prefix=\$BB_PDB_DIR/bb \
+        inference.output_prefix=\$BB_PDB_DIR/\$EXECUTION_ID \
         inference.model_directory_path='.' \
         inference.input_pdb=${target_pdb} \
         'ppi.hotspot_res=${hotspot_residues}' \
@@ -110,9 +108,10 @@ process GenerateCandidatesTask {
 
     cp ${proteinmpnn_params} /opt/proteinmpnn/vanilla_model_weights
 
-    PATH_FOR_PARSED_CHAINS="parsed_pdbs.jsonl"
-    PATH_FOR_ASSIGNED_CHAINS="assigned_pdbs.jsonl"
-    PATH_FOR_FIXED_POSITIONS="fixed_pdbs.jsonl"
+    mkdir -p tmp
+    PATH_FOR_PARSED_CHAINS="tmp/parsed_pdbs.jsonl"
+    PATH_FOR_ASSIGNED_CHAINS="tmp/assigned_pdbs.jsonl"
+    PATH_FOR_FIXED_POSITIONS="tmp/fixed_pdbs.jsonl"
 
     /opt/conda/bin/python3 /opt/proteinmpnn/helper_scripts/parse_multiple_chains.py \
         --input_path=\$BB_PDB_DIR --output_path=\$PATH_FOR_PARSED_CHAINS
@@ -135,15 +134,11 @@ process GenerateCandidatesTask {
         --sampling_temp "${proteinmpnn_sampling_temp}" \
         --batch_size 8
 
-    ls -loh
-
     /opt/conda/bin/python3 /opt/scripts/collect_designs.py \
         --scaffold_pdb=${scaffold_pdb} \
         --design_only_positions="${scaffold_design_positions}" \
         --seq_dir="seqs" \
-        --output_path=seq-"${task.index}"
-
-    ls -loh
+        --output_path=\$EXECUTION_ID
 
     """
 }
@@ -152,7 +147,6 @@ workflow {
     RFDiffusionProteinMPNN(
         Channel.fromPath(params.target_pdb),
         Channel.value(params.hotspot_residues),
-        Channel.of(1..params.num_parallel_workflows),
         Channel.value(params.num_bb_designs_per_target),
         Channel.value(params.num_seq_designs_per_bb),
         Channel.value(params.proteinmpnn_sampling_temp),

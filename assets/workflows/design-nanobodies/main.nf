@@ -12,7 +12,6 @@ workflow DesignNanobodies {
     take:
     target_pdb
     hotspot_residues
-    parallel_iteration
     num_bb_designs_per_target
     num_seq_designs_per_bb
     proteinmpnn_sampling_temp
@@ -29,7 +28,6 @@ workflow DesignNanobodies {
     RFDiffusionProteinMPNN(
         target_pdb,
         hotspot_residues,
-        parallel_iteration,
         num_bb_designs_per_target,
         num_seq_designs_per_bb,
         proteinmpnn_sampling_temp,
@@ -41,38 +39,29 @@ workflow DesignNanobodies {
         proteinmpnn_model_name
         )
 
-    RFDiffusionProteinMPNN.out.backbone_pdb.collect().set { generated_backbone }
     RFDiffusionProteinMPNN.out.generated_fasta.collect().set { generated_fasta }
     RFDiffusionProteinMPNN.out.generated_jsonl.collect().set { generated_jsonl }
-    generated_jsonl.view()
-    generated_fasta.view()
 
-    // ESMFold(
-    //     generated_fasta,
-    //     esmfold_max_records_per_partition,
-    //     esmfold_model_parameters
-    //     )
+    ESMFold(
+        generated_fasta,
+        esmfold_model_parameters
+        )
 
-    // ESMFold.out.pdb.collect().set { esmfold_pdb }
-    // ESMFold.out.tensors.collect().set { esmfold_tensors }
-    // ESMFold.out.pae_plot.collect().set { esmfold_pae_plots }
-    // ESMFold.out.metrics.collect().set { esmfold_metrics }
-    // ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
+    ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
 
-    // CollectResultsTask(generated_jsonl, combined_esmfold_metrics)
-    // CollectResultsTask.out.results.collect().set { results_ch }
-    // results_ch.view()
+    CollectResultsTask(generated_jsonl, combined_esmfold_metrics)
+    CollectResultsTask.out.results.collect().set { results_ch }
 
-    // emit:
-    // results_ch
+    emit:
+    results_ch
 }
 
 process CollectResultsTask {
     label 'utility'
-    cpus 4
-    memory '14 GB'
-    maxRetries 2
-    publishDir "/mnt/workflow/pubdir/${task.process.replace(':', '/')}/${task.index}"
+    cpus 2
+    memory '4 GB'
+    maxRetries 1
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
     path generation_results
@@ -96,7 +85,6 @@ workflow {
     DesignNanobodies(
         Channel.fromPath(params.target_pdb),
         Channel.value(params.hotspot_residues),
-        Channel.of(1..params.num_parallel_workflows),
         Channel.value(params.num_bb_designs_per_target),
         Channel.value(params.num_seq_designs_per_bb),
         Channel.value(params.proteinmpnn_sampling_temp),
