@@ -4,14 +4,13 @@
 
 import argparse
 import json
-
 import logging
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
-import torch
-import csv
-from transformers import AutoTokenizer, EsmForProteinFolding
 import os
+import pyfastx
+import torch
+from transformers import AutoTokenizer, EsmForProteinFolding
 from tqdm import tqdm
 
 logging.basicConfig(
@@ -32,6 +31,7 @@ def plot_pae(pae, output) -> None:
     ax.set_xlabel("Scored residue")
     ax.set_ylabel("Aligned residue")
     fig.savefig(output)
+    plt.close(fig)
     return None
 
 
@@ -54,8 +54,8 @@ def predict_structures(
         desc=f"Generating structures",
     ):
         logging.info(f"Sequence {n+1} of {len(seqs)}")
-        metrics = {"sequence": seq, "sequence_length": len(seq)}
-        inputs = tokenizer(seq, return_tensors="pt", add_special_tokens=False).to(
+        metrics = {"name": seq.name, "sequence": seq.seq, "sequence_length": len(seq.seq)}
+        inputs = tokenizer(seq.seq, return_tensors="pt", add_special_tokens=False).to(
             device
         )
         with torch.inference_mode():
@@ -63,16 +63,14 @@ def predict_structures(
 
         output = {key: value.cpu() for key, value in outputs.items()}
         pdb_string = model.output_to_pdb(output)[0]
-        if n > 1:
-            output_dir = os.path.join(args.output_dir, str(n))
-        else:
-            output_dir = args.output_dir
+        output_dir = os.path.join(args.output_dir, str(n))
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_file = os.path.join(output_dir, "prediction.pdb")
-
+        output_file = os.path.join(output_dir, seq.name + ".pdb")
+        header_str = f"REMARK 1\t{seq.name}\n"
         with open(output_file, "w") as f:
+            f.write(header_str)
             f.write(pdb_string)
         metrics.update(
             {
@@ -83,18 +81,21 @@ def predict_structures(
                 ),
             }
         )
-        torch.save(output, os.path.join(output_dir, "outputs.pt"))
+        torch.save(output, os.path.join(output_dir, seq.name + ".pt"))
         pae = output["predicted_aligned_error"]
-        plot_pae(pae[0], os.path.join(output_dir, "pae.png"))
-        with open(os.path.join(output_dir, "metrics.json"), "w") as f:
+        plot_pae(pae[0], os.path.join(output_dir, seq.name + ".png"))
+        with open(os.path.join(output_dir, seq.name + ".json"), "w") as f:
             json.dump(metrics, f)
+            f.write("\n")
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_file", help="Path to input CSV file with sequences to process", type=str
+        "input_file",
+        help="Path to input fasta file with sequences to process",
+        type=str,
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
@@ -110,9 +111,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    with open(args.input_file, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        seqs = [row["text"] for row in reader]
+    seqs = [seq for seq in pyfastx.Fasta(args.input_file)]
 
     predict_structures(
         seqs,

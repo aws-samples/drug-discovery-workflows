@@ -2,7 +2,7 @@ from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
 import torch
 import numpy as np
 import argparse
-import csv
+import pyfastx
 import logging
 from tqdm import tqdm
 
@@ -15,7 +15,7 @@ logging.basicConfig(
 
 def generate_embeddings(
     text: list,
-    pretrained_model_name_or_path: str = "facebook/esm2_t36_3B_UR50D",
+    pretrained_model_name_or_path: str = "facebook/esm2_t33_650M_UR50D",
     batch_size: int = 24,
     quant: bool = False,
     output_file: str = "embeddings.npy",
@@ -34,9 +34,13 @@ def generate_embeddings(
     else:
         bnb_config = None
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(
+        pretrained_model_name_or_path, trust_remote_code=True
+    )
     model = AutoModel.from_pretrained(
-        pretrained_model_name_or_path, quantization_config=bnb_config
+        pretrained_model_name_or_path,
+        quantization_config=bnb_config,
+        trust_remote_code=True,
     ).to(device)
 
     tmp = []
@@ -65,12 +69,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_file", help="Path to input CSV file with sequences to process", type=str
+        "input_file",
+        help="Path to input fasta file with sequences to process",
+        type=str,
     )
     parser.add_argument(
         "--pretrained_model_name_or_path",
-        help="ESM model to use",
-        default="facebook/esm2_t36_3B_UR50D",
+        help="pLM model to use",
+        default="facebook/esm2_t33_650M_UR50D",
         type=str,
     )
     parser.add_argument(
@@ -93,9 +99,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    with open(args.input_file, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        seqs = [row["text"] for row in reader]
+    seqs = [i.seq for i in pyfastx.Fasta(args.input_file)]
 
     generate_embeddings(
         seqs,

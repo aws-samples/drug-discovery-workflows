@@ -18,12 +18,13 @@ process SearchUniref90 {
     script:
     """
     set -euxo pipefail
-    cat $fasta_path
+    mv $fasta_path ${id}.fa
+    cat ${id}.fa
 
     mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
-      --fasta_path=$fasta_path \
+      --fasta_path=${id}.fa \
       --database_type=uniref90 \
       --database_path=$database_path \
       --output_dir=output_${id} \
@@ -52,12 +53,12 @@ process SearchMgnify {
     script:
     """
     set -euxo pipefail
-    cat $fasta_path
-
+    mv $fasta_path ${id}.fa
+    cat ${id}.fa
     mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
-      --fasta_path=$fasta_path \
+      --fasta_path=${id}.fa \
       --database_type=mgnify \
       --database_path=$database_path \
       --output_dir=output_${id} \
@@ -91,11 +92,12 @@ process SearchBFD {
     script:
     """
     set -euxo pipefail
-    cat $fasta_path
+    mv $fasta_path ${id}.fa
+    cat ${id}.fa
     mkdir -p output_${id}
 
     /opt/venv/bin/python /opt/create_msa_monomer.py \
-      --fasta_path=$fasta_path \
+      --fasta_path=${id}.fa \
       --database_type=bfd \
       --database_path=$bfd_database_folder \
       --database_path_2=$uniref30_database_folder \
