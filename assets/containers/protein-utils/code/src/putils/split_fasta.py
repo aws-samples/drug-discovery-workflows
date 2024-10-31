@@ -124,7 +124,7 @@ def download(source: str, filename: str) -> str:
         logging.info(f"Downloading {source} to {filename}")
 
         with open(filename, "wb") as f:
-            with requests.get(source, stream=True) as r:
+            with requests.get(source, stream=True, timeout=60) as r:
                 r.raise_for_status()
                 total = int(r.headers.get("content-length", 0))
 

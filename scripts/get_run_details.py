@@ -1,11 +1,8 @@
 import argparse
 import logging
-import io
-import json
 import jsonlines
 import os
 import boto3
-from time import sleep
 from pprint import pprint
 import statistics
 
