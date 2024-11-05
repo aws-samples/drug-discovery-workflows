@@ -124,6 +124,12 @@ process GenerateCandidatesTask {
 
     echo "Generating sequences with proteinmpnn"
 
+    protein_mpnn_batch_size=8
+
+    if [ ${num_seq_designs_per_bb} -lt \${protein_mpnn_batch_size} ]; then
+        protein_mpnn_batch_size=${num_seq_designs_per_bb}
+    fi
+
     /opt/conda/bin/python3 /opt/proteinmpnn/protein_mpnn_run.py \
         --jsonl_path \$PATH_FOR_PARSED_CHAINS \
         --chain_id_jsonl \$PATH_FOR_ASSIGNED_CHAINS \
@@ -132,7 +138,7 @@ process GenerateCandidatesTask {
         --num_seq_per_target=${num_seq_designs_per_bb} \
         --out_folder "." \
         --sampling_temp "${proteinmpnn_sampling_temp}" \
-        --batch_size 8
+        --batch_size \${protein_mpnn_batch_size}
 
     /opt/conda/bin/python3 /opt/scripts/collect_designs.py \
         --scaffold_pdb=${scaffold_pdb} \
