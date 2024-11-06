@@ -4,16 +4,25 @@
 
 A collection of AWS HealthOmics workflows to accelerate drug discovery.
 
+## Workflow Catalog
+
+1. [Alphafold2-Monomer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-monomer): Predict the 3D structure of one or more single-chain proteins
+2. [Alphafold2-multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): Predict the 3D structure of multi-chain protein complexes.
+3. [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope.
+4. [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): Predict protein structures using ESMFold for one or more amino acid sequences.
+5. [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
+6. [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): Generate protein backbone structures and sequences given a binding target or other structural context.
+7. [AMPLIFY](https://github.com/chandar-lab/AMPLIFY): Efficient generation of sequence embeddings or pseudo-likelihood scores
+
 ## Deployment
 
-For individual deployments, you also can navigate to the README in `assets/workflows/<workflow-name>`. The following is currently a WIP, but will be the recommended way shortly!
+This repository contains Amazon CloudFormation templates and supporting resources to automatically deploy AWS HealthOmics private workflows into your AWS account. You are responsible for all costs associated with the deployed resources.
 
 ### Quick Start
 
 1. Clone this repository to your local environment.
 2. Authenticate into your AWS account of interest and `cd` into the project dir.
-3. Run the following command, replacing the placeholders with the name of a S3 bucket,
-desired stack name, and region:
+3. Run the following command, replacing the placeholders with the name of a S3 bucket, desired stack name, and region:
 
 ```bash
 bash scripts/deploy.sh \
@@ -102,12 +111,11 @@ Also see [.github/workflows](./.github/workflows/) for other linting tools that 
 The `scripts/testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
 
 Prerequisites:
-- S3 bucket with input data
-- S3 bucket to store outputs, can be the same as the input bucket
-- HealthOmics execution role with access to the buckets
 
+* S3 bucket with input data
+* S3 bucket to store outputs, can be the same as the input bucket
+* HealthOmics execution role with access to the buckets `testparams/rfdiffusion.params.json`:
 
-`testparams/rfdiffusion.params.json`:
 ```sh
 {
   "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb"
@@ -127,6 +135,7 @@ Example run with full argument list:
 ```
 
 Or create an `.aws/env` file to simplify the arguments:
+
 ```sh
 ACCOUNT_ID=123456789012
 REGION=us-east-1
@@ -135,6 +144,7 @@ OUTPUT_BUCKET=mybucket
 ```
 
 and then:
+
 ```sh
 ./scripts/testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
 ```
@@ -143,8 +153,9 @@ and then:
 
 We currently support three types of data sources:
 
-- s3: Records that begin with `s3` will be downloaded using the AWS CLI.
-- HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
-- Other: All other records will be downloaded using `wget` to an s3 mountpoint.
+* s3: Records that begin with `s3` will be downloaded using the AWS CLI.
+* HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
+* NVIDIA NGC: Records that begin with `nvidia` will be downloaded using the NCG CLI IF credentials are provided via the `-s` option in `delpoy.sh`.
+* Other: All other records will be downloaded using `wget` to an s3 mountpoint.
 
 The `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}. You can also reference your deployment S3 bucket with {{S3_BUCKET_NAME}} to access data downloaded during stack creation.
