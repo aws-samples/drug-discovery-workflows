@@ -30,6 +30,23 @@ To add a new module add the necessary files to the `assets` folder. There are th
 
 Many of the workflows in this repository require additional model weights or reference data. Please refer to the README files for each workflow in the `workflows/` folder.
 
+## Third Party Credentials
+
+Follow these steps to download data from third-party repositories:
+
+1. Obtain an API key or other credential with the necessary access to the data.
+2. Save the credentials in AWS Secrets Manager, for example:
+
+```bash
+aws secretsmanager create-secret \
+    --name MyDataCredentials \
+    --description "My data credentials." \
+    --secret-string "{\"API_KEY\":\"MyFakeKey\",\"ORG\":\"myfakeorg\"}"
+```
+
+3. Add your data uri to a new file in the `assets/data` folder.
+4. Run the deploy.sh script with the `-s` option and pass in your secret name (not the key or value) from step 1. CodeBuild will save these secret values as environment variables in the data download job.
+
 ### Infrastructure Diagram
 
 <!-- Not final form yet -->

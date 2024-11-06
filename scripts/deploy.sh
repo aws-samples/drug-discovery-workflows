@@ -15,13 +15,15 @@
 # -c Should CloudFormation deploy the containers?
 # -o Should CloudFormation deploy the workflows?
 # -d Should CloudFormation deploy the data?
+# -s AWS Secrets Manager secret name for 3rd party download credentialts
 #
 # Example CMD
 # ./deploy.sh \
 #   -b "my-deployment-bucket" \
 #   -n "my-aho-ddw-stack" \
 #   -r "us-east-1" \
-#   -w "Y"
+#   -w "Y" \
+#   -s "NGC_CREDS"
 
 set -e
 unset -v BUCKET_NAME STACK_NAME REGION TIMESTAMP WAITFORCODEBUILD
@@ -38,7 +40,7 @@ if ! command -v jq &>/dev/null; then
   exit 1
 fi
 
-while getopts 'b:e:n:r:w:c:o:d:' OPTION; do
+while getopts 'b:e:n:r:w:c:o:d:s:' OPTION; do
   case "$OPTION" in
   b) BUCKET_NAME="$OPTARG" ;;
   n) STACK_NAME="$OPTARG" ;;
@@ -47,6 +49,7 @@ while getopts 'b:e:n:r:w:c:o:d:' OPTION; do
   c) DEPLOYCONTAINERS="$OPTARG" ;;
   o) DEPLOYWORKFLOWS="$OPTARG" ;;
   d) DEPLOYDATA="$OPTARG" ;;
+  s) SECRETNAME="$OPTARG" ;;
   *) exit 1 ;;
   esac
 done
@@ -57,6 +60,7 @@ done
 [ -z "$DEPLOYCONTAINERS" ] && { DEPLOYCONTAINERS="Y"; }
 [ -z "$DEPLOYWORKFLOWS" ] && { DEPLOYWORKFLOWS="Y"; }
 [ -z "$DEPLOYDATA" ] && { DEPLOYDATA="Y"; }
+[ -z "$SECRETNAME" ] && { SECRETNAME=""; }
 
 zip -r build/code.zip build assets -x .\*/\* -x tests
 aws s3 cp build/code.zip s3://$BUCKET_NAME/build/code/code.zip
@@ -69,7 +73,8 @@ aws cloudformation deploy --template-file build/cloudformation/packaged.yaml \
   --capabilities CAPABILITY_NAMED_IAM --stack-name $STACK_NAME --region $REGION \
   --parameter-overrides S3BucketName=$BUCKET_NAME Timestamp=$TIMESTAMP \
   WaitForCodeBuild=$WAITFORCODEBUILD Environment=$ENVIRONMENT \
-  DeployContainers=$DEPLOYCONTAINERS DeployWorkflows=$DEPLOYWORKFLOWS DeployData=$DEPLOYDATA
+  DeployContainers=$DEPLOYCONTAINERS DeployWorkflows=$DEPLOYWORKFLOWS DeployData=$DEPLOYDATA \
+  SecretName=$SECRETNAME
 aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION |
   jq -r '.Stacks[0].Outputs' |
   tee stack-outputs.json |

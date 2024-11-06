@@ -36,6 +36,10 @@ Parameters:
     Type: String
     Default: "Y"
     AllowedValues: [Y, N]
+  SecretName:
+    Description: AWS Secrets Manager secret name containing 3rd party data download credentials
+    Type: String
+    Default: ""
 
 Conditions:
   DoContainerBuild: !Equals [!Ref DeployContainers, "Y"]
@@ -110,6 +114,7 @@ Resources:
               ],
             ],
           ]
+        SecretName: !Ref SecretName
 
 Outputs:
   ApplicationName:
