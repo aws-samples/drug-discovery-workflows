@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.1] - 2024-11-06
+
+### 2.3.1 Added
+
+- Added support 3rd party data download credentials.
+
+---
+
 ## [2.3.0] - 2024-11-06
 
 ### 2.3.0 Added
