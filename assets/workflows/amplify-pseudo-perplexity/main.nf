@@ -9,14 +9,14 @@ workflow AMPLIFY {
 
     main:
     fasta_path.view()
-    AMPLIFYTask(fasta_path, model_parameters)
-    AMPLIFYTask.out.ppl_results.set { ppl_results }
+    PPLTask(fasta_path, model_parameters)
+    PPLTask.out.ppl_results.set { ppl_results }
 
     emit:
     ppl_results
 }
 
-process AMPLIFYTask {
+process PPLTask {
     label 'ppl'
     cpus 4
     memory '16 GB'
