@@ -8,6 +8,10 @@ include {
     ESMFold
 } from '../esmfold/main'
 
+include {
+    AMPLIFY
+} from '../amplify-pseudo-perplexity/main'
+
 workflow DesignNanobodies {
     take:
     target_pdb
@@ -23,6 +27,7 @@ workflow DesignNanobodies {
     proteinmpnn_model_name
     esmfold_max_records_per_partition
     esmfold_model_parameters
+    amplify_model_parameters
 
     main:
     RFDiffusionProteinMPNN(
@@ -49,7 +54,14 @@ workflow DesignNanobodies {
 
     ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
 
-    CollectResultsTask(generated_jsonl, combined_esmfold_metrics)
+    AMPLIFY(
+        generated_fasta,
+        amplify_model_parameters
+    )
+
+    AMPLIFY.out.ppl_results.set { ppl_results }
+
+    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results)
     CollectResultsTask.out.results.collect().set { results_ch }
 
     emit:
@@ -66,6 +78,7 @@ process CollectResultsTask {
     input:
     path generation_results
     path esmfold_results
+    path ppl_results
 
     output:
     path 'results.jsonl', emit: results
@@ -75,9 +88,11 @@ process CollectResultsTask {
     set -euxo pipefail
     echo ${generation_results}
     echo ${esmfold_results}
+    echo ${ppl_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
         --generation_results ${generation_results} \
-        --esmfold_results ${esmfold_results}
+        --esmfold_results ${esmfold_results} \
+        --ppl_results ${ppl_results}
     """
 }
 
@@ -95,6 +110,7 @@ workflow {
         Channel.fromPath(params.proteinmpnn_params),
         Channel.value(params.proteinmpnn_model_name),
         Channel.value(params.esmfold_max_records_per_partition),
-        Channel.fromPath(params.esmfold_model_parameters)
+        Channel.fromPath(params.esmfold_model_parameters),
+        Channel.fromPath(params.amplify_model_parameters)
     )
 }
