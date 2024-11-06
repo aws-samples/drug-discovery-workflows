@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2024-11-06
+
+### 2.3.0 Added
+
+- Added support for zero-shot pseudo-perplexity calculation with the AMPLIFY pLM.
+
+---
+
 ## [2.2.1] - 2024-11-05
 
 ### 2.2.1 Fixed
