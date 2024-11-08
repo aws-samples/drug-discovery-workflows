@@ -1,0 +1,6 @@
+{
+    "input_fasta": "s3://hodgkin-spt-data-us-east-1/test_data/alphaseq_binding/test_de_mitll_aalpha_1seed.fasta",
+    "preserved_regions": "None",
+    "plm_model_files": "s3://hodgkin-spt-data-us-east-1/static_data/huggingface/facebook/esm2_t6_8M_UR50D/",
+    "onehotcnn_model_files": "s3://hodgkin-spt-data-us-east-1/test_data/alphaseq_binding/ml_splits/20241030_onehotcnn_mitll/"
+}
