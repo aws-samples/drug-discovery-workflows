@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.2] - 2024-11-08
+
+### 2.3.2 Added
+
+- Added predicted structure / scaffold RMSD as output for nanobody design workflow.
+
+---
+
 ## [2.3.1] - 2024-11-06
 
 ### 2.3.1 Added
