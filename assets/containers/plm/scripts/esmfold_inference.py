@@ -68,7 +68,7 @@ def predict_structures(
             os.makedirs(output_dir)
 
         output_file = os.path.join(output_dir, seq.name + ".pdb")
-        header_str = f"REMARK 1\t{seq.name}\n"
+        header_str = f"REMARK   1\nREMARK   1 {seq.name}\n"
         with open(output_file, "w") as f:
             f.write(header_str)
             f.write(pdb_string)
