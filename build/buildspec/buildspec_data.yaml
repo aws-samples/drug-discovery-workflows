@@ -12,7 +12,7 @@ phases:
       - echo Build started on `date` for $NAME
       - echo "Loading secrets from AWS Secrets Manager"
       - echo $SECRET_NAME
-      - aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text > secrets.json
+      - aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text > secrets.json 2>/dev/null || true
       - |
         function export_json_to_env () {
           INPUT_FILE="${1}"
