@@ -28,4 +28,3 @@ ENV TMPDIR="/tmp"
 COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
-# ENTRYPOINT ["python", "directed_evolution.py"]  # removing ENTRYPOINT to use this container with nf-aho
