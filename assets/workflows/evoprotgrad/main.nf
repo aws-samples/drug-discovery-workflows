@@ -31,8 +31,8 @@ workflow EvoProtGrad {
 
 process RunDirectedEvolutionTask {
     label 'evoprotgrad'
-    cpus 8
-    memory '30 GB'
+    cpus 4
+    memory '16 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-tesla-a10g'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"

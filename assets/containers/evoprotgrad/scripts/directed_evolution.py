@@ -182,7 +182,7 @@ def run_evo_prot_grad(args):
 
     expert_list = get_expert_list(args)
 
-    if args.preserved_regions:
+    if args.preserved_regions != "None":
         list_of_strings = args.preserved_regions.split(" ")
         preserved_regions = [
             tuple(map(int, region.split(","))) for region in list_of_strings
