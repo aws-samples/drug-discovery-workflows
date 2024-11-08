@@ -1,4 +1,5 @@
 biopython
+biotite
 jsonlines
 numpy
 pandas

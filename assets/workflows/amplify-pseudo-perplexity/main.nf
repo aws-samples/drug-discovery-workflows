@@ -8,7 +8,6 @@ workflow AMPLIFY {
     model_parameters
 
     main:
-    fasta_path.view()
     PPLTask(fasta_path, model_parameters)
     PPLTask.out.ppl_results.set { ppl_results }
 

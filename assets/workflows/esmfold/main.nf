@@ -8,7 +8,6 @@ workflow ESMFold {
     esmfold_model_parameters
 
     main:
-    fasta_path.view()
     ESMFoldTask(fasta_path, esmfold_model_parameters)
     ESMFoldTask.out.pdb.set { pdb }
     ESMFoldTask.out.tensors.set { tensors }

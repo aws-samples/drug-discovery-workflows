@@ -53,6 +53,8 @@ workflow DesignNanobodies {
         )
 
     ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
+    ESMFold.out.pdb.set { esmfold_pdb }
+
 
     AMPLIFY(
         generated_fasta,
@@ -61,11 +63,40 @@ workflow DesignNanobodies {
 
     AMPLIFY.out.ppl_results.set { ppl_results }
 
-    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results)
+    AdditionalResultsTask(scaffold_pdb, esmfold_pdb)
+    AdditionalResultsTask.out.additional_results.collect().set { additional_results }
+
+    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results, additional_results)
     CollectResultsTask.out.results.collect().set { results_ch }
 
     emit:
     results_ch
+}
+
+process AdditionalResultsTask {
+    label 'utility'
+    cpus 2
+    memory '4 GB'
+    maxRetries 1
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+
+    input:
+    path scaffold_pdb
+    path predicted_pdb
+    
+    output:
+    path '*.jsonl', emit: additional_results
+
+    script:
+    """
+    set -euxo pipefail
+    echo ${scaffold_pdb}
+    echo ${predicted_pdb}
+
+    /opt/venv/bin/python /home/putils/src/putils/calculate_scaffold_rmsd.py \
+        --scaffold_pdb ${scaffold_pdb} \
+        --predicted_pdb "${predicted_pdb}"
+    """
 }
 
 process CollectResultsTask {
@@ -79,6 +110,7 @@ process CollectResultsTask {
     path generation_results
     path esmfold_results
     path ppl_results
+    path additional_results
 
     output:
     path 'results.jsonl', emit: results
@@ -89,10 +121,12 @@ process CollectResultsTask {
     echo ${generation_results}
     echo ${esmfold_results}
     echo ${ppl_results}
+    echo ${additional_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
         --generation_results ${generation_results} \
         --esmfold_results ${esmfold_results} \
-        --ppl_results ${ppl_results}
+        --ppl_results ${ppl_results} \
+        --additional_results ${additional_results}
     """
 }
 
