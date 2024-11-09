@@ -14,6 +14,7 @@ workflow EvoProtGrad {
     wtseq_ch = input_fasta
         .splitFasta(record: [id: true, seqString: true])
         .filter ( record -> record.seqString.size() > 0 )
+
     RunDirectedEvolutionTask(
         wtseq_ch,
         plm_model_files,

@@ -2,17 +2,12 @@
 # Modifications Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 import argparse
-import json
 import os
 import logging
-from tqdm import tqdm
 
 import torch
 import evo_prot_grad
-from transformers import AutoModel, EsmForMaskedLM, AutoModelForMaskedLM, AutoTokenizer
-import numpy as np
-from typing import List, Tuple, Optional
-import pandas as pd
+from transformers import AutoModel, EsmForMaskedLM, AutoTokenizer
 from s3_utils import download_s3_folder
 
 logging.basicConfig(
@@ -75,7 +70,7 @@ def _parse_args():
     parser.add_argument(
         "--preserved_regions",
         help="Regions not to mutate, list of tuples",
-        default='',
+        default="",
         type=str,
     )
     return parser.parse_known_args()
@@ -100,9 +95,9 @@ def get_expert_list(args):
             plm_mdl_dir = os.path.join(os.environ["TMPDIR"], "plm_model")
             if not os.path.exists(plm_mdl_dir):
                 os.mkdir(plm_mdl_dir)
-            print("Downloading pLM model files from s3 to", plm_mdl_dir)
+            logging.info("Downloading pLM model files from s3 to", plm_mdl_dir)
             download_s3_folder(args.plm_expert_name_or_path, plm_mdl_dir)
-            print(os.listdir(plm_mdl_dir))
+            logging.info(os.listdir(plm_mdl_dir))
         else:
             plm_mdl_dir = args.plm_expert_name_or_path
         # Load the pLM model and tokenizer as the expert
@@ -151,9 +146,9 @@ def get_expert_list(args):
             scorer_mdl_dir = os.path.join(os.environ["TMPDIR"], "scorer_model")
             if not os.path.exists(scorer_mdl_dir):
                 os.mkdir(scorer_mdl_dir)
-            print("Downloading scorer model files from s3 to", scorer_mdl_dir)
+            logging.info("Downloading scorer model files from s3 to", scorer_mdl_dir)
             download_s3_folder(args.scorer_expert_name_or_path, scorer_mdl_dir)
-            print(os.listdir(scorer_mdl_dir))
+            logging.info(os.listdir(scorer_mdl_dir))
         else:
             scorer_mdl_dir = args.scorer_expert_name_or_path
         scorer_expert = evo_prot_grad.get_expert(
@@ -172,13 +167,6 @@ def run_evo_prot_grad(args):
     """
     Run the specified expert pipeline on the seed sequence to evolve it.
     """
-    # raw_protein_sequence = args.seed_seq
-    # fasta_format_sequence = f">Input_Sequence\n{raw_protein_sequence}"
-
-    # # write the mock FASTA string to a temporary file
-    # temp_fasta_path = "./temp_input_sequence.fasta"
-    # with open(temp_fasta_path, "w") as file:
-    #     file.write(fasta_format_sequence)
 
     expert_list = get_expert_list(args)
 
@@ -193,7 +181,6 @@ def run_evo_prot_grad(args):
 
     # Initialize Directed Evolution with the specified experts
     directed_evolution = evo_prot_grad.DirectedEvolution(
-        # wt_fasta=temp_fasta_path,
         wt_protein=args.seed_seq,
         output=args.output_type,
         experts=expert_list,
@@ -203,7 +190,6 @@ def run_evo_prot_grad(args):
         verbose=args.verbose,
         preserved_regions=preserved_regions,
     )
-    # print(dir(directed_evolution))
     # Run the evolution process
     variants, scores = directed_evolution()
     # Write results to file
@@ -213,11 +199,12 @@ def run_evo_prot_grad(args):
         scores=scores,
         n_seqs_to_keep=None,  # keep all
     )
+    return None
 
 
 if __name__ == "__main__":
     args, _ = _parse_args()
-    print(args)
+    logging.info(args)
     # Run directed evolution
     run_evo_prot_grad(args)
-    print(f"DE results and params saved to {args.output_path}")
+    logging.info(f"DE results and params saved to {args.output_path}")
