@@ -28,3 +28,4 @@ ENV TMPDIR="/tmp"
 COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
+ENTRYPOINT []
