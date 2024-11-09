@@ -1,5 +1,5 @@
 name: EvoProtGrad
-description: "This workflow generates variations of a given protein amino acid sequence given one or more "expert" models."
+description: "This workflow generates variations of a given protein amino acid sequence given one or more 'expert' models."
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
