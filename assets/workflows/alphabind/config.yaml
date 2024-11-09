@@ -1,0 +1,36 @@
+name: AlphaBind for Directed Evolution
+description: "Directed Evolution with AlphaBind to optimize antibody binding affinity."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_training_data: 
+    description: "S3 URI of input file."
+    optional: false
+  max_epochs:
+    description: "max number of epochs."
+    optional: false
+  seed_sequence:
+    description: "The full sequence of the protein of interest. This is the sequence that gets modified. Assigned to sequence_a automatically."
+    optional: false
+  mutation_start_idx: 
+    description: 0-indexed start position of the mutation window.
+    optional: false
+  mutation_end_idx: 
+    description: End position of the mutation window. Is inclusive.
+    optional: false
+  target_protein_sequence:
+    description: "Target antigen protein sequence."
+    optional: false
+  num_seeds: 
+    description: "Number of copies of the seed sequence to optimize."
+    optional: false
+  num_generations: 
+    description: "Number of proposed steps per sequence. For N generations, there will be N proposal/acceptance steps attempted."
+    optional: false
+  generator_type: 
+    description: "Sequence mutation strategy to use during optimization. Options: random, esm-random, esm-simultaneous-random."
+    optional: false
+  
+storageCapacity: 1200
+tags:
+  Name: "DirectedEvolution"
