@@ -173,6 +173,7 @@ process PretrainedOpenFoldMonomer {
         --output_dir ./output \
         --model_device cuda:0 \
         --openfold_checkpoint_path ${openfold_checkpoint}/finetuning_ptm_2.pt
+
     tree .
 
     """

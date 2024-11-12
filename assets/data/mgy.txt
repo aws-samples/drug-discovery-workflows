@@ -1,2 +1,0 @@
-s3://omics-{{REGION}}/alphafold_multimer/mgy/
-https://storage.googleapis.com/alphafold-databases/v2.3/mgy_clusters_2022_05.fa.gz
