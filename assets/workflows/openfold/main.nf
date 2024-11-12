@@ -31,7 +31,7 @@ workflow {
     } | last
 
     // Should be run once
-    PretrainedOpenFold(
+    PretrainedOpenFoldMonomer(
         params.fasta_dir,
         params.pdb_mmcif_files,
         merged_aligned_dir_chan,
@@ -123,7 +123,7 @@ process PrecomputeAlignments {
     """
 }
 
-process PretrainedOpenFold {
+process PretrainedOpenFoldMonomer {
     label 'openfold'
     cpus 32
     memory '128 GB'
@@ -152,7 +152,7 @@ process PretrainedOpenFold {
     tree .
 
     tree ${fasta_dir}
-    tree ${pdb_mmcif_files}
+    # tree ${pdb_mmcif_files}
     tree ${openfold_checkpoint}
 
     pushd ${pdb_mmcif_files}
@@ -173,6 +173,7 @@ process PretrainedOpenFold {
         --output_dir ./output \
         --model_device cuda:0 \
         --openfold_checkpoint_path ${openfold_checkpoint}/finetuning_ptm_2.pt
+
     tree .
 
     """
