@@ -131,6 +131,7 @@ Example run with full argument list:
 -r us-east-1 \
 -o "arn:aws:iam::123456789012:role/healthomics-dev-role" \
 -b mybucket \
+-f mydeployrefbucket \
 -p file://testparams/rfdiffusion.params.json
 ```
 
@@ -141,12 +142,15 @@ ACCOUNT_ID=123456789012
 REGION=us-east-1
 OMICS_EXECUTION_ROLE=arn:aws:iam::123456789012:role/healthomics-dev-role
 OUTPUT_BUCKET=mybucket
+REF_DATA_BUCKET=my-deployment-bucket
 ```
+
+`REF_DATA_BUCKET` should be the same bucket you specified during the CloudFormation deployment: `deploy.sh -b "my-deployment-bucket"`.
 
 and then:
 
 ```sh
-./scripts/testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
+./scripts/testrun.sh -w rfdiffusion -p "file://testparams/rfdiffusion.params.json"
 ```
 
 `s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
