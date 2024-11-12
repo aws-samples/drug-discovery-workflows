@@ -1,3 +1,3 @@
 {
-  "fasta_dir": "s3://bioteam-compchem-test-inputs/openfold/fasta/"
+  "fasta_dir": "s3://my-input-bucket/openfold/fasta/"
 }
