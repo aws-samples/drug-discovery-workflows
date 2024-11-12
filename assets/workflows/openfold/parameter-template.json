@@ -3,40 +3,20 @@
     "optional": true,
     "description": "mmseq db"
   },
-  "uniref90": {
-    "optional": true,
-    "description": "uniref90"
-  },
-  "uniref30": {
-    "optional": true,
-    "description": "uniref30"
-  },
-  "mgnify": {
-    "optional": true,
-    "description": "mgnify"
-  },
   "pdb70": {
     "optional": true,
     "description": "pdb70"
-  },
-  "uniclust30": {
-    "optional": true,
-    "description": "uniclust30"
-  },
-  "bfd": {
-    "optional": true,
-    "description": "bfd"
   },
   "openfold_checkpoint": {
     "optional": true,
     "description": "openfold_checkpoint"
   },
-  "fasta_dir": {
-    "optional": false,
-    "description": "fasta_dir"
-  },
   "pdb_mmcif_files": {
     "optional": true,
     "description": "pdb_mmcif_files"
+  },
+  "fasta_dir": {
+    "optional": false,
+    "description": "fasta_dir"
   }
 }
