@@ -1,0 +1,12 @@
+name: AMPLIFY Pseudo Perplexity
+description: "This workflow calculates the pseudo perplexity of one or more protein sequences using the AMPLIFY pLM."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "AMPLIFYPPL"
+accelerators: GPU

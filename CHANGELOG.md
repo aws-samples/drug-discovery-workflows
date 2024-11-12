@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.3] - 2024-11-08
+
+### 2.3.3 Fixed
+
+- Fixed issue that caused all CodeBuild data jobs to fail without 3rd party credentials.
+
+---
+
+## [2.3.2] - 2024-11-08
+
+### 2.3.2 Added
+
+- Added predicted structure / scaffold RMSD as output for nanobody design workflow.
+
+---
+
+## [2.3.1] - 2024-11-06
+
+### 2.3.1 Added
+
+- Added support 3rd party data download credentials.
+
+---
+
+## [2.3.0] - 2024-11-06
+
+### 2.3.0 Added
+
+- Added support for zero-shot pseudo-perplexity calculation with the AMPLIFY pLM.
+
+---
+
+## [2.2.1] - 2024-11-05
+
+### 2.2.1 Fixed
+
+- Fixed issue where specifying fewer ProteinMPNN results than the batch size produces no sequences.
+
+---
+
+## [2.2.0] - 2024-10-29
+
+### 2.2.0 Added
+
+- Added ProteinMPNN to RFDiffusion workflow
+- Added higher-level nanobody design recipe
+
+---
+
 ## [2.1.1] - 2024-10-15
 
 ### 2.1.1 Changed

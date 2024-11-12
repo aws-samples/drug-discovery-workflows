@@ -1,5 +1,7 @@
-pandas
-numpy
 biopython
+biotite
+jsonlines
+numpy
+pandas
 pyfastx
 tqdm

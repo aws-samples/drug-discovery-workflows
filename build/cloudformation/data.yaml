@@ -24,11 +24,15 @@ Parameters:
     Description: Should CloudFormation wait for CodeBuild?
     Type: String
     Default: "N"
-    AllowedValues: [Y, N]    
+    AllowedValues: [Y, N]
+  SecretName:
+    Description: AWS Secrets Manager secret name containing 3rd party data download credentials
+    Type: String
+    Default: ""
 
 Conditions:
   WaitForCodeBuildCondition:
-    "Fn::Equals": [Ref: "WaitForCodeBuild", "Y"]     
+    "Fn::Equals": [Ref: "WaitForCodeBuild", "Y"]
 
 Resources:
   EncryptionKey:
@@ -152,6 +156,11 @@ Resources:
                   - codebuild:StartBuild
                 Resource:
                   - !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/${StackPrefix}-CodeBuildDataProject"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${SecretName}-*"
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -179,6 +188,8 @@ Resources:
             Value: !Join ["/", ["s3:/", !Ref S3BucketName, "ref-data"]]
           - Name: WAIT_CONDITION_HANDLE
             Value: !Ref CodeBuildWaitHandle
+          - Name: SECRET_NAME
+            Value: !Ref SecretName          
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
@@ -268,11 +279,11 @@ Resources:
 
   CodeBuildWaitCondition:
     Type: AWS::CloudFormation::WaitCondition
-    Condition: WaitForCodeBuildCondition    
+    Condition: WaitForCodeBuildCondition
     Properties:
       Handle: !Ref CodeBuildWaitHandle
       Timeout: 28800
-      Count: !GetAtt StartCodeBuildData.ArtifactCount    
+      Count: !GetAtt StartCodeBuildData.ArtifactCount
 
 Outputs:
   CodeBuildDataProject:

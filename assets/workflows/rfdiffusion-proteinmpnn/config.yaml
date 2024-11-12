@@ -1,0 +1,26 @@
+name: RFDiffusion
+description: "Generate proteins with the RFDiffusion+ProteinMPNN algorithms."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  target_pdb: 
+    description: "S3 URI of target PDB file."
+    optional: false
+  hotspot_residues:
+    description: "RFDiffusion hotspot residues indices. See https://github.com/RosettaCommons/RFdiffusion/tree/main?tab=readme-ov-file#binder-design for more information."
+    optional: false
+  scaffold_pdb:
+    description: "S3 URI of scaffold PDB file."
+    optional: false
+  num_bb_designs_per_target:
+    description: "(Optional) Number of protein backbone designs per input target (Default: 3)."
+    optional: true
+  num_seq_designs_per_bb:
+    description: "(Optional) Number of protein sequence designs per backbone design (Default: 10)."
+    optional: true
+  proteinmpnn_sampling_temp:
+    description: "(Optional) Sampling temperature for ProteinMPNN (Default: 0.1)."
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "RFDiffusion"
