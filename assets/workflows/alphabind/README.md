@@ -19,28 +19,7 @@ aws secretsmanager create-secret \
     --secret-string "{\"NGC_CLI_API_KEY\":\"<YourAPIKey>\",\"NGC_CLI_ORG\":\"<YourNGCSignUpOrganization>\"}"
 ```
 
-### Step 2: Download AlphaBind code base and model checkpoint 
-
-Check out AlphaBind code base, and copy the entire `alphabind` folder to `assets/containers/alphabind` folder:
-```txt
-assets/
-└──containers/
-    ├── alphabind
-           ├── Dockerfile
-           └── alphabind <-- this is the folder you copied from AlphaBind Github repo.
-```
-
-Download AlphaBind model checkpoint, and upload it to an Amazon S3 bucket, grab the file [S3 URI](https://repost.aws/questions/QUFXlwQxxJQQyg9PMn2b6nTg/what-is-s3-uri-in-simple-storage-service), open your preferred code editor, and add the S3 URI for checkpoint file in nextflow.config file. So your `assets/workflows/alphabind/nextflow.config` will look like:
-```txt
-params {
-    aws_region = "us-east-1" // set default region
-    tx_model_path = "s3://yours3bucket/aalphabio/models/alphabind_pretrained_checkpoint.pt"
-    esm2nv_path = "s3://{{S3_BUCKET_NAME}}/ref-data/alphabind_parameters/esm2nv3b_v1.0/esm2nv_3B_converted.nemo"
-    tokenizer_path = "s3://{{S3_BUCKET_NAME}}/ref-data/alphabind_parameters/facebook/"
-}
-```
-
-### Step 3: Deploy the stack to create the container and AWS HealthOmics workflow
+### Step 2: Deploy the stack to create the container and AWS HealthOmics workflow
 
 You can deploy the stack using the following script:
 
@@ -48,7 +27,7 @@ You can deploy the stack using the following script:
 bash scripts/deploy.sh   -b "<DeploymentS3BucketName>"   -n "<CloudFormationStackName>"   -r "<AWS Region>" -s "<YourSecretName>"
 ```
 
-### Step 4: Run a workflow
+### Step 3: Run a workflow
 Create an IAM role to run HealthOmics jobs, and set up value of `$ROLEARN` to this role ARN. Replace `$OUTPUTLOC` with the S3 folder created for output files like `s3://{mybucket}/alphabind/output/`. Also create a new `params.json` to point to the processed binding affinity data to fine tune AlphaBind model, like:
 ```txt
 {

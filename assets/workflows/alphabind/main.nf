@@ -5,7 +5,6 @@ workflow {
     TrainAlphaBind(
         params.input_training_data,
         params.esm2nv_path,
-        params.tx_model_path,
         params.tokenizer_path,
         params.max_epochs
     )
@@ -34,7 +33,6 @@ process TrainAlphaBind {
     input:
         path input_training_data
         path esm2nv_path
-        path tx_model_path
         path tokenizer_path
         val max_epochs
 
@@ -53,7 +51,7 @@ process TrainAlphaBind {
     cp ${esm2nv_path} /workspace/bionemo/models/
     mkdir embeddings model
     python -m alphabind.features.build_features --input_filepath ${input_training_data} --output_filepath train_data_featurized.csv --embedding_dir_path ./embeddings/
-    python -m alphabind.models.train_model --dataset_csv_path train_data_featurized.csv --tx_model_path ${tx_model_path} --max_epochs ${max_epochs} --output_model_path model/alphabind_trained_model.pt
+    python -m alphabind.models.train_model --dataset_csv_path train_data_featurized.csv --tx_model_path /workspace/bionemo/alphabind/alphabind/models/alphabind_pretrained_checkpoint.pt --max_epochs ${max_epochs} --output_model_path model/alphabind_trained_model.pt
     """
 }
 
