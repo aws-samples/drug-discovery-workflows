@@ -1,2 +1,2 @@
-facebook/esm2_t36_3B_UR50D
 nvidia/clara/esm2nv3b:1.0
+https://github.com/A-Alpha-Bio/alphabind/raw/refs/heads/main/alphabind/models/alphabind_pretrained_checkpoint.pt

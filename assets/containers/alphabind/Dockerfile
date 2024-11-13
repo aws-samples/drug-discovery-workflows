@@ -12,3 +12,5 @@ RUN set -o pipefail \
     && python -m build \
     && python -m pip list --format freeze | egrep "torch|nvidia|cuda" > constraints.txt \
     && python -m pip install --no-cache-dir -c constraints.txt ./dist/alphabind-*-py3-*.whl
+
+ENTRYPOINT []
