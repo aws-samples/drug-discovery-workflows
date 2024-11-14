@@ -1,0 +1,18 @@
+name: EquiFold
+description: "This workflow predicts the 3D structures for one or more protein amino acid sequences using the EquiFold SE(3)-equivariant, all-atom protein structure prediction model."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_csv:
+    description: "CSV file containing the protein sequences to predict structure for."
+    optional: false
+  model:
+    description: "The type of protein to predict structure for, can be of value ['ab', 'science']."
+    optional: false
+  ncpu:
+    description: "Number of CPU for parallel preprocessing of the data."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "EquiFold"
+accelerators: GPU
