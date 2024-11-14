@@ -1,0 +1,2 @@
+nvidia/clara/esm2nv3b:1.0
+facebook/esm2_t36_3B_UR50D

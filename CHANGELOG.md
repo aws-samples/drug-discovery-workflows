@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.3] - 2024-11-08
 
+### 2.3.3 Added
+
+- Added AlphaBind antibody optimization workflow.
+
 ### 2.3.3 Fixed
 
 - Fixed issue that caused all CodeBuild data jobs to fail without 3rd party credentials.

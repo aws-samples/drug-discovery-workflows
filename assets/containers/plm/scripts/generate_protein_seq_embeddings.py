@@ -52,12 +52,16 @@ def generate_embeddings(
     ):
         print(f"Batch {n+1} of {total_batches}")
         inputs = tokenizer(
-            batch, return_tensors="pt", truncation=True, padding=True, max_length=1024
+            batch, return_tensors="pt", 
+            return_attention_mask=False, # avoid dtype error on attention_mask for AMPLIFY
+            truncation=True, padding=True, max_length=1024
         ).to(device)
         with torch.inference_mode():
-            predictions = model(**inputs)
+            predictions = model(**inputs, output_hidden_states=True)
+        # take last hidden state as embedding
+        per_token_emb = predictions['hidden_states'][-1] 
         # Return mean embeddings after removing <cls> and <eos> tokens and converting to numpy.
-        tmp.append(predictions.last_hidden_state[:, 1:-1, :].cpu().numpy().mean(axis=1))
+        tmp.append(per_token_emb[:, 1:-1, :].cpu().numpy().mean(axis=1))
     output = np.vstack(tmp)
     print(f"Output shape: {output.shape}")
     print(f"Saving embeddings to {output_file}")
