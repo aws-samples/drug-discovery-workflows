@@ -1,0 +1,30 @@
+name: EvoProtGrad
+description: "This workflow generates variations of a given protein amino acid sequence given one or more 'expert' models."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_fasta:
+    description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
+    optional: false
+  plm_model_files:
+    description: "S3 URI of folder containinng plm model files"
+    optional: true
+  parallel_chains:
+    description: "Number of parallel generation chains. Default is 10."
+    optional: true
+  n_steps:
+    description: "Number of steps to run directed evolution. Default is 100."
+    optional: true     
+  max_mutations:
+    description: "maximum mutation distance from WT, disable by setting to -1. Default is -1."
+    optional: true       
+  output_type:
+    description: "Either 'best', 'last' or 'all'. Default is 'all'."
+    optional: true     
+  preserved_regions:
+    description: "List of (start,end) tuples for preserved regions, e.g. '1,5 6,10 55,97'."
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "EvoProtGrad"
+accelerators: GPU

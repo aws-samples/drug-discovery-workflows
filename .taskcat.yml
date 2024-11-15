@@ -4,14 +4,14 @@
 project:
   name: aho-drug-discovery-workflows
   package_lambda: false
-  s3_bucket: ddw-deployment-588738610715
+  s3_bucket: ddw-deployment-588738610715-ue2
   regions:
-    - us-east-1
+    - us-east-2
   parameters:
     ApplicationName: "aho-ddw-taskcat"
-    S3BucketName: "ddw-deployment-588738610715"
+    S3BucketName: "ddw-deployment-588738610715-ue2"
     WaitForCodeBuild: "Y"
-    DeployContainer: "Y"
+    DeployContainer: "N"
     DeployWorkflow: "Y"
     DeployData: "N"
 tests:
