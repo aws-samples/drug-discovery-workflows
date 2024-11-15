@@ -4,10 +4,12 @@
 import argparse
 import os
 import logging
-
+import re
+import pyfastx
 import torch
 import evo_prot_grad
 from transformers import AutoModel, EsmForMaskedLM, AutoTokenizer
+from tempfile import TemporaryFile
 from s3_utils import download_s3_folder
 
 logging.basicConfig(
@@ -20,9 +22,9 @@ logging.basicConfig(
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("seed_seq", help="Seed sequence to evolve", type=str)
-    parser.add_argument(
-        "seed_id", help="Id for the seed sequence, used to name output file", type=str
-    )
+    # parser.add_argument(
+    #     "seed_id", help="Id for the seed sequence, used to name output file", type=str
+    # )
     parser.add_argument("output_path", help="file path for output files", type=str)
     parser.add_argument(
         "--plm_expert_name_or_path",
@@ -163,6 +165,11 @@ def get_expert_list(args):
     return expert_list
 
 
+def parse_fasta_string(fasta):
+    m = re.match(r"^>([A-Za-z0-9_\-]*).*\n(.*)", fasta)
+    return m.group(1), m.group(2)
+
+
 def run_evo_prot_grad(args):
     """
     Run the specified expert pipeline on the seed sequence to evolve it.
@@ -179,9 +186,11 @@ def run_evo_prot_grad(args):
     else:
         preserved_regions = None
 
+    seed_id, seed_seq = parse_fasta_string(args.seed_seq)
+
     # Initialize Directed Evolution with the specified experts
     directed_evolution = evo_prot_grad.DirectedEvolution(
-        wt_protein=args.seed_seq,
+        wt_protein=seed_seq,
         output=args.output_type,
         experts=expert_list,
         parallel_chains=args.parallel_chains,
@@ -194,7 +203,7 @@ def run_evo_prot_grad(args):
     variants, scores = directed_evolution()
     # Write results to file
     directed_evolution.save_results(
-        csv_filename=os.path.join(args.output_path, f"{args.seed_id}_de_results.csv"),
+        csv_filename=os.path.join(args.output_path, f"{seed_id}_de_results.csv"),
         variants=variants,
         scores=scores,
         n_seqs_to_keep=None,  # keep all

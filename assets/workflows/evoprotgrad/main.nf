@@ -11,10 +11,9 @@ workflow EvoProtGrad {
     max_mutations
 
     main:
-    wtseq_ch = input_fasta
-        .splitFasta(record: [id: true, seqString: true])
-        .filter ( record -> record.seqString.size() > 0 )
-
+    wtseq_ch = input_fasta.splitFasta()
+        
+    wtseq_ch.view()
     RunDirectedEvolutionTask(
         wtseq_ch,
         plm_model_files,
@@ -24,7 +23,7 @@ workflow EvoProtGrad {
         n_steps,
         max_mutations
     )
-    RunDirectedEvolutionTask.out.csvs.set { csv_ch }
+    RunDirectedEvolutionTask.out.csvs.collectFile(name:'results.csv', keepHeader: true, skip: 1).set { csv_ch }
 
     emit:
     csv_ch
@@ -39,7 +38,7 @@ process RunDirectedEvolutionTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-        tuple val(wtseq_id), val(wtseq)
+        each wtseq
         path plm_model_files
         val preserved_regions
         val output_type
@@ -54,8 +53,7 @@ process RunDirectedEvolutionTask {
     """
     set -euxo pipefail
     mkdir output
-    /opt/conda/bin/python /home/scripts/directed_evolution.py ${wtseq} \
-        "${wtseq_id}" \
+    /opt/conda/bin/python /home/scripts/directed_evolution.py '${wtseq}' \
         output/ \
         --plm_expert_name_or_path=${plm_model_files} \
         --preserved_regions ${preserved_regions} \
