@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2024-11-16
+
+### 2.4.0 Added
+
+- Added EvoProtGrad antibody optimization workflow.
+
+---
+
 ## [2.3.3] - 2024-11-08
 
 ### 2.3.3 Added
