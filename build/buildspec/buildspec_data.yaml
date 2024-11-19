@@ -40,7 +40,7 @@ phases:
         fi
       - echo Installing Mountpoint for Amazon S3
       - wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
-      - sudo apt-get update && sudo apt-get install -y ./mount-s3.deb git-lfs
+      - sudo apt-get update && sudo apt-get install -y ./mount-s3.deb git-lfs zip tar
       - git lfs install
       - mkdir $HOME/s3
       - echo Mounting $DESTINATION_URI
@@ -81,13 +81,24 @@ phases:
             echo "Downloading ${SOURCE_URI} from NVIDIA NGC"
             mkdir -p $HOME/s3/$KEY/$SOURCE_URI
             ngc registry model download-version nvidia/clara/esm2nv3b:1.0 --dest $HOME/s3/$KEY
+          elif [[ "$SOURCE_URI" =~ ^https://api.ngc.nvidia.com/(.+) ]]; then
+            echo "Downloading ${SOURCE_URI} from NVIDIA API"
+            NGC_PATH=${BASH_REMATCH[1]}
+            mkdir -p $HOME/s3/$KEY/$NGC_PATH
+            TOKEN=$(curl -s -u "\$oauthtoken":"$NGC_CLI_API_KEY" -H 'Accept:application/json' "https://authn.nvidia.com/token?service=ngc&scope=group/ngc:${NGC_CLI_ORG}&group/ngc:${NGC_CLI_ORG}/" | jq -r '.token')
+            wget --header="Authorization: Bearer $TOKEN" \
+            --header="Content-Type: application/json" \
+            $SOURCE_URI -O ngc.zip
+            unzip -nD ngc.zip -d $HOME/s3/$KEY/$NGC_PATH
+            rm ngc.zip
           elif [[ "$SOURCE_URI" =~ ^[^/]+/[^/]+ ]]; then
             echo "Downloading ${SOURCE_URI} from Hugging Face Hub"
-            git clone https://huggingface.co/$SOURCE_URI $HOME/tmp --depth=1
-            rm -rf $HOME/tmp/.git
+            mkdir tmp
+            git clone https://huggingface.co/$SOURCE_URI tmp --depth=1
+            rm -rf tmp/.git
             mkdir -p $HOME/s3/$KEY/$SOURCE_URI
-            mv $HOME/tmp/* $HOME/s3/$KEY/$SOURCE_URI
-            rm -rf $HOME/tmp
+            mv -n tmp/* $HOME/s3/$KEY/$SOURCE_URI
+            rm -rf tmp
           else
             echo "Downloading ${SOURCE_URI}"
             wget -nc $SOURCE_URI -P $HOME/s3/$KEY --no-verbose --show-progress --progress=dot:giga
