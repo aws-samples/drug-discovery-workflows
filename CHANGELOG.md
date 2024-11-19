@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1] - TBD
+
+### 2.4.1 Added
+
+- Added additional datasets from NVIDIA NGC.
+
+---
+
 ## [2.4.0] - 2024-11-16
 
 ### 2.4.0 Added
