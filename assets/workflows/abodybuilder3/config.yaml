@@ -1,0 +1,12 @@
+name: ABodyBuilder3
+description: "This workflow predicts the 3D structures for one or more antibody amino acid sequences using the ABodyBuilder3 model from Exscientia."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format containing two records: one for the heavy chain sequence and a second for the light chain sequence."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "ABodyBuilder3"
+accelerators: GPU
