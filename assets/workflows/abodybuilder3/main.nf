@@ -10,9 +10,11 @@ workflow ABodyBuilder3 {
     main:
     ABodyBuilder3Task(fasta_path, model_parameters)
     ABodyBuilder3Task.out.pdb.set { pdb }
+    ABodyBuilder3Task.out.metrics.set { metrics }
 
     emit:
     pdb
+    metrics
 }
 
 process ABodyBuilder3Task {
@@ -28,12 +30,13 @@ process ABodyBuilder3Task {
     path model_parameters
 
     output:
-    path '*.pdb', emit: pdb
+    path 'output/*.pdb', emit: pdb
+    path 'output/*.json', emit: metrics
 
     script:
     """
     set -euxo pipefail
-    which tar
+    mkdir output
     tar -xzvf $model_parameters
     /opt/conda/bin/python /home/scripts/abb3_inference.py $fasta_path \
         --model_path plddt-loss/best_second_stage.ckpt
