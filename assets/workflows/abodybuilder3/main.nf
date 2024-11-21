@@ -35,8 +35,7 @@ process ABodyBuilder3Task {
     set -euxo pipefail
     which tar
     tar -xzvf $model_parameters
-    /opt/conda/bin/python /home/scripts/inference.py \
-        $fasta_path \
+    /opt/conda/bin/python /home/scripts/abb3_inference.py $fasta_path \
         --model_path plddt-loss/best_second_stage.ckpt
     """
 }
