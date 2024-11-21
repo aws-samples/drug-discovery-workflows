@@ -12,11 +12,8 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-def predict_structure(
-    heavy,
-    weights_dir=os.getcwd(),
-    output_dir="output"
-):
+
+def predict_structure(heavy, weights_dir=os.getcwd(), output_dir="output"):
     id = str(uuid.uuid4())
     logging.info(f"Heavy chain sequence: {heavy}")
     predictor = NanoBodyBuilder2(weights_dir=weights_dir)
@@ -33,8 +30,8 @@ def predict_structure(
     logging.info(f"Mean error is {mean_error}")
 
     metrics = {
-        "name": id, 
-        "sequence": heavy, 
+        "name": id,
+        "sequence": heavy,
         "sequence_length": len(heavy),
         "mean_error": round(mean_error, 3),
     }
