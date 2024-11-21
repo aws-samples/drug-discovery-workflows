@@ -31,6 +31,14 @@ def get_collected_results(args):
         for obj in reader:
             ppl[obj["name"]] = obj
 
+    nbb = {}
+    logging.info(
+        f"Loading NanoBodyBuilder2 results from {args.nanobodybuilder2_results}"
+    )
+    with jsonlines.open(args.nanobodybuilder2_results, "r") as reader:
+        for obj in reader:
+            nbb[obj["name"]] = obj
+
     additional = {}
     logging.info(f"Loading additional results from {args.additional_results}")
     with jsonlines.open(args.additional_results, "r") as reader:
@@ -44,6 +52,7 @@ def get_collected_results(args):
         print(obj["id"])
         esmfold_record = esmfold[obj["id"]]
         ppl_record = ppl[obj["id"]]
+        nbb_record = nbb[obj["id"]]
         additional_record = additional[obj["id"]]
         collected_results.append(
             {
@@ -58,6 +67,7 @@ def get_collected_results(args):
                 "esmfold.structure": esmfold_record["esmfold_structure"],
                 "esmfold.scaffold_rmsd": additional_record["rmsd"],
                 "amplify.pseudo_perplexity": ppl_record["pseudo_perplexity"],
+                "nanobodybuilder2.mean_error": nbb_record["mean_error"],
             }
         )
 
@@ -81,6 +91,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ppl_results",
         help="Path to folder containing pseudo perplexity results.",
+        type=str,
+    )
+    parser.add_argument(
+        "--nanobodybuilder2_results",
+        help="Path to folder containing NanobodyBuilder2 results.",
         type=str,
     )
     parser.add_argument(

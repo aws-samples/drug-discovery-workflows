@@ -12,6 +12,10 @@ include {
     AMPLIFY
 } from '../amplify-pseudo-perplexity/main'
 
+include {
+    NanoBodyBuilder2
+} from '../nanobodybuilder2/main'
+
 workflow DesignNanobodies {
     take:
     target_pdb
@@ -28,6 +32,10 @@ workflow DesignNanobodies {
     esmfold_max_records_per_partition
     esmfold_model_parameters
     amplify_model_parameters
+    nanobodybuilder2_model_parameters_1
+    nanobodybuilder2_model_parameters_2
+    nanobodybuilder2_model_parameters_3
+    nanobodybuilder2_model_parameters_4
 
     main:
     RFDiffusionProteinMPNN(
@@ -63,10 +71,21 @@ workflow DesignNanobodies {
 
     AMPLIFY.out.ppl_results.set { ppl_results }
 
+    NanoBodyBuilder2(
+        generated_fasta,
+        nanobodybuilder2_model_parameters_1,
+        nanobodybuilder2_model_parameters_2,
+        nanobodybuilder2_model_parameters_3,
+        nanobodybuilder2_model_parameters_4        
+    )
+
+    NanoBodyBuilder2.out.metrics.set { nanobodybuilder2_metrics }
+    NanoBodyBuilder2.out.pdb.set { nanobodybuilder2_pdb }
+
     AdditionalResultsTask(scaffold_pdb, esmfold_pdb)
     AdditionalResultsTask.out.additional_results.collect().set { additional_results }
 
-    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results, additional_results)
+    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results, nanobodybuilder2_metrics, additional_results)
     CollectResultsTask.out.results.collect().set { results_ch }
 
     emit:
@@ -110,6 +129,7 @@ process CollectResultsTask {
     path generation_results
     path esmfold_results
     path ppl_results
+    path nanobodybuilder2_results
     path additional_results
 
     output:
@@ -121,11 +141,13 @@ process CollectResultsTask {
     echo ${generation_results}
     echo ${esmfold_results}
     echo ${ppl_results}
+    echo ${nanobodybuilder2_results}
     echo ${additional_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
         --generation_results ${generation_results} \
         --esmfold_results ${esmfold_results} \
         --ppl_results ${ppl_results} \
+        --nanobodybuilder2_results ${nanobodybuilder2_results} \
         --additional_results ${additional_results}
     """
 }
@@ -145,6 +167,10 @@ workflow {
         Channel.value(params.proteinmpnn_model_name),
         Channel.value(params.esmfold_max_records_per_partition),
         Channel.fromPath(params.esmfold_model_parameters),
-        Channel.fromPath(params.amplify_model_parameters)
+        Channel.fromPath(params.amplify_model_parameters),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_1),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_2),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_3),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_4)
     )
 }
