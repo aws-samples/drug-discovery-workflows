@@ -1,5 +1,4 @@
 accelerate
-anarci@git+https://github.com/openmm/pdbfixer.git
 biopython
 click!=8.1.0
 cloudpathlib
@@ -15,7 +14,6 @@ loguru
 ml_collections
 numpy<2.0.0
 pandas==1.5.3
-pdbfixer@git+https://github.com/openmm/pdbfixer.git
 pyfastx
 python-box
 scipy==1.10.1
