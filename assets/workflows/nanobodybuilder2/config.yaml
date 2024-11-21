@@ -4,7 +4,7 @@ engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
   fasta_path:
-    description: "FASTA file containing a single amino acid sequence for the nanobody heavy chain",
+    description: "FASTA file containing a single amino acid sequence for the nanobody heavy chain"
     optional: false
 storageCapacity: 1200
 tags:
