@@ -46,6 +46,7 @@ def predict_structures(seqs, weights_dir=os.getcwd(), output_dir="output"):
 
         metrics.update(
             {
+                "structure": output_file,
                 "mean_error": round(mean_error, 3),
             }
         )

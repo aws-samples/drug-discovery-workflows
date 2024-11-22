@@ -37,6 +37,7 @@ def get_collected_results(args):
     )
     with jsonlines.open(args.nanobodybuilder2_results, "r") as reader:
         for obj in reader:
+            obj["nanobodybuilder2_structure"] = os.path.join(obj["name"] + ".pdb")
             nbb[obj["name"]] = obj
 
     additional = {}
@@ -65,9 +66,10 @@ def get_collected_results(args):
                 "esmfold.mean_plddt": esmfold_record["mean_plddt"],
                 "esmfold.ptm": esmfold_record["ptm"],
                 "esmfold.structure": esmfold_record["esmfold_structure"],
-                "esmfold.scaffold_rmsd": additional_record["rmsd"],
                 "amplify.pseudo_perplexity": ppl_record["pseudo_perplexity"],
+                "nanobodybuilder2.structure": nbb_record["nanobodybuilder2_structure"],
                 "nanobodybuilder2.mean_error": nbb_record["mean_error"],
+                "nanobodybuilder2.scaffold_rmsd": additional_record["rmsd"],
             }
         )
 
