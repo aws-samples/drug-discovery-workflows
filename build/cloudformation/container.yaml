@@ -25,6 +25,10 @@ Parameters:
     Type: String
     Default: "N"
     AllowedValues: [Y, N]
+  SecretName:
+    Description: AWS Secrets Manager secret name containing 3rd party data download credentials
+    Type: String
+    Default: ""    
 
 Conditions:
   WaitForCodeBuildCondition:
@@ -155,6 +159,11 @@ Resources:
                   - ecr:SetRepositoryPolicy
                 Resource:
                   - !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${SecretName}-*"                  
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -180,6 +189,8 @@ Resources:
             Value: !Ref StackPrefix
           - Name: WAIT_CONDITION_HANDLE
             Value: !Ref CodeBuildWaitHandle
+          - Name: SECRET_NAME
+            Value: !Ref SecretName               
         Image: aws/codebuild/standard:7.0
         ImagePullCredentialsType: CODEBUILD
         PrivilegedMode: true
