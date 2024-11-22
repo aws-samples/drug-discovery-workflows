@@ -366,7 +366,7 @@ Resources:
       Role:
         Fn::GetAtt: DeleteWorkflowLambdaExecutionRole.Arn
       Runtime: python3.11
-      Timeout: 30
+      Timeout: 120
       Tags:
         - Key: Application
           Value: !Ref ApplicationName

@@ -4,6 +4,7 @@
 import logging
 import cfnresponse
 import boto3
+from time import sleep
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -50,6 +51,7 @@ def lambda_handler(event, context):
             )
         elif event["RequestType"] == "Delete":
             LOGGER.info("DELETE!")
+            sleep(30)
             omics = boto3.client("omics")
             workflow_list = list_workflows_with_tags(
                 tags={"StackPrefix": event["ResourceProperties"]["StackPrefix"]},
