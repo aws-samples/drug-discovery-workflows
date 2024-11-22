@@ -60,7 +60,7 @@ workflow DesignNanobodies {
         esmfold_model_parameters
         )
 
-    ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
+    ESMFold.out.esmfold_metrics.set { esmfold_metrics }
     ESMFold.out.pdb.set { esmfold_pdb }
 
 
@@ -79,13 +79,13 @@ workflow DesignNanobodies {
         nanobodybuilder2_model_parameters_4        
     )
 
-    NanoBodyBuilder2.out.metrics.set { nanobodybuilder2_metrics }
+    NanoBodyBuilder2.out.nanobodybuilder2_metrics.set { nanobodybuilder2_metrics }
     NanoBodyBuilder2.out.pdb.set { nanobodybuilder2_pdb }
 
-    AdditionalResultsTask(scaffold_pdb, esmfold_pdb)
+    AdditionalResultsTask(scaffold_pdb, nanobodybuilder2_pdb)
     AdditionalResultsTask.out.additional_results.collect().set { additional_results }
 
-    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results, nanobodybuilder2_metrics, additional_results)
+    CollectResultsTask(generated_jsonl, esmfold_metrics, ppl_results, nanobodybuilder2_metrics, additional_results)
     CollectResultsTask.out.results.collect().set { results_ch }
 
     emit:
