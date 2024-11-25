@@ -24,6 +24,7 @@ workflow DesignNanobodies {
     num_seq_designs_per_bb
     proteinmpnn_sampling_temp
     scaffold_pdb
+    reps
     scaffold_design_chain
     scaffold_design_positions
     rfdiffusion_params
@@ -38,6 +39,7 @@ workflow DesignNanobodies {
     nanobodybuilder2_model_parameters_4
 
     main:
+
     RFDiffusionProteinMPNN(
         target_pdb,
         hotspot_residues,
@@ -45,6 +47,7 @@ workflow DesignNanobodies {
         num_seq_designs_per_bb,
         proteinmpnn_sampling_temp,
         scaffold_pdb,
+        channel.of(1..params.reps),
         scaffold_design_chain,
         scaffold_design_positions,
         rfdiffusion_params,
@@ -160,6 +163,7 @@ workflow {
         Channel.value(params.num_seq_designs_per_bb),
         Channel.value(params.proteinmpnn_sampling_temp),
         Channel.fromPath(params.scaffold_pdb),
+        Channel.value(params.reps),
         Channel.value(params.scaffold_design_chain),
         Channel.value(params.scaffold_design_positions),
         Channel.fromPath(params.rfdiffusion_params),
