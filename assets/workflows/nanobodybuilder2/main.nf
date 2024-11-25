@@ -35,7 +35,7 @@ process NanoBodyBuilder2Task {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    path fasta_path
+    each fasta_path
     path model_parameters_1
     path model_parameters_2
     path model_parameters_3
@@ -43,14 +43,14 @@ process NanoBodyBuilder2Task {
 
     output:
     path 'output/*.pdb', emit: pdb
-    path 'output/nanobodybuilder2_metrics.jsonl', emit: nanobodybuilder2_metrics
+    path 'output/*.jsonl', emit: nanobodybuilder2_metrics
 
     script:
     """
     set -euxo pipefail
     mkdir output
     /opt/conda/bin/python /home/scripts/nbb2_inference.py $fasta_path
-    cat output/*.json >> output/nanobodybuilder2_metrics.jsonl
+    cat output/*.json >> output/nanobodybuilder2_metrics_${task.index}.jsonl
 
     """
 }

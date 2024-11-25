@@ -30,14 +30,14 @@ process ESMFoldTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    path fasta_path
+    each fasta_path
     path esmfold_model_parameters
 
     output:
     path 'output/*/*.pdb', emit: pdb
     path 'output/*/*.pt', emit: tensors
     path 'output/*/*.png', emit: pae_plot
-    path 'esmfold_metrics.jsonl', emit: esmfold_metrics
+    path '*.jsonl', emit: esmfold_metrics
 
     script:
     """
@@ -45,7 +45,7 @@ process ESMFoldTask {
     /opt/conda/bin/python /home/scripts/esmfold_inference.py $fasta_path \
         --output_dir "output" \
         --pretrained_model_name_or_path $esmfold_model_parameters
-    cat output/*/*.json >> esmfold_metrics.jsonl
+    cat output/*/*.json >> esmfold_metrics_${task.index}.jsonl
     """
 }
 

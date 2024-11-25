@@ -63,8 +63,8 @@ workflow DesignNanobodies {
         esmfold_model_parameters
         )
 
-    ESMFold.out.esmfold_metrics.set { esmfold_metrics }
-    ESMFold.out.pdb.set { esmfold_pdb }
+    ESMFold.out.esmfold_metrics.collect().set { esmfold_metrics }
+    ESMFold.out.pdb.collect().set { esmfold_pdb }
 
 
     AMPLIFY(
@@ -72,7 +72,7 @@ workflow DesignNanobodies {
         amplify_model_parameters
     )
 
-    AMPLIFY.out.ppl_results.set { ppl_results }
+    AMPLIFY.out.ppl_results.collect().set { ppl_results }
 
     NanoBodyBuilder2(
         generated_fasta,
@@ -82,8 +82,8 @@ workflow DesignNanobodies {
         nanobodybuilder2_model_parameters_4        
     )
 
-    NanoBodyBuilder2.out.nanobodybuilder2_metrics.set { nanobodybuilder2_metrics }
-    NanoBodyBuilder2.out.pdb.set { nanobodybuilder2_pdb }
+    NanoBodyBuilder2.out.nanobodybuilder2_metrics.collect().set { nanobodybuilder2_metrics }
+    NanoBodyBuilder2.out.pdb.collect().set { nanobodybuilder2_pdb }
 
     AdditionalResultsTask(scaffold_pdb, nanobodybuilder2_pdb)
     AdditionalResultsTask.out.additional_results.collect().set { additional_results }
@@ -147,11 +147,11 @@ process CollectResultsTask {
     echo ${nanobodybuilder2_results}
     echo ${additional_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
-        --generation_results ${generation_results} \
-        --esmfold_results ${esmfold_results} \
-        --ppl_results ${ppl_results} \
-        --nanobodybuilder2_results ${nanobodybuilder2_results} \
-        --additional_results ${additional_results}
+        --generation_results "${generation_results}" \
+        --esmfold_results "${esmfold_results}" \
+        --ppl_results "${ppl_results}" \
+        --nanobodybuilder2_results "${nanobodybuilder2_results}" \
+        --additional_results "${additional_results}"
     """
 }
 

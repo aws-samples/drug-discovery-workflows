@@ -14,37 +14,42 @@ def get_collected_results(args):
 
     rfdiffusion = {}
     logging.info(f"Loading generation results from {args.generation_results}")
-    with jsonlines.open(args.generation_results, "r") as reader:
-        for obj in reader:
-            rfdiffusion[obj["id"]] = obj
+    for result in args.generation_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                rfdiffusion[obj["id"]] = obj
 
     esmfold = {}
     logging.info(f"Loading protein folding results from {args.esmfold_results}")
-    with jsonlines.open(args.esmfold_results, "r") as reader:
-        for obj in reader:
-            obj["esmfold_structure"] = os.path.join(obj["name"] + ".pdb")
-            esmfold[obj["name"]] = obj
+    for result in args.esmfold_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                obj["esmfold_structure"] = os.path.join(obj["name"] + ".pdb")
+                esmfold[obj["name"]] = obj
 
     ppl = {}
     logging.info(f"Loading pseudo perplexity results from {args.ppl_results}")
-    with jsonlines.open(args.ppl_results, "r") as reader:
-        for obj in reader:
-            ppl[obj["name"]] = obj
+    for result in args.ppl_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                ppl[obj["name"]] = obj
 
     nbb = {}
     logging.info(
         f"Loading NanoBodyBuilder2 results from {args.nanobodybuilder2_results}"
     )
-    with jsonlines.open(args.nanobodybuilder2_results, "r") as reader:
-        for obj in reader:
-            obj["nanobodybuilder2_structure"] = os.path.join(obj["name"] + ".pdb")
-            nbb[obj["name"]] = obj
+    for result in args.nanobodybuilder2_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                obj["nanobodybuilder2_structure"] = os.path.join(obj["name"] + ".pdb")
+                nbb[obj["name"]] = obj
 
     additional = {}
     logging.info(f"Loading additional results from {args.additional_results}")
-    with jsonlines.open(args.additional_results, "r") as reader:
-        for obj in reader:
-            additional[obj["name"]] = obj
+    for result in args.additional_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                additional[obj["name"]] = obj
 
     collected_results = []
     logging.info(f"Combining results")
