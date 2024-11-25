@@ -57,7 +57,7 @@ process GenerateCandidatesTask {
         val num_seq_designs_per_bb
         val proteinmpnn_sampling_temp
         path scaffold_pdb
-        val rep
+        each rep
         val scaffold_design_chain
         val scaffold_design_positions
         path rfdiffusion_params
