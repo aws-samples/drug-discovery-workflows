@@ -31,7 +31,7 @@ phases:
       - echo "Loading NGC credentials from AWS Secrets Manager"
       - export NGC_CLI_API_KEY=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_API_KEY'`
       - export NGC_CLI_ORG=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_ORG'`            
-      - wget --content-disposition https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/3.53.0/files/ngccli_linux.zip -O ngccli_linux.zip && unzip ngccli_linux.zip
+      - wget -q --content-disposition https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/3.53.0/files/ngccli_linux.zip -O ngccli_linux.zip && unzip -q ngccli_linux.zip
       - chmod u+x ngc-cli/ngc
       - echo "export PATH=\"\$PATH:$(pwd)/ngc-cli\"" >> ~/.bash_profile && source ~/.bash_profile
   build:
@@ -69,13 +69,14 @@ phases:
           elif [[ "$SOURCE_URI" =~ ^https://api.ngc.nvidia.com/(.+) ]]; then
             echo "Downloading ${SOURCE_URI} from NVIDIA API"
             NGC_PATH=${BASH_REMATCH[1]}
-            mkdir -p $HOME/s3/$KEY/$NGC_PATH
+            mkdir -p $HOME/s3/$KEY/$NGC_PATH 
+            mkdir -p $HOME/s3/tmp
             TOKEN=$(curl -s -u "\$oauthtoken":"$NGC_CLI_API_KEY" -H 'Accept:application/json' "https://authn.nvidia.com/token?service=ngc&scope=group/ngc:${NGC_CLI_ORG}&group/ngc:${NGC_CLI_ORG}/" | jq -r '.token')
             wget --header="Authorization: Bearer $TOKEN" \
             --header="Content-Type: application/json" \
-            $SOURCE_URI -O ngc.zip
-            unzip -nD ngc.zip -d $HOME/s3/$KEY/$NGC_PATH
-            rm ngc.zip
+            $SOURCE_URI -O $HOME/s3/tmp/ngc.zip
+            unzip -nD $HOME/s3/tmp/ngc.zip -d $HOME/s3/$KEY/$NGC_PATH
+            rm $HOME/s3/tmp/ngc.zip
           elif [[ "$SOURCE_URI" =~ ^[^/]+/[^/]+ ]]; then
             echo "Downloading ${SOURCE_URI} from Hugging Face Hub"
             mkdir tmp

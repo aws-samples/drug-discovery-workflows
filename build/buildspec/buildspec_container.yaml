@@ -13,8 +13,8 @@ phases:
       - export NGC_CLI_API_KEY=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_API_KEY'`
       - if [ -n "$NGC_CLI_API_KEY"];
         then
-        echo "Logging in to nvcr.io"
-        echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io
+        echo "Logging in to nvcr.io";
+        echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io;
         fi
   build:
     commands:
