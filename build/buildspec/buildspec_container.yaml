@@ -9,6 +9,13 @@ phases:
       - echo Build started on `date` for $NAME
       - echo Logging in to AWS Deep Learning Containers ECR...
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com
+      - echo "Loading NGC credentials from AWS Secrets Manager"
+      - export NGC_CLI_API_KEY=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_API_KEY'`
+      - if [ -n "$NGC_CLI_API_KEY"];
+        then
+        echo "Logging in to nvcr.io";
+        echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io;
+        fi
   build:
     commands:
       - echo "Checking for repository ${NAME}"

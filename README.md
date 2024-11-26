@@ -6,13 +6,22 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 
 ## Workflow Catalog
 
-1. [Alphafold2-Monomer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-monomer): Predict the 3D structure of one or more single-chain proteins
-2. [Alphafold2-multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): Predict the 3D structure of multi-chain protein complexes.
-3. [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope.
-4. [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): Predict protein structures using ESMFold for one or more amino acid sequences.
-5. [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
-6. [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): Generate protein backbone structures and sequences given a binding target or other structural context.
-7. [AMPLIFY](https://github.com/chandar-lab/AMPLIFY): Efficient generation of sequence embeddings or pseudo-likelihood scores
+### Modules
+
+- [ABodyBuilder3](https://github.com/Exscientia/abodybuilder3): From Exscientia. Predict the 3D structure of antibody heavy and light chains.
+- [Alphafold2-Monomer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-monomer): From Google DeepMind. Predict the 3D structure of one or more single-chain proteins
+- [Alphafold2-Multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): From Google DeepMind. Predict the 3D structure of multi-chain protein complexes.
+- [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
+- [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
+- [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
+- [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
+- [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
+- [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
+- [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
+
+### E2E Workflows
+
+- [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope using RFDiffusion, ProteinMPNN, ESMFold, AMPLIFY, and NanobodyBuilder2.
 
 ## Deployment
 

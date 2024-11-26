@@ -12,13 +12,13 @@ workflow ESMFold {
     ESMFoldTask.out.pdb.set { pdb }
     ESMFoldTask.out.tensors.set { tensors }
     ESMFoldTask.out.pae_plot.set { pae_plot }
-    ESMFoldTask.out.combined_metrics.set { combined_metrics }
+    ESMFoldTask.out.esmfold_metrics.set { esmfold_metrics }
 
     emit:
     pdb
     tensors
     pae_plot
-    combined_metrics
+    esmfold_metrics
 }
 
 process ESMFoldTask {
@@ -30,14 +30,14 @@ process ESMFoldTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    path fasta_path
+    each fasta_path
     path esmfold_model_parameters
 
     output:
     path 'output/*/*.pdb', emit: pdb
     path 'output/*/*.pt', emit: tensors
     path 'output/*/*.png', emit: pae_plot
-    path 'combined_metrics.jsonl', emit: combined_metrics
+    path '*.jsonl', emit: esmfold_metrics
 
     script:
     """
@@ -45,7 +45,7 @@ process ESMFoldTask {
     /opt/conda/bin/python /home/scripts/esmfold_inference.py $fasta_path \
         --output_dir "output" \
         --pretrained_model_name_or_path $esmfold_model_parameters
-    cat output/*/*.json >> combined_metrics.jsonl
+    cat output/*/*.json >> esmfold_metrics_${task.index}.jsonl
     """
 }
 

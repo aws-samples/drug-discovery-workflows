@@ -14,28 +14,42 @@ def get_collected_results(args):
 
     rfdiffusion = {}
     logging.info(f"Loading generation results from {args.generation_results}")
-    with jsonlines.open(args.generation_results, "r") as reader:
-        for obj in reader:
-            rfdiffusion[obj["id"]] = obj
+    for result in args.generation_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                rfdiffusion[obj["id"]] = obj
 
     esmfold = {}
     logging.info(f"Loading protein folding results from {args.esmfold_results}")
-    with jsonlines.open(args.esmfold_results, "r") as reader:
-        for obj in reader:
-            obj["esmfold_structure"] = os.path.join(obj["name"] + ".pdb")
-            esmfold[obj["name"]] = obj
+    for result in args.esmfold_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                obj["esmfold_structure"] = os.path.join(obj["name"] + ".pdb")
+                esmfold[obj["name"]] = obj
 
     ppl = {}
     logging.info(f"Loading pseudo perplexity results from {args.ppl_results}")
-    with jsonlines.open(args.ppl_results, "r") as reader:
-        for obj in reader:
-            ppl[obj["name"]] = obj
+    for result in args.ppl_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                ppl[obj["name"]] = obj
+
+    nbb = {}
+    logging.info(
+        f"Loading NanoBodyBuilder2 results from {args.nanobodybuilder2_results}"
+    )
+    for result in args.nanobodybuilder2_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                obj["nanobodybuilder2_structure"] = os.path.join(obj["name"] + ".pdb")
+                nbb[obj["name"]] = obj
 
     additional = {}
     logging.info(f"Loading additional results from {args.additional_results}")
-    with jsonlines.open(args.additional_results, "r") as reader:
-        for obj in reader:
-            additional[obj["name"]] = obj
+    for result in args.additional_results.split(' '):
+        with jsonlines.open(result, "r") as reader:
+            for obj in reader:
+                additional[obj["name"]] = obj
 
     collected_results = []
     logging.info(f"Combining results")
@@ -44,6 +58,7 @@ def get_collected_results(args):
         print(obj["id"])
         esmfold_record = esmfold[obj["id"]]
         ppl_record = ppl[obj["id"]]
+        nbb_record = nbb[obj["id"]]
         additional_record = additional[obj["id"]]
         collected_results.append(
             {
@@ -56,8 +71,10 @@ def get_collected_results(args):
                 "esmfold.mean_plddt": esmfold_record["mean_plddt"],
                 "esmfold.ptm": esmfold_record["ptm"],
                 "esmfold.structure": esmfold_record["esmfold_structure"],
-                "esmfold.scaffold_rmsd": additional_record["rmsd"],
                 "amplify.pseudo_perplexity": ppl_record["pseudo_perplexity"],
+                "nanobodybuilder2.structure": nbb_record["nanobodybuilder2_structure"],
+                "nanobodybuilder2.mean_error": nbb_record["mean_error"],
+                "nanobodybuilder2.scaffold_rmsd": additional_record["rmsd"],
             }
         )
 
@@ -81,6 +98,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ppl_results",
         help="Path to folder containing pseudo perplexity results.",
+        type=str,
+    )
+    parser.add_argument(
+        "--nanobodybuilder2_results",
+        help="Path to folder containing NanobodyBuilder2 results.",
         type=str,
     )
     parser.add_argument(

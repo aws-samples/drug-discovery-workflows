@@ -69,6 +69,7 @@ Resources:
               ],
             ],
           ]
+        SecretName: !Ref SecretName
 
   WorkflowBuild:
     Type: "AWS::CloudFormation::Stack"

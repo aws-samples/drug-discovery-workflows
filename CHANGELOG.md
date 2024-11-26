@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] - 2024-11-25
+
+### 2.5.0 Added
+
+- Added additional datasets from NVIDIA NGC.
+- Added ABodyBuilder3 antibody structure prediction workflow.
+- Added NanobodyBuilder2 nanobody structure prediction workflow.
+
+### 2.5.0 Changed
+
+- Updated parallelization of nanobody design workflow to improve throughput.
+
+---
+
 ## [2.4.0] - 2024-11-16
 
 ### 2.4.0 Added
