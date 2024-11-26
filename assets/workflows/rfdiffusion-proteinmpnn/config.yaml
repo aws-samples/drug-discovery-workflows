@@ -12,6 +12,9 @@ parameterTemplate:
   scaffold_pdb:
     description: "S3 URI of scaffold PDB file."
     optional: false
+  reps: 
+    description: "Number of RFDiffusion-ProteinMPNN replicates."
+    optional: true
   num_bb_designs_per_target:
     description: "(Optional) Number of protein backbone designs per input target (Default: 3)."
     optional: true

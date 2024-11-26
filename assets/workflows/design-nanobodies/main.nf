@@ -12,6 +12,10 @@ include {
     AMPLIFY
 } from '../amplify-pseudo-perplexity/main'
 
+include {
+    NanoBodyBuilder2
+} from '../nanobodybuilder2/main'
+
 workflow DesignNanobodies {
     take:
     target_pdb
@@ -20,6 +24,7 @@ workflow DesignNanobodies {
     num_seq_designs_per_bb
     proteinmpnn_sampling_temp
     scaffold_pdb
+    reps
     scaffold_design_chain
     scaffold_design_positions
     rfdiffusion_params
@@ -28,8 +33,13 @@ workflow DesignNanobodies {
     esmfold_max_records_per_partition
     esmfold_model_parameters
     amplify_model_parameters
+    nanobodybuilder2_model_parameters_1
+    nanobodybuilder2_model_parameters_2
+    nanobodybuilder2_model_parameters_3
+    nanobodybuilder2_model_parameters_4
 
     main:
+
     RFDiffusionProteinMPNN(
         target_pdb,
         hotspot_residues,
@@ -37,6 +47,7 @@ workflow DesignNanobodies {
         num_seq_designs_per_bb,
         proteinmpnn_sampling_temp,
         scaffold_pdb,
+        channel.of(1..params.reps),
         scaffold_design_chain,
         scaffold_design_positions,
         rfdiffusion_params,
@@ -52,8 +63,8 @@ workflow DesignNanobodies {
         esmfold_model_parameters
         )
 
-    ESMFold.out.combined_metrics.set { combined_esmfold_metrics }
-    ESMFold.out.pdb.set { esmfold_pdb }
+    ESMFold.out.esmfold_metrics.collect().set { esmfold_metrics }
+    ESMFold.out.pdb.collect().set { esmfold_pdb }
 
 
     AMPLIFY(
@@ -61,12 +72,23 @@ workflow DesignNanobodies {
         amplify_model_parameters
     )
 
-    AMPLIFY.out.ppl_results.set { ppl_results }
+    AMPLIFY.out.ppl_results.collect().set { ppl_results }
 
-    AdditionalResultsTask(scaffold_pdb, esmfold_pdb)
+    NanoBodyBuilder2(
+        generated_fasta,
+        nanobodybuilder2_model_parameters_1,
+        nanobodybuilder2_model_parameters_2,
+        nanobodybuilder2_model_parameters_3,
+        nanobodybuilder2_model_parameters_4        
+    )
+
+    NanoBodyBuilder2.out.nanobodybuilder2_metrics.collect().set { nanobodybuilder2_metrics }
+    NanoBodyBuilder2.out.pdb.collect().set { nanobodybuilder2_pdb }
+
+    AdditionalResultsTask(scaffold_pdb, nanobodybuilder2_pdb)
     AdditionalResultsTask.out.additional_results.collect().set { additional_results }
 
-    CollectResultsTask(generated_jsonl, combined_esmfold_metrics, ppl_results, additional_results)
+    CollectResultsTask(generated_jsonl, esmfold_metrics, ppl_results, nanobodybuilder2_metrics, additional_results)
     CollectResultsTask.out.results.collect().set { results_ch }
 
     emit:
@@ -110,6 +132,7 @@ process CollectResultsTask {
     path generation_results
     path esmfold_results
     path ppl_results
+    path nanobodybuilder2_results
     path additional_results
 
     output:
@@ -121,12 +144,14 @@ process CollectResultsTask {
     echo ${generation_results}
     echo ${esmfold_results}
     echo ${ppl_results}
+    echo ${nanobodybuilder2_results}
     echo ${additional_results}
     /opt/venv/bin/python /home/putils/src/putils/collect_results.py \
-        --generation_results ${generation_results} \
-        --esmfold_results ${esmfold_results} \
-        --ppl_results ${ppl_results} \
-        --additional_results ${additional_results}
+        --generation_results "${generation_results}" \
+        --esmfold_results "${esmfold_results}" \
+        --ppl_results "${ppl_results}" \
+        --nanobodybuilder2_results "${nanobodybuilder2_results}" \
+        --additional_results "${additional_results}"
     """
 }
 
@@ -138,6 +163,7 @@ workflow {
         Channel.value(params.num_seq_designs_per_bb),
         Channel.value(params.proteinmpnn_sampling_temp),
         Channel.fromPath(params.scaffold_pdb),
+        Channel.value(params.reps),
         Channel.value(params.scaffold_design_chain),
         Channel.value(params.scaffold_design_positions),
         Channel.fromPath(params.rfdiffusion_params),
@@ -145,6 +171,10 @@ workflow {
         Channel.value(params.proteinmpnn_model_name),
         Channel.value(params.esmfold_max_records_per_partition),
         Channel.fromPath(params.esmfold_model_parameters),
-        Channel.fromPath(params.amplify_model_parameters)
+        Channel.fromPath(params.amplify_model_parameters),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_1),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_2),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_3),
+        Channel.fromPath(params.nanobodybuilder2_model_parameters_4)
     )
 }

@@ -2,21 +2,23 @@
 
 nextflow.enable.dsl = 2
 
-workflow AMPLIFY {
+workflow ABodyBuilder3 {
     take:
     fasta_path
     model_parameters
 
     main:
-    PPLTask(fasta_path, model_parameters)
-    PPLTask.out.ppl_results.set { ppl_results }
+    ABodyBuilder3Task(fasta_path, model_parameters)
+    ABodyBuilder3Task.out.pdb.set { pdb }
+    ABodyBuilder3Task.out.metrics.set { metrics }
 
     emit:
-    ppl_results
+    pdb
+    metrics
 }
 
-process PPLTask {
-    label 'ppl'
+process ABodyBuilder3Task {
+    label 'abodybuilder3'
     cpus 4
     memory '16 GB'
     maxRetries 1
@@ -24,24 +26,25 @@ process PPLTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    each fasta_path
+    path fasta_path
     path model_parameters
 
     output:
-    path "*.jsonl", emit: ppl_results
+    path 'output/*.pdb', emit: pdb
+    path 'output/*.json', emit: metrics
 
     script:
     """
     set -euxo pipefail
-    /opt/conda/bin/python /home/scripts/calculate_ppl.py $fasta_path \
-        --output_dir "." \
-        --pretrained_model_name_or_path $model_parameters
-    mv ppl.jsonl ppl_${task.index}.jsonl
+    mkdir output
+    tar -xzvf $model_parameters
+    /opt/conda/bin/python /home/scripts/abb3_inference.py $fasta_path \
+        --model_path plddt-loss/best_second_stage.ckpt
     """
 }
 
 workflow {
-    AMPLIFY(
+    ABodyBuilder3(
         Channel.fromPath(params.fasta_path),
         Channel.fromPath(params.model_parameters)
     )
