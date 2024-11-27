@@ -1,5 +1,4 @@
 nvidia/clara/esm2nv3b:1.0
 https://api.ngc.nvidia.com/v2/org/nim/team/ipd/models/rfdiffusion/versions/1.0.0/zip
 https://api.ngc.nvidia.com/v2/org/nim/team/ipd/models/proteinmpnn/versions/1.0.0/zip
-https://api.ngc.nvidia.com/v2/org/nim/team/deepmind/models/alphafold2-data/versions/1.0.0/zip
-https://api.ngc.nvidia.com/v2/org/nim/team/deepmind/models/alphafold2-data/versions/1.1.0/zip
+nim/deepmind/alphafold2-data:1.1.0
