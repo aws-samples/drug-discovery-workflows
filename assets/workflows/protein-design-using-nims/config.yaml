@@ -1,0 +1,29 @@
+name: ProteinDesignWorkflow
+description: "RFdiffusion => ProteinMPNN => AlphaFold2Multimer"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  pdb_input_path: 
+    description: "Input PDB."
+    optional: false
+  fasta_path: 
+    description: "Input file in FASTA format."
+    optional: false
+  contigs:
+    description: "contigs stands for contiguous [protein regions]."
+    optional: false
+  num_design:
+    description: "number of designed binders."
+    optional: false
+  input_pdb_chains:
+    description: "The model will design amino acid sequences for the given chains in the input protein."
+    optional: false
+  num_seq_per_target:
+    description: "This parameter specifies the number of sequences to generate per target protein structure."
+    optional: false
+  max_retries:
+    description: "Max number of retries of Nextflow processes."
+    optional: false
+storageCapacity: 4800
+tags:
+  Name: "ProteinDesignWorkflow"
