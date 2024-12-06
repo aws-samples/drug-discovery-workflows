@@ -1,0 +1,8 @@
+https://chaiassets.com/chai1-inference-depencencies/conformers_v1.apkl
+https://chaiassets.com/chai1-inference-depencencies/models_v2/feature_embedding.pt
+https://chaiassets.com/chai1-inference-depencencies/models_v2/bond_loss_input_proj.pt
+https://chaiassets.com/chai1-inference-depencencies/models_v2/token_embedder.pt
+https://chaiassets.com/chai1-inference-depencencies/models_v2/trunk.pt
+https://chaiassets.com/chai1-inference-depencencies/models_v2/diffusion_module.pt
+https://chaiassets.com/chai1-inference-depencencies/models_v2/confidence_head.pt
+facebook/esm2_t36_3B_UR50D
