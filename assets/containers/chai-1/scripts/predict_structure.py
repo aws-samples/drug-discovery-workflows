@@ -1,9 +1,8 @@
 import argparse
 import logging
-import shutil
-from pathlib import Path
 import numpy as np
-
+from pathlib import Path
+import shutil
 from chai_lab.chai1 import run_inference
 
 # We use fasta-like format for inputs.
@@ -14,11 +13,11 @@ from chai_lab.chai1 import run_inference
 
 def main(
     fasta_path,
-    output_dir="output",
-    num_trunk_recycles=3,
-    num_diffn_timesteps=200,
-    seed=None,
     device="cuda:0",
+    num_diffn_timesteps=200,
+    num_trunk_recycles=3,
+    output_dir="output",
+    seed=None,
     use_esm_embeddings=True,
 ):
 
@@ -52,11 +51,11 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("fasta_path", type=str)
-    parser.add_argument("--output_dir", type=str, default="output")
-    parser.add_argument("--num_trunk_recycles", type=int, default=3)
-    parser.add_argument("--num_diffn_timesteps", type=int, default=200)
-    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument("--num_diffn_timesteps", type=int, default=200)
+    parser.add_argument("--num_trunk_recycles", type=int, default=3)
+    parser.add_argument("--output_dir", type=str, default="output")
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--use_esm_embeddings", type=bool, default=True)
     args = parser.parse_args()
     main(**vars(args))

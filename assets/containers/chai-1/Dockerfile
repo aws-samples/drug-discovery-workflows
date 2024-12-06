@@ -1,8 +1,6 @@
 ARG AWS_DEFAULT_REGION=us-east-1
 
-# FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.4.0-gpu-py311-cu124-ubuntu22.04-ec2
-FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.3.0-gpu-py311-cu124-ubuntu22.04-ec2
-
+FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-inference:2.5.1-gpu-py311-cu124-ubuntu22.04-ec2
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get autoremove -y \
@@ -12,7 +10,7 @@ RUN apt-get update \
 # Install additional dependencies from requirements.txt file
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
-    # && pip install --no-cache-dir -U --no-deps chai_lab==0.5.0 \
+    && pip install --no-cache-dir -U --no-deps chai_lab==0.5.0 \
     && rm /tmp/requirements.txt
 
 ## Cleanup ##
