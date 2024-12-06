@@ -1,0 +1,18 @@
+name: Chai-1
+description: "This workflow predicts the 3D structures for one or more biomolecules (protein, nuleic acid, and/or ligand) using the Chai-1 model from Chai Discovery."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "Input file in FASTA format containing two records: one for the heavy chain sequence and a second for the light chain sequence."
+    optional: false
+  num_diffn_timesteps:
+    description: "Number of diffusion steps. Defaults to 200."
+    optional: true
+  num_trunk_recycles:
+    description: "Number of trunk recycles. Defaults to 3."
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "Chai1"
+accelerators: GPU

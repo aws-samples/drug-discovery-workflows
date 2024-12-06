@@ -24,7 +24,7 @@ def main(
     fasta_path = Path(fasta_path)
 
     # Inference expects an empty directory; enforce this
-    output_dir = Path("/tmp/outputs")
+    output_dir = Path(output_dir)
     if output_dir.exists():
         logging.warning(f"Removing old output directory: {output_dir}")
         shutil.rmtree(output_dir)
