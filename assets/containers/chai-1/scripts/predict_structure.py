@@ -1,7 +1,13 @@
 import argparse
+import json
 import logging
 import numpy as np
+import os
 from pathlib import Path
+import pyfastx
+import re
+import torch
+
 import shutil
 from chai_lab.chai1 import run_inference
 
@@ -10,10 +16,16 @@ from chai_lab.chai1 import run_inference
 # - each entity is labeled with unique name;
 # - ligands are encoded with SMILES; modified residues encoded like AAA(SEP)AAA
 
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)
+
 
 def main(
     fasta_path,
-    device="cuda:0",
+    device="cuda:0" if torch.cuda.is_available() else "cpu",
     num_diffn_timesteps=200,
     num_trunk_recycles=3,
     output_dir="output",
@@ -21,7 +33,20 @@ def main(
     use_esm_embeddings=True,
 ):
 
-    fasta_path = Path(fasta_path)
+    input_records = pyfastx.Fasta(fasta_path, build_index=False)
+    sequence_name = None
+
+    with open("input.fasta", "w") as f:
+        for record in input_records:
+            # Use the first sequence in the input fasta for output naming
+            sequence_name = sequence_name or record[0]
+            if not re.match("(protein|ligand|rna|dna|glycan)", record[0]):
+                name = "protein|" + record[0]
+            else:
+                name = record[0]
+            f.write(f">{name}\n{record[1]}\n")
+
+    fasta_path = Path("input.fasta")
 
     # Inference expects an empty directory; enforce this
     output_dir = Path(output_dir)
@@ -40,12 +65,27 @@ def main(
         use_esm_embeddings=use_esm_embeddings,
     )
 
-    cif_paths = candidates.cif_paths
-    agg_scores = [rd.aggregate_score.item() for rd in candidates.ranking_data]
+    best_structure = candidates.sorted().cif_paths[0]
+    best_metrics = candidates.sorted().ranking_data[0]
 
-    # Load pTM, ipTM, pLDDTs and clash scores for sample 2
-    scores = np.load(output_dir.joinpath("scores.model_idx_2.npz"))
-    return (cif_paths, agg_scores, scores)
+    metrics = {
+        "name": sequence_name,
+        "best_structure_path": str(best_structure),
+        "best_structure_aggregate_score": best_metrics.aggregate_score.item(),
+        "best_structure_complex_ptm": best_metrics.ptm_scores.complex_ptm.item(),
+        "best_structure_interface_ptm": best_metrics.ptm_scores.interface_ptm.item(),
+        "best_structure_complex_plddt": best_metrics.plddt_scores.complex_plddt.item(),
+        "best_structure_total_clashes": best_metrics.clash_scores.total_clashes.item(),
+        "best_structure_total_inter_chain_clashes": best_metrics.clash_scores.total_inter_chain_clashes.item(),
+        "best_structure_has_inter_chain_clashes": best_metrics.clash_scores.has_inter_chain_clashes.item(),
+    }
+
+    logging.info(metrics)
+    with open(os.path.join(output_dir, sequence_name + ".json"), "w") as f:
+        json.dump(metrics, f)
+        f.write("\n")
+
+    return metrics
 
 
 if __name__ == "__main__":

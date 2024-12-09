@@ -45,10 +45,12 @@ workflow Chai1 {
 
     Chai1Task.out.cif.set { cif }
     Chai1Task.out.npz.set { npz }
+    Chai1Task.out.metrics.set { metrics }
 
     emit:
     cif
     npz
+    metrics
 }
 
 process Chai1Task {
@@ -60,7 +62,7 @@ process Chai1Task {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-        each fasta_path
+        path fasta_path
         val num_diffn_timesteps
         val num_trunk_recycles
         path bond_loss_input_proj
@@ -81,6 +83,7 @@ process Chai1Task {
     output:
     path 'output/*.cif', emit: cif
     path 'output/*.npz', emit: npz
+    path 'output/*.json', emit: metrics
 
     script:
     """

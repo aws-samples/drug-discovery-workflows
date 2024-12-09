@@ -9,6 +9,7 @@ numba==0.60.0
 numpy==2.0.2
 pandas[parquet,aws]==2.2.3
 pandera==0.21.1
+pyfastx==2.1.0
 rdkit==2024.3.6
 tmtools==0.2.0
 torch==2.5.1+cu124
