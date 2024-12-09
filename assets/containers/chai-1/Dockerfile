@@ -10,7 +10,7 @@ RUN apt-get update \
 # Install additional dependencies from requirements.txt file
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
-    && pip install --no-cache-dir -U --no-deps chai_lab==0.5.0 \
+    && pip install --no-cache-dir -U --no-deps chai-lab \
     && rm /tmp/requirements.txt
 
 ## Cleanup ##
@@ -22,5 +22,7 @@ COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
 ENV TMPDIR="/tmp"
+# https://pytorch.org/docs/stable/notes/cuda.html#environment-variables
+ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 ENTRYPOINT []
