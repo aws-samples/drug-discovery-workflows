@@ -10,7 +10,23 @@ phases:
       - echo Logging in to AWS Deep Learning Containers ECR...
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com
       - echo "Loading NGC credentials from AWS Secrets Manager"
-      - export NGC_CLI_API_KEY=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_API_KEY'`
+      - echo $SECRET_NAME
+      - aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text > secrets.json 2>/dev/null || true
+      - |
+        function export_json_to_env () {
+          INPUT_FILE="${1}"
+          while IFS=$'\t\n' read -r LINE; do
+            export "${LINE}"
+          done < <(
+            <"${INPUT_FILE}" jq \
+                --compact-output \
+                --raw-output \
+                --monochrome-output \
+                --from-file \
+                <(echo 'to_entries | map("\(.key)=\(.value)") | .[]')
+          )
+        } \
+        && export_json_to_env "secrets.json" && rm secrets.json
       - if [ -n "$NGC_CLI_API_KEY"];
         then
         echo "Logging in to nvcr.io";
