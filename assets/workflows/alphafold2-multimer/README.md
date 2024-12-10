@@ -16,7 +16,6 @@ Pick your favorite small fasta file to run your fist end-to-end test. The follow
 
 ### Inputs
 
-`target_id`: The ID of the target you wish to predict
 `fasta_path`: S3 URI to a single FASTA file that is in multi-FASTA format. Currently supports 1-chain per record.
 
 ### Example params.json

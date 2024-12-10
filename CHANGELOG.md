@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.0] - 2024-12-10
+
+### 2.7.0 Added
+
+- Added Chai-1 biomolecule structure prediction workflow.
+
+### 2.7.0 Changes
+
+- Removed `target_id` input for AlphaFold2-Multimer workflow.
+
+---
+
 ## [2.6.0] - 2024-12-04
 
 ### 2.6.0 Added

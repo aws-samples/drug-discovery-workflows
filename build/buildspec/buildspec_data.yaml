@@ -10,16 +10,17 @@ phases:
   pre_build:
     commands:
       - echo Build started on `date` for $NAME
+      - echo "Build context is $BUILD_CONTEXT"
+      - echo "Loading secrets from AWS Secrets Manager"
+      - echo $SECRET_NAME
+      - aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text > 'secrets.json' 2>/dev/null || true
+      - SECRET_VALUES=$(jq --compact-output --raw-output 'to_entries | map("\(.key)=\(.value)") | .[]' secrets.json)
+      - for SECRET in $SECRET_VALUES; do export $SECRET; done
+      - rm secrets.json && unset SECRET_VALUES
       - echo "Processing $BUILD_CONTEXT"
       - echo "Replacing REGION placeholders"
       - sed -i='' "s/{{REGION}}/$REGION/g" $BUILD_CONTEXT 2>/dev/null || true
-      - |
-        if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then
-          BUCKET_NAME=${BASH_REMATCH[1]}
-          echo "Destination Bucket Name: $BUCKET_NAME"
-        else
-          echo "Invalid S3 URI"
-        fi
+      - if [[ "$DESTINATION_URI" =~ ^s3?://([^/]+) ]]; then BUCKET_NAME=${BASH_REMATCH[1]}; else echo "Invalid S3 URI"; fi
       - echo Installing Mountpoint for Amazon S3
       - wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.deb
       - sudo apt-get update && sudo apt-get install -y ./mount-s3.deb git-lfs zip tar
@@ -28,9 +29,6 @@ phases:
       - echo Mounting $DESTINATION_URI
       - mount-s3 $BUCKET_NAME $HOME/s3 --allow-delete --allow-overwrite --write-part-size=419257600
       - echo "Installing NVIDIA NGC CLI"
-      - echo "Loading NGC credentials from AWS Secrets Manager"
-      - export NGC_CLI_API_KEY=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_API_KEY'`
-      - export NGC_CLI_ORG=`aws secretsmanager get-secret-value --secret-id NVIDIA_NGC_CREDS --query SecretString --output text | jq -r '.NGC_CLI_ORG'`            
       - wget -q --content-disposition https://api.ngc.nvidia.com/v2/resources/nvidia/ngc-apps/ngc_cli/versions/3.53.0/files/ngccli_linux.zip -O ngccli_linux.zip && unzip -q ngccli_linux.zip
       - chmod u+x ngc-cli/ngc
       - echo "export PATH=\"\$PATH:$(pwd)/ngc-cli\"" >> ~/.bash_profile && source ~/.bash_profile

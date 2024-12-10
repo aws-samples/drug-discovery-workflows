@@ -21,7 +21,7 @@ include {
 } from './unpack'
 
 workflow AlphaFold2Multimer {
-    CheckAndValidateInputsTask(params.target_id, params.fasta_path)
+    CheckAndValidateInputsTask(params.fasta_path)
 
     // split fasta run parallel searches (Scatter)
     split_seqs = CheckAndValidateInputsTask.out.fasta
@@ -70,8 +70,7 @@ workflow AlphaFold2Multimer {
 
     // Predict. Five separate models
     model_nums = Channel.of(0, 1, 2, 3, 4)
-    AlphaFoldMultimerInference(params.target_id,
-                               GenerateFeaturesTask.out.features,
+    AlphaFoldMultimerInference(GenerateFeaturesTask.out.features,
                                params.alphafold_model_parameters,
                                model_nums, params.random_seed,
                                params.run_relax)
@@ -87,7 +86,6 @@ process CheckAndValidateInputsTask {
     publishDir '/mnt/workflow/pubdir/inputs'
 
     input:
-        val target_id
         path fasta_path
 
     output:
@@ -101,7 +99,7 @@ process CheckAndValidateInputsTask {
     ls -alR
     /opt/venv/bin/python \
     /home/putils/src/putils/check_and_validate_inputs.py \
-    --target_id=$target_id --fasta_path=$fasta_path
+    --fasta_path=$fasta_path
     """
 }
 
@@ -156,7 +154,6 @@ process AlphaFoldMultimerInference {
     maxRetries 2
     publishDir '/mnt/workflow/pubdir'
     input:
-        val target_id
         path features
         path alphafold_model_parameters
         val modelnum
@@ -174,7 +171,7 @@ process AlphaFoldMultimerInference {
     export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
     export TF_FORCE_UNIFIED_MEMORY=1
     /opt/conda/bin/python /app/alphafold/predict.py \
-      --target_id=$target_id --features_path=$features --model_preset=multimer \
+      --features_path=$features --model_preset=multimer \
       --model_dir=model --random_seed=$random_seed --output_dir=output_model_${modelnum} \
       --run_relax=${run_relax} --use_gpu_relax=${run_relax} --model_num=$modelnum
 
