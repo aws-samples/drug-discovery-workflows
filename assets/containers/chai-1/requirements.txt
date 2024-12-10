@@ -1,8 +1,6 @@
-accelerate==1.2.0
 antipickle==0.2.0
 beartype==0.19.0
 biopython==1.84
-bitsandbytes==0.45.0
 einops==0.8.0
 gemmi==0.7.0
 jaxtyping==0.2.36

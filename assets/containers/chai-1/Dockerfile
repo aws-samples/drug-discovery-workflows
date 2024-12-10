@@ -10,7 +10,7 @@ RUN apt-get update \
 # Install additional dependencies from requirements.txt file
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
-    && pip install --no-cache-dir -U --no-deps chai-lab \
+    && pip install --no-cache-dir -U --no-deps chai_lab \
     && rm /tmp/requirements.txt
 
 ## Cleanup ##
