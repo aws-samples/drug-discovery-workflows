@@ -92,8 +92,8 @@ process Chai1Task {
     mkdir models_v2
     ln -t models_v2 $bond_loss_input_proj $confidence_head $diffusion_module $feature_embedding $token_embedder $trunk
     
-    mkdir -p esm/models--facebook--esm2_t36_3B_UR50D/snapshots/476b639933c8baad5ad09a60ac1a87f987b656fc
-    ln -t esm/models--facebook--esm2_t36_3B_UR50D/snapshots/476b639933c8baad5ad09a60ac1a87f987b656fc \
+    mkdir -p facebook/esm2_t36_3B_UR50D
+    ln -t facebook/esm2_t36_3B_UR50D \
         $esm2_config $esm2_pytorch_model_00001_of_00002 \
         $esm2_pytorch_model_00002_of_00002 \
         $esm2_pytorch_model_bin_index \
