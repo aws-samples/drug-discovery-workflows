@@ -1,0 +1,4 @@
+platform:
+  accel: "gpu"
+  cache_dir: "/home/thermompnn/enzyme_stability_cache"
+  thermompnn_dir: "/home/thermompnn"
