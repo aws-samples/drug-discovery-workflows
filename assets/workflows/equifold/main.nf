@@ -1,24 +1,34 @@
 nextflow.enable.dsl = 2
 
-// static data files are in nextflow.config
-workflow {
-    if(!(params.model in ["ab", "science"])) {
+workflow Equifold{
+
+    take:
+    input_csv
+    model
+    ncpu
+    
+    main:
+    if(!(model in ["ab", "science"])) {
         error("model type can only be 'ab' (for antibodies), or 'science' (for mini-proteins)")
     }
     RunEquifoldPredict(
-        params.input_csv,
-        params.model,
-        params.ncpu
+        input_csv,
+        model,
+        ncpu
     )
+
+    RunEquifoldPredict.out.pdbs.collect().set {pdbs}
+
+    emit:
+    pdbs
 }
 
-
 process RunEquifoldPredict {
-    container '588738610715.dkr.ecr.us-east-1.amazonaws.com/equifold:latest'
+    label 'equifold'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir/'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path input_csv
@@ -37,4 +47,12 @@ process RunEquifoldPredict {
         --ncpu ${ncpu} \
         --out_dir output
     """
+}
+
+workflow {
+    Equifold(
+        Channel.fromPath(params.input_csv),
+        Channel.value(params.model),
+        Channel.value(params.ncpu)
+    )
 }

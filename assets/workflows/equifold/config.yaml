@@ -8,10 +8,10 @@ parameterTemplate:
     optional: false
   model:
     description: "The type of protein to predict structure for, can be of value ['ab', 'science']."
-    optional: false
+    optional: true
   ncpu:
     description: "Number of CPU for parallel preprocessing of the data."
-    optional: false
+    optional: true
 storageCapacity: 1200
 tags:
   Name: "EquiFold"
