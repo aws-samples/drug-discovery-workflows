@@ -30,10 +30,10 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 from resource import getrusage, RUSAGE_SELF
 
-from uuid import uuid4
 
 logging.set_verbosity(logging.INFO)
 
+flags.DEFINE_string("target_id", None, "Target id info.")
 flags.DEFINE_string("features_path", None, "Path to features pkl file.")
 flags.DEFINE_string("model_dir", None, "Path to unzipped model dir.")
 flags.DEFINE_string(
@@ -108,6 +108,7 @@ def plot_pae(pae, output) -> None:
 
 
 def predict_structure(
+    target_id: str,
     output_dir: str,
     features_path: str,
     model_runners: Dict[str, model.RunModel],
@@ -115,11 +116,12 @@ def predict_structure(
     random_seed: int,
 ):
     """Predicts structure using AlphaFold for the given sequence."""
-    logging.info("Predicting target")
+    logging.info("Predicting %s", target_id)
     metrics = {
         "model_name": "AlphaFold",
         "model_version": "2.3.1",
         "start_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime()),
+        "target_id": target_id,
     }
     timings = {}
     metrics["timings"] = {}
@@ -148,7 +150,7 @@ def predict_structure(
     num_models = len(model_runners)
     metrics["model_results"] = {}
     for model_index, (model_name, model_runner) in enumerate(model_runners.items()):
-        logging.info("Running model %s", model_name)
+        logging.info("Running model %s on %s", model_name, target_id)
         t_0 = time.time()
         model_random_seed = model_index + random_seed * num_models
         processed_feature_dict = model_runner.process_features(
@@ -165,6 +167,7 @@ def predict_structure(
         logging.info(
             "Total JAX model %s on %s predict time (includes compilation time): %.1fs",
             model_name,
+            target_id,
             t_diff,
         )
 
@@ -263,7 +266,7 @@ def predict_structure(
     ]["max_predicted_aligned_error"]
 
     # Write out metrics
-    logging.info("Final timings: %s", timings)
+    logging.info("Final timings for %s: %s", target_id, timings)
     timings_output_path = os.path.join(output_dir, "timings.json")
     with open(timings_output_path, "w") as f:
         f.write(json.dumps(timings, indent=4))
@@ -333,9 +336,12 @@ def main(argv):
 
     random_seed = FLAGS.random_seed
 
+    target_id = FLAGS.target_id
+
     if random_seed is None:
         random_seed = random.randrange(sys.maxsize // len(model_runners))
     predict_structure(
+        target_id=target_id,
         features_path=FLAGS.features_path,
         output_dir=FLAGS.output_dir,
         model_runners=model_runners,
@@ -347,6 +353,7 @@ def main(argv):
 if __name__ == "__main__":
     flags.mark_flags_as_required(
         [
+            "target_id",
             "features_path",
             "output_dir",
             "model_dir",
