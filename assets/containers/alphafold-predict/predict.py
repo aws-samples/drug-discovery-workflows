@@ -336,7 +336,6 @@ def main(argv):
     if random_seed is None:
         random_seed = random.randrange(sys.maxsize // len(model_runners))
     predict_structure(
-        target_id=uuid4().hex,
         features_path=FLAGS.features_path,
         output_dir=FLAGS.output_dir,
         model_runners=model_runners,
