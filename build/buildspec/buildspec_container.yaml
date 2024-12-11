@@ -3,12 +3,23 @@
 
 version: 0.2
 
+env:
+  shell: bash
+
 phases:
   pre_build:
     commands:
       - echo Build started on `date` for $NAME
+      - echo "Build context is $BUILD_CONTEXT"
+      - echo "Loading secrets from AWS Secrets Manager"
+      - echo $SECRET_NAME
+      - aws secretsmanager get-secret-value --secret-id $SECRET_NAME --query SecretString --output text > 'secrets.json' 2>/dev/null || true
+      - SECRET_VALUES=$(jq --compact-output --raw-output 'to_entries | map("\(.key)=\(.value)") | .[]' secrets.json)
+      - for SECRET in $SECRET_VALUES; do export $SECRET; done
+      - rm secrets.json && unset SECRET_VALUES
       - echo Logging in to AWS Deep Learning Containers ECR...
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com
+      - if [ -n "${NGC_CLI_API_KEY+x}" ]; then echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io; fi
   build:
     commands:
       - echo "Checking for repository ${NAME}"

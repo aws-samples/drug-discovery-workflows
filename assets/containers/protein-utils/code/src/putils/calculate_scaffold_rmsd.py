@@ -13,7 +13,9 @@ logging.basicConfig(
 
 
 def clean_structure(structure):
-    structure.res_id = struc.create_continuous_res_ids(structure)
+    structure.res_id = struc.create_continuous_res_ids(
+        structure, restart_each_chain=True
+    )
     structure[struc.info.standardize_order(structure)]
     structure = structure[struc.filter_canonical_amino_acids(structure)]
     return structure
@@ -52,7 +54,6 @@ def to_pdb_string(atom_array):
 def calc_rmsd(scaffold_pdb, predicted_pdb, output_dir):
 
     scaffold_file = PDBFile.read(scaffold_pdb)
-
     scaffold_structure = struc.io.pdb.get_structure(scaffold_file)
     scaffold_structure = clean_structure(
         scaffold_structure[0][scaffold_structure.chain_id == "A"]
@@ -62,16 +63,13 @@ def calc_rmsd(scaffold_pdb, predicted_pdb, output_dir):
     ]
 
     predicted_pdb_list = predicted_pdb.split(" ")
-
     output = []
-    for predicted_pdb in predicted_pdb_list:
+    for pred in predicted_pdb_list:
 
-        predicted_file = PDBFile.read(predicted_pdb)
+        predicted_file = PDBFile.read(pred)
         name = "".join(predicted_file.get_remark("1")).strip()
         predicted_structure = struc.io.pdb.get_structure(predicted_file)
-        predicted_structure = clean_structure(
-            predicted_structure[0][predicted_structure.chain_id == "A"]
-        )
+        predicted_structure = clean_structure(predicted_structure[0])
         predicted_backbone = predicted_structure[
             struc.filter_peptide_backbone(predicted_structure)
         ]
@@ -84,13 +82,16 @@ def calc_rmsd(scaffold_pdb, predicted_pdb, output_dir):
             "name": name,
             "rmsd": rmsd,
             "scaffold": os.path.basename(scaffold_pdb),
-            "predicted": os.path.basename(predicted_pdb),
+            "predicted": os.path.basename(pred),
         }
         output.append(metrics)
         logging.info(metrics)
 
-    with jsonlines.open(os.path.join(output_dir, "additional_results.jsonl"), mode="w") as writer:
+    with jsonlines.open(
+        os.path.join(output_dir, "additional_results.jsonl"), mode="w"
+    ) as writer:
         writer.write_all(output)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

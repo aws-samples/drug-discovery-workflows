@@ -7,7 +7,8 @@ workflow RFDiffusionProteinMPNN {
     num_bb_designs_per_target
     num_seq_designs_per_bb
     proteinmpnn_sampling_temp
-    scaffold_pdb
+    scaffold_pdb    
+    reps
     scaffold_design_chain
     scaffold_design_positions
     rfdiffusion_params
@@ -15,6 +16,7 @@ workflow RFDiffusionProteinMPNN {
     proteinmpnn_model_name
 
     main:
+
     GenerateCandidatesTask(
         target_pdb,
         hotspot_residues,
@@ -22,6 +24,7 @@ workflow RFDiffusionProteinMPNN {
         num_seq_designs_per_bb,
         proteinmpnn_sampling_temp,
         scaffold_pdb,
+        channel.of(1..params.reps),
         scaffold_design_chain,
         scaffold_design_positions,
         rfdiffusion_params,
@@ -54,6 +57,7 @@ process GenerateCandidatesTask {
         val num_seq_designs_per_bb
         val proteinmpnn_sampling_temp
         path scaffold_pdb
+        each rep
         val scaffold_design_chain
         val scaffold_design_positions
         path rfdiffusion_params
@@ -71,6 +75,7 @@ process GenerateCandidatesTask {
 
     export HYDRA_FULL_ERROR=1
 
+    echo "Rep is ${rep}"
     echo "Task id ${task.index}"
     echo "Task process ${task.process}"
 
@@ -157,6 +162,7 @@ workflow {
         Channel.value(params.num_seq_designs_per_bb),
         Channel.value(params.proteinmpnn_sampling_temp),
         Channel.fromPath(params.scaffold_pdb),
+        Channel.value(params.reps),
         Channel.value(params.scaffold_design_chain),
         Channel.value(params.scaffold_design_positions),
         Channel.fromPath(params.rfdiffusion_params),

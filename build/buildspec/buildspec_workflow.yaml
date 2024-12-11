@@ -7,9 +7,9 @@ phases:
   pre_build:
     commands:
       - echo Build started on `date` for $NAME
+      - echo Build context is $BUILD_CONTEXT
   build:
     commands:
-      - echo Build context is $BUILD_CONTEXT
       - echo Updating ECR URIs in workflow configs
       - sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
       - echo Updating S3 BucketName in workflow configs

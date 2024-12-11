@@ -1,0 +1,17 @@
+https://zenodo.org/records/11354577/files/output.tar.gz
+https://zenodo.org/record/7258553/files/antibody_model_1
+https://zenodo.org/record/7258553/files/antibody_model_2
+https://zenodo.org/record/7258553/files/antibody_model_3
+https://zenodo.org/record/7258553/files/antibody_model_4
+https://zenodo.org/record/7258553/files/nanobody_model_1
+https://zenodo.org/record/7258553/files/nanobody_model_2
+https://zenodo.org/record/7258553/files/nanobody_model_3
+https://zenodo.org/record/7258553/files/nanobody_model_4
+https://zenodo.org/records/10892159/files/tcr_model_1
+https://zenodo.org/records/10892159/files/tcr_model_2
+https://zenodo.org/records/10892159/files/tcr_model_3
+https://zenodo.org/records/10892159/files/tcr_model_4
+https://zenodo.org/record/7258553/files/tcr_model_1
+https://zenodo.org/record/7258553/files/tcr_model_2
+https://zenodo.org/record/7258553/files/tcr_model_3
+https://zenodo.org/record/7258553/files/tcr_model_4

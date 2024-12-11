@@ -7,7 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.8.0] - 2024-12-11
+
+### 2.8.0 Added
+
+- Added ThermoMPNN thermostability prediction workflow.
+
+---
+
+## [2.7.0] - 2024-12-10
+
+### 2.7.0 Added
+
+- Added Chai-1 biomolecule structure prediction workflow.
+
+---
+
+## [2.6.0] - 2024-12-04
+
+### 2.6.0 Added
+
+- Added NVIDIA BioNeMo NiM protein design workflow.
+
+---
+
+## [2.5.0] - 2024-11-25
+
+### 2.5.0 Added
+
+- Added additional datasets from NVIDIA NGC.
+- Added ABodyBuilder3 antibody structure prediction workflow.
+- Added NanobodyBuilder2 nanobody structure prediction workflow.
+
+### 2.5.0 Changed
+
+- Updated parallelization of nanobody design workflow to improve throughput.
+
+---
+
+## [2.4.0] - 2024-11-16
+
+### 2.4.0 Added
+
+- Added EvoProtGrad antibody optimization workflow.
+
+---
+
 ## [2.3.3] - 2024-11-08
+
+### 2.3.3 Added
+
+- Added AlphaBind antibody optimization workflow.
 
 ### 2.3.3 Fixed
 

@@ -24,11 +24,11 @@ process PPLTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    path fasta_path
+    each fasta_path
     path model_parameters
 
     output:
-    path 'ppl.jsonl', emit: ppl_results
+    path "*.jsonl", emit: ppl_results
 
     script:
     """
@@ -36,6 +36,7 @@ process PPLTask {
     /opt/conda/bin/python /home/scripts/calculate_ppl.py $fasta_path \
         --output_dir "." \
         --pretrained_model_name_or_path $model_parameters
+    mv ppl.jsonl ppl_${task.index}.jsonl
     """
 }
 

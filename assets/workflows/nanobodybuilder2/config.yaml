@@ -1,0 +1,12 @@
+name: NanoBodyBuilder2
+description: "This workflow predicts the 3D structures for one or more nanobody amino acid sequences using the NanoBodyBuilder2 model from the Oxford Protein Informatics Group."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  fasta_path:
+    description: "FASTA file containing a single amino acid sequence for the nanobody heavy chain"
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "NanoBodyBuilder2"
+accelerators: GPU

@@ -1,0 +1,9 @@
+{
+    "pdb_input_path":"s3://<Your Bucket>/input/pdb/",
+    "fasta_path":"s3:///<Your Bucket>/input/fasta/",
+    "contigs": "A163-181/0 10-40",
+    "num_design": 5,
+    "input_pdb_chains": "B",
+    "num_seq_per_target": 5,
+    "max_retries": 2
+}
