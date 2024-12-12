@@ -8,9 +8,7 @@ workflow Equifold{
     ncpu
     
     main:
-    if(!(model in ["ab", "science"])) {
-        error("model type can only be 'ab' (for antibodies), or 'science' (for mini-proteins)")
-    }
+
     RunEquifoldPredict(
         input_csv,
         model,
@@ -50,6 +48,9 @@ process RunEquifoldPredict {
 }
 
 workflow {
+    if(!(params.model in ["ab", "science"])) {
+        error("model type can only be 'ab' (for antibodies), or 'science' (for mini-proteins)")
+    }
     Equifold(
         Channel.fromPath(params.input_csv),
         Channel.value(params.model),
