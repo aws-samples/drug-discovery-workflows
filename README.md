@@ -15,6 +15,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
 - [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
 - [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
+- [EquiFold](https://github.com/Genentech/equifold): From Prescient Design, a Genentech accelerator. Predict protein structures with an novel coarse-grained structure representation.
 - [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
 - [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
 - [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
