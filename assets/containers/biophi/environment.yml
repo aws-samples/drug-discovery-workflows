@@ -1,0 +1,21 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python = 3.9
+  - pip<24.1 # due to error in omegaconf (dependency of fairseq)
+  - pip:
+    - pandas < 2.2
+    - sqlalchemy < 2
+    - biopython
+    - fairseq >= 0.10.2
+    - pytest
+    - requests
+    - tqdm
+    - xlsxwriter
+    - humanize
+    - sapiens >= 1.0.4
+  - abnumber == 0.3.2
+  - anarci == 2020.04.23
+  - hmmer >= 3.1
+  - biophi == 1.0.10

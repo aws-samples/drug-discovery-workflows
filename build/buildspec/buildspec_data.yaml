@@ -89,6 +89,10 @@ phases:
           else
             echo "Downloading ${SOURCE_URI}"
             wget -nc $SOURCE_URI -P $HOME/s3/$KEY --no-verbose --show-progress --progress=dot:giga
+            if [[ "$SOURCE_URI" =~ .*\.gz$ ]]; then
+              echo "Extracting file"
+              gunzip -k $HOME/s3/$KEY/*.gz
+            fi;
           fi;          
         done <$BUILD_CONTEXT
 

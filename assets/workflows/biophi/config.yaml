@@ -1,0 +1,21 @@
+name: BioPhi
+description: "This workflow performs antibody humanization and humanness evaluation."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_fasta:
+    description: "Fasta file containing the Ab sequences for the humanization and humanness eval; Both chains of each antibody should have the same ID with an optional _VL/_VH or _HC/_LC suffix"
+    optional: false
+  humanize:
+    description: "Whether to run humanization on the antibody sequences"
+    optional: true
+  eval:
+    description: "Whether to run humanness evaluation on the antibody sequences"
+    optional: true
+  eval_option:
+    description: "Method to use for humanness evaluation, valid values are 'sapien' and 'oasis'"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "BioPhi"
+accelerators: GPU
