@@ -1,40 +1,46 @@
 nextflow.enable.dsl = 2
 
-// static data files are in nextflow.config
-workflow {
-    if ( params.humanize && params.eval) {
-        // run the full humanization and eval
+workflow BioPhi {
+
+    take:
+    input_fasta
+    humanize
+    eval
+    eval_option
+    oas_db_path
+
+    main:
+    
+    if ( humanize && eval ) {
         RunHumanizationAndEval(
-            params.input_fasta,
-            params.oas_db_path
+            input_fasta,
+            oas_db_path
         )
-        }
-    else if (params.humanize && !params.eval) {
-        // only run humanization
-        RunHumanization(params.input_fasta)
-        }
-    else if (!params.humanize && params.eval) {
-        // only run eval
-        if (params.eval_option == "sapien") {
-            RunSapienEval(params.input_fasta)
-        }
-        else if (params.eval_option == "oasis") {
-            RunOASisEval(
-                params.input_fasta,
-                params.oas_db_path
-            )
+    }
+    else if (humanize && !eval) {
+        RunHumanization(input_fasta)
+    }
+    else if (!humanize && eval ) {
+        if (eval_option == "sapien") {
+            RunSapienEval(input_fasta)
+        }  
+        else if (eval_option == "oasis") {
+            RunOASisEval(input_fasta, oas_db_path)
         }
         else {error "Error: supported eval options are 'sapien' and 'oasis'."}
+    }
+    else {
+        println "Please specify either humanize or eval."
     }
 }
 
 
 process RunSapienEval {
-    container '588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest'
+    label 'biophi'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path input_fasta
@@ -52,11 +58,11 @@ process RunSapienEval {
 }
 
 process RunOASisEval {
-    container '588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest'
+    label 'biophi'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path input_fasta
@@ -75,11 +81,11 @@ process RunOASisEval {
 }
 
 process RunHumanization {
-    container '588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest'
+    label 'biophi'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path input_fasta
@@ -97,11 +103,11 @@ process RunHumanization {
 }
 
 process RunHumanizationAndEval {
-    container '588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest'
+    label 'biophi'
     cpus 8
     memory '32 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir '/mnt/workflow/pubdir'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path input_fasta
@@ -117,4 +123,14 @@ process RunHumanizationAndEval {
         --oasis-db ${oas_db_path} \
         --output humanized/
     """
+}
+
+workflow {
+    BioPhi(
+        Channel.fromPath(params.input_fasta),
+        params.humanize,
+        params.eval,
+        params.eval_option,
+        Channel.fromPath(params.oas_db_path)
+    )
 }

@@ -15,3 +15,5 @@ RUN conda env create -n biophi -f /tmp/environment.yml
 # activate environment
 RUN echo "source activate biophi" > ~/.bashrc
 ENV PATH=/opt/conda/envs/biophi/bin:$PATH
+
+ENTRYPOINT []

@@ -1,4 +1,4 @@
-name: Biophi
+name: BioPhi
 description: "This workflow performs antibody humanization and humanness evaluation."
 engine: NEXTFLOW
 main: main.nf
@@ -8,14 +8,14 @@ parameterTemplate:
     optional: false
   humanize:
     description: "Whether to run humanization on the antibody sequences"
-    optional: false
+    optional: true
   eval:
     description: "Whether to run humanness evaluation on the antibody sequences"
-    optional: false
+    optional: true
   eval_option:
     description: "Method to use for humanness evaluation, valid values are 'sapien' and 'oasis'"
-    optional: false
+    optional: true
 storageCapacity: 1200
 tags:
-  Name: "Biophi"
+  Name: "BioPhi"
 accelerators: GPU
