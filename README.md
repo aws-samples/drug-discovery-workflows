@@ -22,6 +22,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
 - [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
 - [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
+- [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
 - [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN): From the University of North Carolina School of Medicine. Predict changes in thermodynamic stability for protein point mutants.
 
 ### E2E Workflows
