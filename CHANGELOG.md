@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.9.0] - 2024-12-13
+
+### 2.9.0 Added
+
+- Added EquiFold prediction workflow.
+- Added BioPhi prediction workflow.
+
+---
+
 ## [2.8.0] - 2024-12-11
 
 ### 2.8.0 Added
