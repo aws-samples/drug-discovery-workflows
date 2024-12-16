@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.0] - 2024-12-13
+
+### 2.10.0 Added
+
+- Added TemStaPro prediction workflow.
+
+---
+
+## [2.9.0] - 2024-12-13
+
+### 2.9.0 Added
+
+- Added EquiFold prediction workflow.
+- Added BioPhi prediction workflow.
+
+---
+
+## [2.8.0] - 2024-12-11
+
+### 2.8.0 Added
+
+- Added ThermoMPNN thermostability prediction workflow.
+
+---
+
+## [2.7.0] - 2024-12-10
+
+### 2.7.0 Added
+
+- Added Chai-1 biomolecule structure prediction workflow.
+
+---
+
 ## [2.6.0] - 2024-12-04
 
 ### 2.6.0 Added

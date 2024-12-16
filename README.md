@@ -13,12 +13,17 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [Alphafold2-Multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): From Google DeepMind. Predict the 3D structure of multi-chain protein complexes.
 - [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
 - [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
+- [BioPhi](https://github.com/Merck/BioPhi): From Merck. Automated humanization and humanness evaluation.
+- [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
 - [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
+- [EquiFold](https://github.com/Genentech/equifold): From Prescient Design, a Genentech accelerator. Predict protein structures with an novel coarse-grained structure representation.
 - [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
 - [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
 - [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
 - [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
 - [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
+- [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
+- [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN): From the University of North Carolina School of Medicine. Predict changes in thermodynamic stability for protein point mutants.
 
 ### E2E Workflows
 
@@ -68,16 +73,14 @@ aws secretsmanager create-secret \
 
 ### Infrastructure Diagram
 
-<!-- Not final form yet -->
 <img src="./img/infra-diagram.png" />
 
-## Development (WIP)
+## Development
 
 To add a new module, fork the repository. There are three main components:
 
 * **Containers:** contains the required information/data to build Docker images for specific tasks
 * **Data:** contains links to parameters and other reference data used by workflow models
-* **Modules:** common packages, such as MSA search/unpacking data that multiple algorithms may use
 * **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
 ```txt
@@ -90,11 +93,6 @@ assets/
     ├── esm2.txt
     ├── esmfold.txt
     ├── rfdiffusion.txt
-    └── ...
-    modules/
-    ├── alphafold2/
-    ├── alphafold-multimer/
-    ├── unpack.nf
     └── ...
     workflows/
     ├── alphafold2/

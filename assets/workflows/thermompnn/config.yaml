@@ -1,0 +1,15 @@
+name: ThermoMPNN
+description: "GNN trained to predict changes in thermodynamic stability for protein point mutants. From the University of North Carolina School of Medicine"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  pdb_path:
+    description: "Input file in PDB format"
+    optional: false
+  chain_id:
+    description: "Chain ID to analyze. Defaults to A"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "ThermoMPNN"
+accelerators: GPU

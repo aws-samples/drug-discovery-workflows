@@ -1,0 +1,9 @@
+biopython
+joblib
+mmseqs
+numpy<2.0.0
+omegaconf
+pandas
+pytorch-lightning
+tqdm
+wandb
