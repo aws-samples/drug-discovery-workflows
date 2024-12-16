@@ -51,12 +51,11 @@ else
 fi
 
 # Package the workflow
-mkdir -p tmp/assets/workflows/$WORKFLOW_NAME tmp/assets/modules
+mkdir -p tmp/assets/workflows/$WORKFLOW_NAME
 
 pushd tmp
 
 cp -r ../assets/workflows/$WORKFLOW_NAME/* assets/workflows/$WORKFLOW_NAME
-cp -r ../assets/modules/* assets/modules
 
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
