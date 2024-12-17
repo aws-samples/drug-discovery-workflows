@@ -46,10 +46,10 @@ workflow {
     split_seqs = CheckAndValidateInputsTask.out.fasta.splitFasta(  record: [id: true, text: true] ).map { record ->
         def newRecordFile = file("${record.id}.fasta")
         newRecordFile.setText(record.text)
-        return tuple (newRecordFile.getBaseName().split("_")[0], newRecordFile.getBaseName(), newRecordFile)
+        return tuple (CheckAndValidateInputsTask.out.fasta.getBaseName(), newRecordFile.getBaseName(), newRecordFile)
     }
 
-    uniref30 = Channel.fromPath(params.uniref30_database_src).first()
+    // uniref30 = Channel.fromPath(params.uniref30_database_src).first()
     alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
 
     // Unpack the databases
