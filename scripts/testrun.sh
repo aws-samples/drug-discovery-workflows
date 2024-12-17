@@ -72,7 +72,8 @@ aws omics wait workflow-active --region $REGION --id $workflow_id
 # Run the workflow
 start_run_command="aws omics start-run \
     --retention-mode REMOVE \
-    --storage-type DYNAMIC \
+    --storage-type STATIC \
+    --storage-capacity 9600 \
     --workflow-id $workflow_id \
     --name $WORKFLOW_NAME-dev-$TIMESTAMP \
     --role-arn \"$OMICS_EXECUTION_ROLE\" \
