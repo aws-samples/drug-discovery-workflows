@@ -1,1 +1,2 @@
 boltz-community/boltz-1
+https://raw.githubusercontent.com/jwohlwend/boltz/refs/heads/main/examples/ligand.yaml
