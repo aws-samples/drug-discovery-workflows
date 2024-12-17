@@ -92,7 +92,6 @@ phases:
             if [[ "$SOURCE_URI" =~ .*\.tar.gz$ ]]; then
               echo "Extracting file"
               tar -xzf $HOME/s3/$KEY/*.tar.gz -C $HOME/s3/$KEY
-            fi;
             elif [[ "$SOURCE_URI" =~ .*\.gz$ ]]; then
               echo "Extracting file"
               gunzip -k $HOME/s3/$KEY/*.gz
