@@ -1,0 +1,30 @@
+name: AntiFold
+description: "This workflow uses AntiFold to predict sequences which fit into antibody variable domain structures."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  pdb_file:
+    description: "Input PDB file (for single PDB predictions)"
+    optional: true
+  heavy_chain:
+    description: "Antibody heavy chain (for single PDB predictions)"
+    optional: true
+  light_chain:
+    description: "Antibody light chain (for single PDB predictions)"
+    optional: true
+  antigen_chain:
+    description: "Antigen chain (for single PDB predictions) of antibody-antigen complex"
+    optional: true
+  nanobody_chain:
+    description: "Antibody nanobody chain (for single PDB predictions)"
+    optional: true
+  pdbs_csv:
+    description: "Input CSV file with PDB names and H/L chains (multi-PDB predictions)"
+    optional: true
+  pdb_dir:
+    description: "Directory with input PDB files (multi-PDB predictions)"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "AntiFold"
+accelerators: GPU
