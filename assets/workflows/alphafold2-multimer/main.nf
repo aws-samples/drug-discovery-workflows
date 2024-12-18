@@ -29,6 +29,16 @@ workflow {
         fasta_path = params.fasta_path
     }
     
+    // [5nl6, 5nl6.fasta]
+    // [5mlq, 5mlq.fasta]
+    fasta_files = Channel
+                  .fromPath(fasta_path)
+                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
+
+    // 5nl6.fasta
+    // 5mlq.fasta
+    CheckAndValidateInputsTask(fasta_files)
+
     // [5nl6, 5nl6.1, 5nl6.1.fasta]
     // [5nl6, 5nl6.2, 5nl6.2.fasta]
     // [5mlq, 5mlq.1, 5mlq.1.fasta]
@@ -37,21 +47,7 @@ workflow {
                  .splitFasta( file: true )
                  .map { filename -> tuple (filename.getBaseName().split("\\.")[0], filename.getBaseName(), filename) }
 
-    // 5nl6.fasta
-    // 5mlq.fasta
-    CheckAndValidateInputsTask(fasta_files)
-
-    // [5nl6, 5nl6_A, 5nl6_A.fasta]
-    // [5nl6, 5nl6_B, 5nl6_B.fasta]
-    // [5mlq, 5mlq_A, 5mlq_A.fasta]
-    // [5mlq, 5mlq_B, 5mlq_B.fasta]
-    split_seqs = CheckAndValidateInputsTask.out.fasta.splitFasta(  record: [id: true, text: true] ).map { record ->
-        def newRecordFile = file("${record.id}.fasta")
-        newRecordFile.setText(record.text)
-        return tuple (CheckAndValidateInputsTask.out.fasta.baseName, newRecordFile.getBaseName(), newRecordFile)
-    }
-
-    // uniref30 = Channel.fromPath(params.uniref30_database_src).first()
+    uniref30 = Channel.fromPath(params.uniref30_database_src).first()
     alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
 
     // Unpack the databases
