@@ -46,7 +46,7 @@ process AntiFoldSinglePDBHLChain {
     cpus 8
     memory '30 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir"
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path pdb_file
@@ -72,7 +72,7 @@ process AntiFoldSinglePDBAntigenComplex {
     cpus 8
     memory '30 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir"
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path pdb_file
@@ -100,7 +100,7 @@ process AntiFoldSinglePDBNanobody {
     cpus 8
     memory '30 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir"
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path pdb_file
@@ -128,7 +128,7 @@ process AntiFoldMultiplePDB {
     cpus 8
     memory '30 GB'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir"
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
         path pdb_file
