@@ -1,0 +1,1 @@
+s3://openfold/openfold_params/

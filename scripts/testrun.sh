@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# usage: ./scripts/testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS [-g RUN_GROUP_ID]
+# usage: ./scripts/testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -f REF_DATA_BUCKET -p PARAMETERS [-g RUN_GROUP_ID]
 
 set -ex
-unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS RUN_GROUP_ID
+unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET REF_DATA_BUCKET PARAMETERS RUN_GROUP_ID
 
 TIMESTAMP=$(date +%s)
 
@@ -13,13 +13,14 @@ if [ -f ".aws/env" ]; then
 fi
 
 # Set variables from arguments if they are not already set
-while getopts 'w:a:r:o:b:p:g:' OPTION; do
+while getopts 'w:a:r:o:b:p:g:f:' OPTION; do
   case "$OPTION" in
   w) WORKFLOW_NAME="$OPTARG" ;;
   a) [ -z "$ACCOUNT_ID" ] && ACCOUNT_ID="$OPTARG" ;;
   r) [ -z "$REGION" ] && REGION="$OPTARG" ;;
   o) [ -z "$OMICS_EXECUTION_ROLE" ] && OMICS_EXECUTION_ROLE="$OPTARG" ;;
   b) [ -z "$OUTPUT_BUCKET" ] && OUTPUT_BUCKET="$OPTARG" ;;
+  f) [ -z "$REF_DATA_BUCKET" ] && REF_DATA_BUCKET="$OPTARG" ;;
   p) PARAMETERS="$OPTARG" ;;
   g) [ -z "$RUN_GROUP_ID" ] && RUN_GROUP_ID="$OPTARG" ;;
   *) exit 1 ;;
@@ -33,34 +34,27 @@ if [ -z "$WORKFLOW_NAME" ] || [ -z "$ACCOUNT_ID" ] || [ -z "$REGION" ] || [ -z "
   exit 1
 fi
 
-# Login to ECR
-aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
-
-# rfdiffusion is the only workflow name that is 1:1 with container name
-if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
-  pushd assets/containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
-  popd
-else
-  docker build \
-    --platform linux/amd64 \
-    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
-    -f assets/containers/$WORKFLOW_NAME/Dockerfile assets/containers/$WORKFLOW_NAME
-
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
-fi
+# Run container build script
+pushd assets/containers
+bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
+popd
 
 # Package the workflow
-mkdir -p tmp/assets/workflows/$WORKFLOW_NAME tmp/assets/modules
+mkdir -p tmp/assets/workflows/$WORKFLOW_NAME
 
 pushd tmp
 
 cp -r ../assets/workflows/$WORKFLOW_NAME/* assets/workflows/$WORKFLOW_NAME
-cp -r ../assets/modules/* assets/modules
 
+# Replace ECR URLs (legacy config)
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+
+# Replace {{S3_BUCKET_NAME}} and container strings like {{openfold:latest}}
+# Always use develop tag in this script
+sed -i='' "s/{{\s*\([A-Za-z0-9_-]*\):[A-Za-z0-9_-]*\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1:develop/g" ./assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+sed -i='' "s/{{S3_BUCKET_NAME}}/$REF_DATA_BUCKET/g" ./assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
 
 zip -r drug-discovery-workflows.zip .
 
