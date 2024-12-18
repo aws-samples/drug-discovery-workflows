@@ -46,7 +46,7 @@ workflow {
     split_seqs = CheckAndValidateInputsTask.out.fasta.splitFasta(  record: [id: true, text: true] ).map { record ->
         def newRecordFile = file("${record.id}.fasta")
         newRecordFile.setText(record.text)
-        return tuple (CheckAndValidateInputsTask.out.fasta.getBaseName(), newRecordFile.getBaseName(), newRecordFile)
+        return tuple (CheckAndValidateInputsTask.out.fasta.baseName, newRecordFile.getBaseName(), newRecordFile)
     }
 
     // uniref30 = Channel.fromPath(params.uniref30_database_src).first()
