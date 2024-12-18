@@ -29,11 +29,13 @@ workflow {
         fasta_path = params.fasta_path
     }
     
-    // [5nl6, 5nl6.fasta]
-    // [5mlq, 5mlq.fasta]
-    fasta_files = Channel
-                  .fromPath(fasta_path)
-                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
+    // [5nl6, 5nl6.1, 5nl6.1.fasta]
+    // [5nl6, 5nl6.2, 5nl6.2.fasta]
+    // [5mlq, 5mlq.1, 5mlq.1.fasta]
+    // [5mlq, 5mlq.2, 5mlq.2.fasta]
+    split_seqs = CheckAndValidateInputsTask.out.fasta
+                 .splitFasta( file: true )
+                 .map { filename -> tuple (filename.getBaseName().split("\\.")[0], filename.getBaseName(), filename) }
 
     // 5nl6.fasta
     // 5mlq.fasta
