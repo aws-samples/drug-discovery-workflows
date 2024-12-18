@@ -1,0 +1,6 @@
+{  
+  "fasta_path": {
+      "description": "Input file in multi-FASTA format.",
+      "optional": false
+    }
+}
