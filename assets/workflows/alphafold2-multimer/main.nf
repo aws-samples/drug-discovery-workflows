@@ -40,35 +40,20 @@ workflow {
     CheckAndValidateInputsTask(fasta_files)
 
     // Explode/scatter the fasta files into channels per contained record ID
-    splitFastaWithBasename = CheckAndValidateInputsTask.out.fasta.map { f ->
-        // use indexed fasta names rather than record 
-        return tuple (f.baseName, f.splitFasta( file: true ))
-        // return tuple (f.baseName, f.splitFasta( record: [id: true, text: true] ))
-    }
-    
-    // Write fasta records and return expected tuple format:
-    // [5nl6, 5nl6_A, 5nl6_A.fasta]
-    // [5nl6, 5nl6_B, 5nl6_B.fasta]
-    // [5mlq, 5mlq_A, 5mlq_A.fasta]
-    // [5mlq, 5mlq_B, 5mlq_B.fasta]
-    // or
-    // [4ZQK_simple, 4ZQK2, 4ZQK2.fasta] 
-    // [4ZQK_simple, 4ZQK1, 4ZQK1.fasta]
-    // 
     // Write the exploded fasta records to their own file, include in tuple that contains original fasta file basename
-    split_seqs = splitFastaWithBasename.map { t ->
-        def fastaBaseName = t[0]
-        def records = t[1]
+    // [5nl6, 5nl6.1, 5nl6.1.fasta]
+    // [5nl6, 5nl6.2, 5nl6.2.fasta]
+    // [5mlq, 5mlq.1, 5mlq.1.fasta]
+    // [5mlq, 5mlq.2, 5mlq.2.fasta]
+    split_seqs = CheckAndValidateInputsTask.out.fasta.map { fastaFile ->
+        def fastaBaseName = fastaFile.baseName
+        def records = fastaFile.splitFasta( file: true )
 
-        def recordList = []
+        def fastaRecordTupleList = []
         records.forEach { record -> 
-            // def newRecordFile = file("${record.id}.fasta")
-            // newRecordFile.setText(record.text)
-            // 
-            // use indexed fasta names rather than record 
-            recordList.add(tuple (fastaBaseName, record.getBaseName(), record))
+            fastaRecordTupleList.add(tuple (fastaBaseName, record.getBaseName(), record))
         }
-        return recordList
+        return fastaRecordTupleList
     } | flatMap
 
     // uniref30 = Channel.fromPath(params.uniref30_database_src).first()
@@ -93,9 +78,6 @@ workflow {
                 params.pdb_mmcif_src9, 
                 params.pdb_mmcif_obsolete)
 
-    // [4ZQK_simple, 4ZQK2, 4ZQK2.fasta] 
-    // [4ZQK_simple, 4ZQK1, 4ZQK1.fasta]
-    // 
     // Searches are call for each fastas * records
     SearchUniref90(split_seqs, params.uniref90_database_src)
     SearchMgnify(split_seqs, params.mgnify_database_src)
@@ -104,8 +86,8 @@ workflow {
 
     SearchTemplatesTask(SearchUniref90.out.fasta_basename_with_record_id_and_msa, UnpackPdb70nSeqres.out.db_folder)
 
-    // [5nl6, 5nl6.fasta, [output_5nl6_A/5nl6_A_uniref90_hits.sto, output_5nl6_B/5nl6_B_uniref90_hits.sto], [output_5nl6_B/5nl6_B_mgnify_hits.sto, output_5nl6_A/5nl6_A_mgnify_hits.sto], ...]
-    // [5mlq, 5mlq.fasta, [output_5mlq_A/5mlq_A_uniref90_hits.sto, output_5mlq_B/5mlq_B_uniref90_hits.sto], [output_5mlq_A/5mlq_A_mgnify_hits.sto, output_5mlq_B/5mlq_B_mgnify_hits.sto], ...]
+    // [5nl6, 5nl6.fasta, [output_5nl6.1/5nl6.1_uniref90_hits.sto, output_5nl6.2/5nl6.2_uniref90_hits.sto], [output_5nl6.2/5nl6.2_mgnify_hits.sto, output_5nl6.1/5nl6.1_mgnify_hits.sto], ...]
+    // [5mlq, 5mlq.fasta, [output_5mlq.1/5mlq.1_uniref90_hits.sto, output_5mlq.2/5mlq.2_uniref90_hits.sto], [output_5mlq.1/5mlq.1_mgnify_hits.sto, output_5mlq.2/5mlq.2_mgnify_hits.sto], ...]
     // 
     // Combine/gather the search results into channels per original fasta file
     msa_tuples = fasta_files
