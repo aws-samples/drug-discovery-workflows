@@ -39,15 +39,15 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 # rfdiffusion is the only workflow name that is 1:1 with container name
 if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
   pushd assets/containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
+  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID developjj
   popd
 else
   docker build \
     --platform linux/amd64 \
-    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
+    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:developjj \
     -f assets/containers/$WORKFLOW_NAME/Dockerfile assets/containers/$WORKFLOW_NAME
 
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:developjj
 fi
 
 # Package the workflow
@@ -72,6 +72,8 @@ aws omics wait workflow-active --region $REGION --id $workflow_id
 # Run the workflow
 start_run_command="aws omics start-run \
     --retention-mode REMOVE \
+    --cache-id "4556527" \
+    --cache-behavior "CACHE_ALWAYS" \
     --storage-type STATIC \
     --storage-capacity 9600 \
     --workflow-id $workflow_id \

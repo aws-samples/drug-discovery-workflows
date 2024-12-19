@@ -57,7 +57,7 @@ workflow {
 
         def recordList = []
         records.forEach { record -> 
-            def newRecordFile = file("${fastaBaseName}-${record.id}.fasta")
+            def newRecordFile = file("${record.id}.fasta")
             newRecordFile.setText(record.text)
             recordList.add(tuple (fastaBaseName, newRecordFile.getBaseName(), newRecordFile))
         }
