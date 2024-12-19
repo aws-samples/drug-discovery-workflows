@@ -39,7 +39,7 @@ workflow {
     // 5mlq.fasta
     CheckAndValidateInputsTask(fasta_files)
 
-    // Explode/scatter the fasta files into channels per contained record ID
+    // Explode/scatter the fasta files into channel items per contained record ID
     // Write the exploded fasta records to their own file, include in tuple that contains original fasta file basename
     // [5nl6, 5nl6.1, 5nl6.1.fasta]
     // [5nl6, 5nl6.2, 5nl6.2.fasta]
@@ -56,7 +56,6 @@ workflow {
         return fastaRecordTupleList
     } | flatMap
 
-    // uniref30 = Channel.fromPath(params.uniref30_database_src).first()
     alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
 
     // Unpack the databases
