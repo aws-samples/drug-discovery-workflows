@@ -39,15 +39,15 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 # rfdiffusion is the only workflow name that is 1:1 with container name
 if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
   pushd assets/containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID developjj
+  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
   popd
 else
   docker build \
     --platform linux/amd64 \
-    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:developjj \
+    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
     -f assets/containers/$WORKFLOW_NAME/Dockerfile assets/containers/$WORKFLOW_NAME
 
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:developjj
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
 fi
 
 # Package the workflow
