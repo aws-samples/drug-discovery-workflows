@@ -2,8 +2,9 @@ nextflow.enable.dsl = 2
 
 process SearchUniref90 {
     label 'data'
-    cpus 8
-    memory '32 GB'
+    cpus { 8 * Math.pow(2, task.attempt) }
+    memory { 32.GB * Math.pow(2, task.attempt) }
+    maxRetries 3
     publishDir '/mnt/workflow/pubdir/msa'
 
     input:
@@ -35,8 +36,9 @@ process SearchUniref90 {
 
 process SearchUniprot {
     label 'data'
-    cpus 8
-    memory '32 GB'
+    cpus { 8 * Math.pow(2, task.attempt) }
+    memory { 32.GB * Math.pow(2, task.attempt) }
+    maxRetries 3
     publishDir '/mnt/workflow/pubdir/msa'
 
     input:
@@ -68,8 +70,9 @@ process SearchUniprot {
 
 process SearchMgnify {
     label 'data'
-    cpus 8
-    memory '64 GB'
+    cpus { 8 * Math.pow(2, task.attempt) }
+    memory { 64.GB * Math.pow(2, task.attempt) }
+    maxRetries 3
     publishDir '/mnt/workflow/pubdir/msa'
 
     input:
@@ -102,7 +105,7 @@ process SearchBFD {
     label 'data'
     cpus { 8 * Math.pow(2, task.attempt) }
     memory { 64.GB * Math.pow(2, task.attempt) }
-    maxRetries 1
+    maxRetries 3
     errorStrategy 'retry'
     publishDir '/mnt/workflow/pubdir/msa'
 
