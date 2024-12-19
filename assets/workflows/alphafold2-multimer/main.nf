@@ -39,15 +39,23 @@ workflow {
     // 5mlq.fasta
     CheckAndValidateInputsTask(fasta_files)
 
+    // Explode/scatter the fasta files into channel items per contained record ID
+    // Write the exploded fasta records to their own file, include in tuple that contains original fasta file basename
     // [5nl6, 5nl6.1, 5nl6.1.fasta]
     // [5nl6, 5nl6.2, 5nl6.2.fasta]
     // [5mlq, 5mlq.1, 5mlq.1.fasta]
     // [5mlq, 5mlq.2, 5mlq.2.fasta]
-    split_seqs = CheckAndValidateInputsTask.out.fasta
-                 .splitFasta( file: true )
-                 .map { filename -> tuple (filename.getBaseName().split("\\.")[0], filename.getBaseName(), filename) }
+    split_seqs = CheckAndValidateInputsTask.out.fasta.map { fastaFile ->
+        def fastaBaseName = fastaFile.baseName
+        def records = fastaFile.splitFasta( file: true )
 
-    uniref30 = Channel.fromPath(params.uniref30_database_src).first()
+        def fastaRecordTupleList = []
+        records.forEach { record -> 
+            fastaRecordTupleList.add(tuple (fastaBaseName, record.getBaseName(), record))
+        }
+        return fastaRecordTupleList
+    } | flatMap
+
     alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
 
     // Unpack the databases
@@ -69,14 +77,18 @@ workflow {
                 params.pdb_mmcif_src9, 
                 params.pdb_mmcif_obsolete)
 
+    // Searches are call for each fastas * records
     SearchUniref90(split_seqs, params.uniref90_database_src)
     SearchMgnify(split_seqs, params.mgnify_database_src)
     SearchUniprot(split_seqs, params.uniprot_database_src)
     SearchBFD(split_seqs, UnpackBFD.out.db_folder, params.uniref30_database_src)
+
     SearchTemplatesTask(SearchUniref90.out.fasta_basename_with_record_id_and_msa, UnpackPdb70nSeqres.out.db_folder)
 
-    // [5nl6, 5nl6.fasta, [output_5nl6_A/5nl6_A_uniref90_hits.sto, output_5nl6_B/5nl6_B_uniref90_hits.sto], [output_5nl6_B/5nl6_B_mgnify_hits.sto, output_5nl6_A/5nl6_A_mgnify_hits.sto], ...]
-    // [5mlq, 5mlq.fasta, [output_5mlq_A/5mlq_A_uniref90_hits.sto, output_5mlq_B/5mlq_B_uniref90_hits.sto], [output_5mlq_A/5mlq_A_mgnify_hits.sto, output_5mlq_B/5mlq_B_mgnify_hits.sto], ...]
+    // [5nl6, 5nl6.fasta, [output_5nl6.1/5nl6.1_uniref90_hits.sto, output_5nl6.2/5nl6.2_uniref90_hits.sto], [output_5nl6.2/5nl6.2_mgnify_hits.sto, output_5nl6.1/5nl6.1_mgnify_hits.sto], ...]
+    // [5mlq, 5mlq.fasta, [output_5mlq.1/5mlq.1_uniref90_hits.sto, output_5mlq.2/5mlq.2_uniref90_hits.sto], [output_5mlq.1/5mlq.1_mgnify_hits.sto, output_5mlq.2/5mlq.2_mgnify_hits.sto], ...]
+    // 
+    // Combine/gather the search results into channels per original fasta file
     msa_tuples = fasta_files
                 .join(SearchUniref90.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchMgnify.out.fasta_basename_with_msa.groupTuple())
@@ -84,9 +96,11 @@ workflow {
                 .join(SearchBFD.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchTemplatesTask.out.fasta_basename_with_msa.groupTuple())
 
-    // Gather
+    // Per original fasta file, move all of the search result files (ArrayList of files) into single directory structure: msa/A, msa/B, ... 
+    // Emit the first two elements of msa_tuples, and a single merged msa/ directory
     CombineSearchResults(msa_tuples)
 
+    // Called per original fasta input file
     GenerateFeaturesTask(CombineSearchResults.out.fasta_basename_fasta_and_msa_path,
                         UnpackMMCIF.out.db_folder,
                         UnpackMMCIF.out.db_obsolete)
