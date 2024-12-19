@@ -45,6 +45,14 @@ from alphafold.data.pipeline_multimer import int_id_to_str_id
 # 5nzz_A_bfd_hits.a3m 5nzz_B_bfd_hits.a3m
 # 5nzz_A_pdb_hits.sto 5nzz_B_pdb_hits.sto
 
+# NEW NEW:
+# [5nl6, 5nl6.1, /Users/john/Documents/Code/nextflow-learning/work/dd/64a9f556e8a9f924448cb6e0b35d88/5nl6.1.fasta]
+# [5nl6, 5nl6.2, /Users/john/Documents/Code/nextflow-learning/work/dd/64a9f556e8a9f924448cb6e0b35d88/5nl6.2.fasta]
+# [5od9, 5od9.1, /Users/john/Documents/Code/nextflow-learning/work/d4/47cd7ab0ebe06438f83aba70061876/5od9.1.fasta]
+# [5od9, 5od9.2, /Users/john/Documents/Code/nextflow-learning/work/d4/47cd7ab0ebe06438f83aba70061876/5od9.2.fasta]
+
+# 5nl6.1_uniref90_hits.sto 5nl6.2_uniref90_hits.sto
+
 STRIP_SUFFIXES = [
    "_uniref90_hits.sto",
    "_mgnify_hits.sto",
@@ -63,28 +71,15 @@ def strip_suffixes(s: str, suffixes: list[str]):
 def update_locations(target_dir, file_list):
     for filename in file_list:
 
-        # strip suffixes from filename
-        # e.g. "5nzz_A_uniref90_hits.sto" ->
-        # stripped_filename = "5nzz_A"
-        # stripped_suffix = _uniref90_hits.sto
-        (stripped_filename, stripped_suffix) = strip_suffixes(filename, STRIP_SUFFIXES)
-        if stripped_suffix == None:
-            raise Exception(f"expected suffixes not found in filename: {filename}")
+        # Indexed format: 5nl6.1_uniref90_hits.sto
+        # record_id = 5nl6.1
+        # outfile = uniref90_hits.sto
+        record_id, _null, outfile = filename.partition("_")
+        record_inx = int(record_id[-1])
 
-        # "_uniref90_hits.sto" -> "uniref90_hits.sto"
-        outfile = stripped_suffix[1:]
+        chain = int_id_to_str_id(record_inx)
 
-        if "_" in stripped_filename:
-            # assume 5nzz_A format
-            # chain = A
-            chain = stripped_filename[-1].upper()
-        else:
-            # assume 4ZQK2 format
-            # chain = B
-            chain = int_id_to_str_id(int(stripped_filename[-1]))
-
-        chain_dir = os.path.join(target_dir, chain)
-        chain_dir_path = pathlib.Path(chain_dir)
+        chain_dir_path = pathlib.Path(os.path.join(target_dir, chain))
 
         if not chain_dir_path.exists():
             chain_dir_path.mkdir(parents=True)

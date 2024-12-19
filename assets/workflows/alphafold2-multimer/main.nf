@@ -41,7 +41,9 @@ workflow {
 
     // Explode/scatter the fasta files into channels per contained record ID
     splitFastaWithBasename = CheckAndValidateInputsTask.out.fasta.map { f ->
-        return tuple (f.baseName, f.splitFasta( record: [id: true, text: true] ))
+        // use indexed fasta names rather than record 
+        return tuple (f.baseName, f.splitFasta( file: true ))
+        // return tuple (f.baseName, f.splitFasta( record: [id: true, text: true] ))
     }
     
     // Write fasta records and return expected tuple format:
@@ -60,9 +62,11 @@ workflow {
 
         def recordList = []
         records.forEach { record -> 
-            def newRecordFile = file("${record.id}.fasta")
-            newRecordFile.setText(record.text)
-            recordList.add(tuple (fastaBaseName, newRecordFile.getBaseName(), newRecordFile))
+            // def newRecordFile = file("${record.id}.fasta")
+            // newRecordFile.setText(record.text)
+            // 
+            // use indexed fasta names rather than record 
+            recordList.add(tuple (fastaBaseName, record.getBaseName(), record))
         }
         return recordList
     } | flatMap
