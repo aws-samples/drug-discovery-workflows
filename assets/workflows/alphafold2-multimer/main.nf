@@ -39,6 +39,7 @@ workflow {
     // 5mlq.fasta
     CheckAndValidateInputsTask(fasta_files)
 
+    // Explode/scatter the fasta files into channels per contained record ID
     splitFastaWithBasename = CheckAndValidateInputsTask.out.fasta.map { f ->
         return tuple (f.baseName, f.splitFasta( record: [id: true, text: true] ))
     }
@@ -51,6 +52,8 @@ workflow {
     // or
     // [4ZQK_simple, 4ZQK2, 4ZQK2.fasta] 
     // [4ZQK_simple, 4ZQK1, 4ZQK1.fasta]
+    // 
+    // Write the exploded fasta records to their own file, include in tuple that contains original fasta file basename
     split_seqs = splitFastaWithBasename.map { t ->
         def fastaBaseName = t[0]
         def records = t[1]
@@ -88,6 +91,8 @@ workflow {
 
     // [4ZQK_simple, 4ZQK2, 4ZQK2.fasta] 
     // [4ZQK_simple, 4ZQK1, 4ZQK1.fasta]
+    // 
+    // Searches are call for each fastas * records
     SearchUniref90(split_seqs, params.uniref90_database_src)
     SearchMgnify(split_seqs, params.mgnify_database_src)
     SearchUniprot(split_seqs, params.uniprot_database_src)
@@ -97,6 +102,8 @@ workflow {
 
     // [5nl6, 5nl6.fasta, [output_5nl6_A/5nl6_A_uniref90_hits.sto, output_5nl6_B/5nl6_B_uniref90_hits.sto], [output_5nl6_B/5nl6_B_mgnify_hits.sto, output_5nl6_A/5nl6_A_mgnify_hits.sto], ...]
     // [5mlq, 5mlq.fasta, [output_5mlq_A/5mlq_A_uniref90_hits.sto, output_5mlq_B/5mlq_B_uniref90_hits.sto], [output_5mlq_A/5mlq_A_mgnify_hits.sto, output_5mlq_B/5mlq_B_mgnify_hits.sto], ...]
+    // 
+    // Combine/gather the search results into channels per original fasta file
     msa_tuples = fasta_files
                 .join(SearchUniref90.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchMgnify.out.fasta_basename_with_msa.groupTuple())
@@ -104,9 +111,11 @@ workflow {
                 .join(SearchBFD.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchTemplatesTask.out.fasta_basename_with_msa.groupTuple())
 
-    // Gather
+    // Per original fasta file, move all of the search result files (ArrayList of files) into single directory structure: msa/A, msa/B, ... 
+    // Emit the first two elements of msa_tuples, and a single merged msa/ directory
     CombineSearchResults(msa_tuples)
 
+    // Called per original fasta input file
     GenerateFeaturesTask(CombineSearchResults.out.fasta_basename_fasta_and_msa_path,
                         UnpackMMCIF.out.db_folder,
                         UnpackMMCIF.out.db_obsolete)
