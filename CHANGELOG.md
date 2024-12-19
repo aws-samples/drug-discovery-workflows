@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.0] - 2024-12-18
+
+### 2.11.0 Added
+
+- Added AntiFold workflow
+
+---
+
 ## [2.10.1] - 2024-12-17
 
 ### 2.10.1 Changed
