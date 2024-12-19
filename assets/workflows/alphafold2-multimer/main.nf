@@ -57,7 +57,7 @@ workflow {
 
         def recordList = []
         records.forEach { record -> 
-            def newRecordFile = file("${record.id}.fasta")
+            def newRecordFile = file("${fastaBaseName}-${record.id}.fasta")
             newRecordFile.setText(record.text)
             recordList.add(tuple (fastaBaseName, newRecordFile.getBaseName(), newRecordFile))
         }
@@ -98,11 +98,8 @@ workflow {
     // [5nl6, 5nl6.fasta, [output_5nl6_A/5nl6_A_uniref90_hits.sto, output_5nl6_B/5nl6_B_uniref90_hits.sto], [output_5nl6_B/5nl6_B_mgnify_hits.sto, output_5nl6_A/5nl6_A_mgnify_hits.sto], ...]
     // [5mlq, 5mlq.fasta, [output_5mlq_A/5mlq_A_uniref90_hits.sto, output_5mlq_B/5mlq_B_uniref90_hits.sto], [output_5mlq_A/5mlq_A_mgnify_hits.sto, output_5mlq_B/5mlq_B_mgnify_hits.sto], ...]
     msa_tuples = fasta_files
-                // groupTuple -> [4ZQK_simple, [record1file, record2file]]
                 .join(SearchUniref90.out.fasta_basename_with_msa.groupTuple())
-                // groupTuple -> [4ZQK_simple, [record1file, record2file]]
                 .join(SearchMgnify.out.fasta_basename_with_msa.groupTuple())
-                // 
                 .join(SearchUniprot.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchBFD.out.fasta_basename_with_msa.groupTuple())
                 .join(SearchTemplatesTask.out.fasta_basename_with_msa.groupTuple())
