@@ -6,9 +6,6 @@ parameterTemplate:
   fasta_path:
     description: "FASTA file containing query sequence."
     optional: false
-  database_name:
-    description: "MMSeqs database name found at https://github.com/soedinglab/mmseqs2/wiki#downloading-databases."
-    optional: true
 storageCapacity: 1200
 tags:
   Name: "MMseqs2"
