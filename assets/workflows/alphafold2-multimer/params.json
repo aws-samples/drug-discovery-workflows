@@ -1,0 +1,3 @@
+{
+    "fasta_path":"s3://example-bucket/alphafold2-multimer/"
+}

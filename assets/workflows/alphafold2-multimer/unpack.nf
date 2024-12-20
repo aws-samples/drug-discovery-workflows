@@ -14,7 +14,7 @@ process UnpackBFD {
         path bfd_database_hhm_ffindex
 
     output:
-        path 'bfd/', emit: db_folder
+        path "bfd/", emit: db_folder
 
     script:
     """
@@ -30,6 +30,7 @@ process UnpackBFD {
     mv $bfd_database_hhm_ffindex bfd/
     """
 }
+
 
 process UnpackUniprot {
     cpus 4
@@ -53,6 +54,7 @@ process UnpackUniprot {
     """
 }
 
+
 process UnpackPdb70nSeqres {
     label 'data'
     cpus 2
@@ -75,12 +77,13 @@ process UnpackPdb70nSeqres {
     # Templates - pdb70 and seqres
     mkdir -p $base_database_path/pdb
     mv $pdb70_src/* $base_database_path/pdb/
-
+    
     # filter strange sequences containing 0
     /opt/venv/bin/python /opt/filter_pdb.py $pdb_seqres_src $base_database_path/pdb/pdb_seqres.txt
     ls -laR $base_database_path/pdb/
     """
 }
+
 
 process UnpackMMCIF {
     cpus 2
@@ -98,10 +101,10 @@ process UnpackMMCIF {
         path pdb_mmcif_src8
         path pdb_mmcif_src9
         path pdb_mmcif_obsolete
-
+    
     output:
-        path 'pdb_mmcif/mmcif_files/', emit: db_folder
-        path 'pdb_mmcif/obsolete.dat', emit: db_obsolete
+        path "pdb_mmcif/mmcif_files/", emit: db_folder
+        path "pdb_mmcif/obsolete.dat", emit: db_obsolete
 
     script:
     """
@@ -124,18 +127,19 @@ process UnpackMMCIF {
     """
 }
 
+
 process UnpackRecords {
     tag "${id}"
     label 'protutils'
     cpus 2
     memory '4 GB'
     publishDir "/mnt/workflow/pubdir/${id}/input"
-
+    
     input:
         tuple val(id), val(header), val(seqString)
 
     output:
-        tuple val(id), path('input.fasta'), emit: fasta
+        tuple val(id), path("input.fasta"), emit: fasta
 
     script:
     """
