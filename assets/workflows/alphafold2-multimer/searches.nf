@@ -207,11 +207,11 @@ process CombineSearchResults {
     echo "<<<<<<<<<<<<<<<<<<<"
 
     mkdir -p msa
-    /opt/venv/bin/python /opt/update_locations.py msa $uniref90_msas
-    /opt/venv/bin/python /opt/update_locations.py msa $mgnify_msas
-    /opt/venv/bin/python /opt/update_locations.py msa $uniprot_msas
-    /opt/venv/bin/python /opt/update_locations.py msa $bfd_msas
-    /opt/venv/bin/python /opt/update_locations.py msa $template_hits
+    /opt/venv/bin/python /opt/update_locations.py msa _uniref90_hits.sto $uniref90_msas
+    /opt/venv/bin/python /opt/update_locations.py msa _mgnify_hits.sto $mgnify_msas
+    /opt/venv/bin/python /opt/update_locations.py msa _uniprot_hits.sto $uniprot_msas
+    /opt/venv/bin/python /opt/update_locations.py msa _bfd_hits.a3m $bfd_msas
+    /opt/venv/bin/python /opt/update_locations.py msa _pdb_hits.sto $template_hits
 
     echo "***********************"
     ls -alR msa/
