@@ -2,8 +2,4 @@
 
 ## Summary
 
- MMseqs2: ultra fast and sensitive search and clustering suite .
-
-## Workflow
-
-TBD
+ MMseqs2: ultra fast and sensitive search and clustering suite.

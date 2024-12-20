@@ -8,14 +8,38 @@ workflow MMSeqs2 {
     database_path
 
     main:
+    MMSeqs2PrepareDatabaseTask(file(database_path))
 
     MMSeqs2SearchTask(
-        fasta_path,
-        database_path
+        file(fasta_path),
+        MMSeqs2PrepareDatabaseTask.out
         )
 
     emit:
     MMSeqs2SearchTask.out
+}
+
+process MMSeqs2PrepareDatabaseTask {
+    label 'mmseqs2'
+    cpus 2
+    memory '4 GB'
+    maxRetries 1
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+
+    input:
+    path database_path
+
+    output:
+    path "db", emit: db
+
+    script:
+    """
+    set -euxo pipefail
+    mkdir db
+    /usr/local/bin/entrypoint createdb $database_path tmpDB
+    /usr/local/bin/entrypoint makepaddedseqdb tmpDB db/gpuDB
+    /usr/local/bin/entrypoint createindex db/gpuDB tmp --index-subset 2
+    """
 }
 
 process MMSeqs2SearchTask {
@@ -31,15 +55,14 @@ process MMSeqs2SearchTask {
     path database_path
 
     output:
-    path "msa.a3m", emit: msa
+    path "*.a3m", emit: msa
 
     script:
     """
     set -euxo pipefail
-
     /usr/local/bin/entrypoint createdb $fasta_path queryDB
-    /usr/local/bin/entrypoint search queryDB $database_path result tmp --gpu 1
-    /usr/local/bin/entrypoint result2msa queryDB $database_path result msa.a3m --msa-format-mode 5
+    /usr/local/bin/entrypoint search queryDB $database_path/gpuDB result tmp --gpu 1
+    /usr/local/bin/entrypoint result2msa queryDB $database_path/gpuDB result ${fasta_path.baseName}.a3m --msa-format-mode 5
     """
 }
 
