@@ -127,7 +127,7 @@ process CheckAndValidateInputsTask {
     output:
         stdout
         path "seq_info.json", emit: seq_info
-        path "${fasta_basename}.fa*", emit: fasta
+        path "${fasta_basename}.fasta", emit: fasta
         val "${fasta_basename}", emit: fasta_basename
 
     script:
@@ -143,7 +143,10 @@ process CheckAndValidateInputsTask {
 
     /opt/venv/bin/python \
     /opt/venv/lib/python3.8/site-packages/putils/check_and_validate_inputs.py \
-    --target_id=$fasta_basename --fasta_path=$fasta_path
+    --target_id=$fasta_basename --fasta_path=$fasta_path --output_prefix=$fasta_basename
+
+    ls -alR
+
     """
 }
 
