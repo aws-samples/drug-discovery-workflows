@@ -6,10 +6,4 @@ Generate de novo nanobody candidates against a given target protein structure an
 
 ## Workflow
 
-```mermaid
-
-flowchart TD
-  A[Split FASTA file into chunks of n sequences] --> B[Predict protein structure] --> C[Return structure]
-  A --> D[Predict protein structure] --> E[Return structure]
-
-```
+![alt text](workflow.png "Nanobody design workflow")

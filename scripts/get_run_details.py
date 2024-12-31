@@ -72,6 +72,9 @@ def extract_raw_metrics(results):
         "proteinmpnn.global_score": [],
         "proteinmpnn.score": [],
         "proteinmpnn.seq_recovery": [],
+        "amplify.pseudo_perplexity": [],
+        "nanobodybuilder2.mean_error": [],
+        "nanobodybuilder2.scaffold_rmsd": []
     }
     for result in results:
         metrics["esmfold.mean_plddt"].append(result["esmfold.mean_plddt"])
@@ -79,6 +82,9 @@ def extract_raw_metrics(results):
         metrics["proteinmpnn.global_score"].append(result["proteinmpnn.global_score"])
         metrics["proteinmpnn.score"].append(result["proteinmpnn.score"])
         metrics["proteinmpnn.seq_recovery"].append(result["proteinmpnn.seq_recovery"])
+        metrics["amplify.pseudo_perplexity"].append(result["amplify.pseudo_perplexity"])
+        metrics["nanobodybuilder2.mean_error"].append(result["nanobodybuilder2.mean_error"])
+        metrics["nanobodybuilder2.scaffold_rmsd"].append(result["nanobodybuilder2.scaffold_rmsd"])
 
     return metrics
 
