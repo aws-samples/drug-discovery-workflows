@@ -1,7 +1,0 @@
-biopython
-biotite
-jsonlines
-numpy
-pandas
-pyfastx
-tqdm
