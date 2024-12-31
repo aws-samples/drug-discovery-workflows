@@ -1,3 +1,2 @@
-numpy
 torch>=2.5.1
-boltz>=0.40
+boltz>=0.4.0

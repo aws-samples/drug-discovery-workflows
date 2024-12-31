@@ -1,32 +1,37 @@
 # https://gitlab.com/nvidia/container-images/cuda/-/tree/master/dist/12.6.3/amzn2023
-FROM nvcr.io/nvidia/cuda:12.6.2-runtime-amzn2023 AS build
-ARG UV_VERSION='0.5.13'
-ARG PYTHON_VERSION='3.11'
-ENV PATH="/opt/venv/bin:/root/.local/bin:$PATH" \
-    UV_COMPILE_BYTECODE=1 \
-    UV_PYTHON=python${PYTHON_VERSION} \    
-    UV_PYTHON_DOWNLOADS=never
+FROM nvcr.io/nvidia/cuda:12.6.3-runtime-amzn2023 as base
+
+ARG PYTHON='python3.11'
+WORKDIR /home
 
 RUN dnf update -y \
-    && dnf install -y nano tar gzip gcc python${PYTHON_VERSION} \
-    && dnf clean all
+    && dnf install -y $PYTHON \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf/*
 
-WORKDIR /app
+ENV VIRTUAL_ENV='/opt/venv'
+ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
+
+##############################################################################
+FROM base as build
+
+ARG PYTHON
+
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_NO_CACHE=1
+ENV UV_PYTHON_DOWNLOADS='never'
+ENV UV_PYTHON=$PYTHON
 
 COPY requirements.txt requirements.txt
-RUN curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
-RUN uv venv && uv pip install -r requirements.txt
 
-############################################################################## Needs work
-FROM nvcr.io/nvidia/cuda:12.6.2-runtime-amzn2023
-ARG PYTHON_VERSION='3.11'
+RUN dnf install -y tar gzip gcc ${PYTHON}-devel \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && /root/.local/bin/uv venv $VIRTUAL_ENV \
+    && /root/.local/bin/uv pip install --no-cache-dir -r requirements.txt
 
-COPY --from=build /app /app
+###############################################################################
+FROM base as runtime
 
-RUN dnf update -y \
-    dnf install -y python${PYTHON_VERSION} \
-    && dnf clean all
-
-ENV PATH="/app/.venv/bin:$PATH"
+COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 
 ENTRYPOINT []
