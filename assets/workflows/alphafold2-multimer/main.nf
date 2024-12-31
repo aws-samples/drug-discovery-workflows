@@ -33,7 +33,7 @@ workflow {
     // [5mlq, 5mlq.fasta]
     fasta_files = Channel
                   .fromPath(fasta_path)
-                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
+                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fa")[0], filename) }
 
     // 5nl6.fasta
     // 5mlq.fasta
