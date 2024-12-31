@@ -127,7 +127,7 @@ process CheckAndValidateInputsTask {
     output:
         stdout
         path "seq_info.json", emit: seq_info
-        path "${fasta_basename}.fasta", emit: fasta
+        path "${fasta_basename}.fa*", emit: fasta
         val "${fasta_basename}", emit: fasta_basename
 
     script:
