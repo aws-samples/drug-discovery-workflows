@@ -1,17 +1,12 @@
-"""
-Adapted from https://gitlab.aws.dev/hodgkin-spt/sm_training_base/-/blob/hodgkin-dev/src/protein_lm_tasks/
-`modelmodule.py` and `simple_load.py`
-Functions to load protein language models and associated fine-tuned models from Applied Sciences team.
-"""
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
 
 import os
 import math
 import time
 import json
-# import hydra
 import contextlib
 
-# import pytorch_lightning as pl
 import torch as th
 from torch import nn
 import safetensors
@@ -22,95 +17,13 @@ from transformers.trainer_pt_utils import get_parameter_names
 from transformers import AutoConfig, AdamW, EsmModel, EsmForMaskedLM, BertForMaskedLM
 from torch.optim import Adam
 import deepspeed
-# import torchmetrics
 
 from tape.models.modeling_utils import accuracy
 from tape import ProteinBertModel, ProteinBertForMaskedLM
 
-# from bimamba_model import BiMambaConfigHF, BiMambaForMaskedLM
-# from ProtMamba_ssm.modules import MambaLMHeadModelwithPosids
-
-def get_optimizer(optim_groups, optimizer_cfg):
-    optim_cls = AdamW if optimizer_cfg.adam_w_mode else Adam
-
-    args = [optim_groups]
-    kwargs = {
-        "lr": optimizer_cfg.lr,
-        "eps": optimizer_cfg.eps,
-        "betas": (optimizer_cfg.betas[0], optimizer_cfg.betas[1]),
-    }
-
-    optimizer = optim_cls(*args, **kwargs)
-    return optimizer
-
-
-def get_cosine_schedule_with_warmup(
-    optimizer: Optimizer,
-    num_warmup_steps: int,
-    num_training_steps: int,
-    num_cycles: float = 0.5,
-    last_epoch: int = -1,
-    min_ratio: float = 0.0,
-    plateau_ratio: float = 0.0,
-):
-    """
-    Create a schedule with a learning rate that decreases following the values of the cosine function between the
-    initial lr set in the optimizer to 0, after a warmup period during which it increases linearly between 0 and the
-    initial lr set in the optimizer.
-
-    Args:
-        optimizer (:class:`~torch.optim.Optimizer`):
-            The optimizer for which to schedule the learning rate.
-        num_warmup_steps (:obj:`int`):
-            The number of steps for the warmup phase.
-        num_training_steps (:obj:`int`):
-            The total number of training steps.
-        num_cycles (:obj:`float`, `optional`, defaults to 0.5):
-            The number of waves in the cosine schedule (the defaults is to just decrease from the max value to 0
-            following a half-cosine).
-        last_epoch (:obj:`int`, `optional`, defaults to -1):
-            The index of the last epoch when resuming training.
-        min_ratio (:obj:`float`, `optional`, defaults to 0.0):
-            The minimum ratio a learning rate would decay to.
-        plateau_ratio (:obj:`float`, `optional`, defaults to 0.0):
-            The ratio for plateau phase.
-
-    Return:
-        :obj:`torch.optim.lr_scheduler.LambdaLR` with the appropriate schedule.
-    """
-
-    def lr_lambda(current_step):
-        plateau_steps = int(plateau_ratio * num_training_steps)
-        if current_step < num_warmup_steps:
-            return float(current_step) / float(max(1, num_warmup_steps))
-        elif current_step < num_warmup_steps + plateau_steps:
-            return 1.0
-        progress = float(current_step - num_warmup_steps - plateau_steps) / float(
-            max(1, num_training_steps - num_warmup_steps - plateau_steps)
-        )
-        return max(
-            min_ratio,
-            0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)),
-        )
-
-    return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 
 def initialize_lm(pretrained_ckpt_path: str, with_lm_head: bool=False):
-    # if "ProtMamba-Long-foundation" in pretrained_ckpt_path:
-    #     # ProtMamba model
-    #     # pretrained_ckpt_path = "/opt/ml/input/data/fsx_out/cache/ProtMamba-Long-foundation"
-    #     lm = MambaLMHeadModelwithPosids.from_pretrained(
-    #         pretrained_ckpt_path,
-    #         checkpoint_mixer=False)
-    #     lm_hidden_size = lm.config.d_model
-    # else:
-        # if "bimamba" in pretrained_ckpt_path.lower():
-        #     assert with_lm_head, "Loading BiMamba model without lm_head is not supported"
-        #     hf_config = BiMambaConfigHF.from_pretrained(pretrained_ckpt_path)
-        #     LMClass = BiMambaForMaskedLM
-        #     lm_hidden_size = hf_config.d_model
-        # else:
     hf_config = AutoConfig.from_pretrained(pretrained_ckpt_path)
     lm_hidden_size = hf_config.hidden_size
     if hf_config.model_type == "bert":
@@ -142,16 +55,6 @@ class ProteinLM(nn.Module):
         if isinstance(self.lm, ProteinBertModel):
             outputs = self.lm(input_ids, input_mask=attention_mask)
             feature = outputs[0]
-        # elif isinstance(self.lm, MambaLMHeadModelwithPosids):
-        #     position_ids = th.arange(input_ids.shape[1])
-        #     position_ids = th.tile(position_ids, [input_ids.shape[0], 1]) # [B, L]
-        #     position_ids = position_ids.to(input_ids.device)
-        #     feature = self.lm.backbone(
-        #         input_ids=input_ids, 
-        #         position_ids=position_ids,
-        #         inference_params=None,
-        #         save_layer=[],
-        #         ) # [B, L, hidden_size]
         else:
             outputs = self.lm(input_ids, attention_mask=attention_mask, output_hidden_states=True)
             if hasattr(outputs, "last_hidden_state"):
@@ -221,46 +124,6 @@ class ProteinLM(nn.Module):
         return self._get_tensor(batch, ["targets", "labels"])
 
 
-class SequenceClassificationHead(nn.Module):
-    """
-    tape.models.modeling_utils.SequenceClassificationHead without weight_norm
-    """
-
-    def __init__(self, in_dim: int, hid_dim: int, out_dim: int, dropout: float = 0.0):
-        super().__init__()
-        self.classify = nn.Sequential(
-            nn.Linear(in_dim, hid_dim),
-            nn.ReLU(),
-            nn.Dropout(dropout, inplace=False),
-            nn.Linear(hid_dim, out_dim),
-        )
-        if out_dim == 1: # binary classification
-            self.loss_fct = nn.BCEWithLogitsLoss()
-            # do not compute metrics that are not accumulate-able
-            self.metric_funcs = {}
-        else: # multiclass
-            self.loss_fct = nn.CrossEntropyLoss()
-            self.metric_funcs = {"accuracy": accuracy}
-
-    def compute_metrics(self, logits, targets):
-        metrics = {}
-        targets = targets.long()
-        for metric_name, metric_func in self.metric_funcs.items():
-            metrics[metric_name] = metric_func(logits, targets)
-        return metrics
-
-    def forward(self, pooled_output, targets=None):
-        logits = self.classify(pooled_output)
-        outputs = (logits,)
-
-        if targets is not None:
-            classification_loss = self.loss_fct(logits, targets)
-            metrics = self.compute_metrics(logits, targets)
-            loss_and_metrics = (classification_loss, metrics)
-            outputs = (loss_and_metrics,) + outputs
-
-        return outputs  # (loss), logits
-
 class SequenceRegressionHead(nn.Module):
     """
     Simple regression head similar to SequenceClassificationHead
@@ -287,22 +150,6 @@ class SequenceRegressionHead(nn.Module):
 
         return outputs  # (loss), logits
 
-
-class SequenceClassificationModel(nn.Module):
-    def __init__(self, pretrained_ckpt_path, num_labels, dropout):
-        super().__init__()
-        self.plm = ProteinLM(pretrained_ckpt_path)
-        self.classify = SequenceClassificationHead(
-            self.plm.lm_hidden_size, 512, num_labels, dropout
-        )
-
-    def forward(self, batch):
-        targets = self.plm._get_labels(batch)
-        pooled_hidden_state = self.plm.get_sequence_representation(batch)
-        return self.classify(
-            pooled_hidden_state, targets
-        )  # (x-ent loss, metric_dict), logits
-
 class SequenceRegressionModel(nn.Module):
     def __init__(self, pretrained_ckpt_path, num_labels, dropout):
         super().__init__()
@@ -318,72 +165,9 @@ class SequenceRegressionModel(nn.Module):
             pooled_hidden_state, targets
         )  # (MSEloss, metric_dict), logits
 
-class TokenClassificationModel(nn.Module):
-    def __init__(self, pretrained_ckpt_path, num_labels, dropout):
-        super().__init__()
-        self.plm = ProteinLM(pretrained_ckpt_path)
-        self.dropout = nn.Dropout(dropout)
-        self.classifier = nn.Linear(self.plm.lm_hidden_size, num_labels)
-        self.num_labels = num_labels
-
-    def forward(self, batch):
-        targets = self.plm._get_labels(batch)        
-        input_ids = batch.get("input_ids")
-        attention_mask = self.plm._get_attention_mask(batch)
-        sequence_output = self.plm._get_last_hidden_state(input_ids, attention_mask)
-        sequence_output = self.dropout(sequence_output)
-        logits = self.classifier(sequence_output)
-        loss = None
-        if targets is not None:
-            loss_fct = nn.CrossEntropyLoss(ignore_index=-1)
-            targets = targets.to(logits.device)
-            loss = loss_fct(logits.view(-1, self.num_labels), targets.view(-1))
-            metrics = {"accuracy": accuracy(logits, targets, ignore_index=-1)}
-            loss = (loss, metrics)
-        return loss, logits # (x-ent loss, metric_dict), logits
-
-
-class MaskedLM(nn.Module):
-    def __init__(self, pretrained_ckpt_path, num_labels, dropout):
-        super().__init__()
-        self.plm = ProteinLM(pretrained_ckpt_path, with_lm_head=True)
-
-    @th.no_grad()
-    def calculate_naturalness_score(self, logits, labels):
-        # logits: [B, L, |V|]
-        # labels: [B, L]
-        B, L, V = logits.shape
-        mlm_mask = labels != -100
-        loss_fct = nn.CrossEntropyLoss(reduction='none')
-        # average over number of masked tokens
-        # this is perplexity, which is non-deterministic
-        pll = loss_fct(
-            logits.view(-1, self.plm.vocab_size), 
-            labels.view(-1)
-            ).view(B, L).sum(axis=1) / mlm_mask.sum(axis=1) # [B] 
-        naturalness_scores = th.exp(pll)
-        # nan can be introduced when none of the residues in a sequence is masked
-        # exclude them from the calculation:
-        naturalness_scores = naturalness_scores.nanmean()
-        return naturalness_scores
-    
-    def forward(self, batch):
-        input_ids = batch["input_ids"]
-        attention_mask = self.plm._get_attention_mask(batch)
-        labels = self.plm._get_labels(batch)
-        mlm_loss, logits = self.plm._forward(input_ids, attention_mask=attention_mask, labels=labels)
-        
-        if labels is not None:
-            metrics = {"naturalness": self.calculate_naturalness_score(logits, labels)}
-            loss = (mlm_loss, metrics)
-        return loss, logits # (x-ent loss, metric_dict), logits
-
 
 MODEL_CLASS_MAPPING = {
-    "SequenceClassificationModel": SequenceClassificationModel,
-    "SequenceRegressionModel": SequenceRegressionModel,
-    "TokenClassificationModel": TokenClassificationModel,
-    "MaskedLM": MaskedLM,
+    "SequenceRegressionModel": SequenceRegressionModel
 }
 
 def get_dtype(precision):
@@ -465,15 +249,6 @@ def model_init_fn(trainer, model_cfg):
         """
         nonlocal unwrapped_state_dict
         all_keys_match = set(unwrapped_state_dict) == set(model.state_dict().keys())
-        # if not all_keys_match:
-        #     # check if this is the bimamba edge case
-        #     if isinstance(model.plm.lm, BiMambaForMaskedLM) and model.plm.lm.config.bidirectional:
-        #         missing_keys = set(model.state_dict().keys()) - set(unwrapped_state_dict)
-        #         if all(["mamba_rev" in key for key in missing_keys]):
-        #             for missing_key in missing_keys:
-        #                 tied_key = missing_key.replace("mamba_rev", "mamba_fwd")
-        #                 unwrapped_state_dict[missing_key] = unwrapped_state_dict[tied_key]
-        #             all_keys_match = True
         return all_keys_match
     
     def load(module: th.nn.Module, prefix=""):
@@ -514,17 +289,6 @@ def model_init_fn(trainer, model_cfg):
                 load(child, prefix + name + ".")
 
     init_dtype = get_dtype(trainer.precision)
-    
-    # if isinstance(trainer.strategy, pl.strategies.DeepSpeedStrategy):
-    #     is_zero3 = trainer.strategy.config["zero_optimization"]["stage"] == 3
-    #     context = deepspeed.zero.Init(
-    #         remote_device=trainer.strategy.remote_device,
-    #         pin_memory=True,
-    #         config_dict_or_path=trainer.strategy.config,
-    #         dtype=init_dtype,
-    #         enabled=is_zero3,
-    #     )
-    # else:
     is_zero3 = False
     context = contextlib.nullcontext()
 
@@ -552,9 +316,6 @@ def model_init_fn(trainer, model_cfg):
                 # For zero2, make sure the weights are actually loaded into model
                 embedding_weight_key = None
                 inner_plm = model.plm.lm
-                # if isinstance(inner_plm, BiMambaForMaskedLM):
-                #     embedding_weights = inner_plm.bimamba.backbone.embedding.weight
-                #     embedding_weight_key = "bimamba.backbone.embedding.weight"
                 if isinstance(inner_plm, EsmModel):
                     embedding_weights = inner_plm.embeddings.word_embeddings.weight
                     embedding_weight_key = "embeddings.word_embeddings.weight"
@@ -564,9 +325,6 @@ def model_init_fn(trainer, model_cfg):
                 elif isinstance(inner_plm, BertForMaskedLM):
                     embedding_weights = inner_plm.bert.embeddings.word_embeddings.weight
                     embedding_weight_key = "bert.embeddings.word_embeddings.weight"
-                # elif isinstance(inner_plm, MambaLMHeadModelwithPosids):
-                #     embedding_weights = inner_plm.backbone.embedding.weight
-                #     embedding_weight_key = "backbone.embedding.weight"
                 if embedding_weight_key:
                     if all_keys_match:
                         embedding_weight_key = f"plm.lm.{embedding_weight_key}"

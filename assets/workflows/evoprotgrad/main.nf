@@ -5,6 +5,7 @@ workflow EvoProtGrad {
     input_fasta
     plm_model_files
     plm_scorer_model_files
+    plm_scorer_num_labels
     onehot_scorer_model_files
     preserved_regions
     output_type
@@ -20,6 +21,7 @@ workflow EvoProtGrad {
         wtseq_ch,
         plm_model_files,
         plm_scorer_model_files,
+        plm_scorer_num_labels,
         onehot_scorer_model_files,
         preserved_regions,
         output_type,
@@ -45,6 +47,7 @@ process RunDirectedEvolutionTask {
         tuple val(wtseq_id), val(wtseq)
         path plm_model_files
         path plm_scorer_model_files
+        val plm_scorer_num_labels
         path onehot_scorer_model_files
         val preserved_regions
         val output_type
@@ -64,6 +67,7 @@ process RunDirectedEvolutionTask {
         output/ \
         --plm_expert_name_or_path=${plm_model_files} \
         --plm_scorer_expert_name_or_path=${plm_scorer_model_files} \
+        --plm_scorer_num_labels=${plm_scorer_num_labels} \
         --onehot_scorer_expert_name_or_path=${onehot_scorer_model_files} \
         --preserved_regions ${preserved_regions}\
         --output_type ${output_type}\
@@ -78,6 +82,7 @@ workflow {
         Channel.fromPath(params.input_fasta),
         Channel.fromPath(params.plm_model_files),
         Channel.fromPath(params.plm_scorer_model_files),
+        Channel.value(params.plm_scorer_num_labels),
         Channel.fromPath(params.onehot_scorer_model_files),
         Channel.value(params.preserved_regions),
         Channel.value(params.output_type),

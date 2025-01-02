@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 from evo_prot_grad.experts.base_experts import AttributeExpert
 import evo_prot_grad.common.utils as utils
 from torch.nn import Module
