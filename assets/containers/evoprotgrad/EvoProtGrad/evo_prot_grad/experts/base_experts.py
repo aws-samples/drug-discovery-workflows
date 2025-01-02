@@ -33,7 +33,7 @@ class Expert(ABC):
         self.device = device
         self.model.to(self.device)
         self.model.eval()
-                
+        self.scoring_strategy = scoring_strategy
         # sort by vocab values
         self.alphabet = [k for k, v in sorted(vocab.items(), key=lambda item: item[1])]
 

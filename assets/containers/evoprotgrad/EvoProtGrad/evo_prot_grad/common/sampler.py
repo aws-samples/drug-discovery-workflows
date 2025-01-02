@@ -5,7 +5,7 @@ from evo_prot_grad.experts.base_experts import Expert
 import evo_prot_grad.common.utils as utils
 import evo_prot_grad.common.tokenizers as tokenizers
 import pandas as pd
-
+import itertools
 
 class DirectedEvolution:
     """Main class for plug and play directed evolution with gradient-based discrete MCMC.
@@ -43,6 +43,8 @@ class DirectedEvolution:
             ValueError: if any of the preserved regions are < 1 amino acid long.
         """
         self.experts = experts
+        self.score_names = [f"{e.name}_{e.scoring_strategy}" for e in self.experts]
+        self.num_scores_per_expert = [1] * len(self.experts) # assume each expert outputs one scores at init
         self.parallel_chains = parallel_chains
         self.n_steps = n_steps
         self.max_mutations = max_mutations
@@ -137,8 +139,15 @@ class DirectedEvolution:
             oh, score = expert(inputs)
             ohs += [oh]
             scores += [expert.temperature * score]
-        # sum scores over experts
-        return ohs, torch.stack(scores, dim=0).sum(dim=0), torch.stack(scores, dim=0)
+        if np.any([s.ndim > 1 for s in scores]): #some attribute scorers output multiple scores)
+            self.num_scores_per_expert = [1 if (s.ndim==1) else s.shape[1] for s in scores]
+            scores = [s.view(len(s), -1) if (s.ndim==1) else s for s in scores ] # add a dim for single output models' score
+            per_expert_score = torch.cat(scores, dim=1).T
+        else:
+            per_expert_score = torch.stack(scores, dim=0)
+        # sum scores over experts for PoE score
+        poe_score = per_expert_score.sum(dim=0)
+        return ohs, poe_score, per_expert_score
     
 
     def _compute_gradients(self, ohs: List[torch.Tensor], PoE: torch.Tensor) -> torch.Tensor:
@@ -229,7 +238,7 @@ class DirectedEvolution:
             'counts': unique_counts,
             'iteration_first_appeared': unique_first_iter
         })
-        df_scores = pd.DataFrame(unique_scores, columns=[e.name for e in self.experts])
+        df_scores = pd.DataFrame(unique_scores, columns=self.score_names)
         df_scores['PoE_scores'] = df_scores.sum(axis=1)
         df = pd.concat([df, df_scores], axis=1)
         # Sort by scores and keep top n sequences if specified
@@ -259,6 +268,10 @@ class DirectedEvolution:
             #    [self.PoE_history[best_idxs[i]][i] for i in range(self.parallel_chains)]).numpy()
             scores_by_expert = torch.stack(
                 [self.score_history[best_idxs[i]][:, i] for i in range(self.parallel_chains)], axis=1).numpy() # shape [n_experts, n_chains]
+        # update score names based on the number of scores output by each expert
+        self.score_names = [[f'{n}_{i+1}' for i in range(c)] \
+                for (n, c) in zip(self.score_names, self.num_scores_per_expert)]
+        self.score_names = list(itertools.chain(*self.score_names))
         return variants, scores_by_expert
     
 
