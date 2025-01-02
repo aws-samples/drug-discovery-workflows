@@ -4,6 +4,8 @@ workflow EvoProtGrad {
     take:
     input_fasta
     plm_model_files
+    plm_scorer_model_files
+    onehot_scorer_model_files
     preserved_regions
     output_type
     parallel_chains
@@ -17,6 +19,8 @@ workflow EvoProtGrad {
     RunDirectedEvolutionTask(
         wtseq_ch,
         plm_model_files,
+        plm_scorer_model_files,
+        onehot_scorer_model_files,
         preserved_regions,
         output_type,
         parallel_chains,
@@ -38,8 +42,10 @@ process RunDirectedEvolutionTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-        each wtseq
+        tuple val(wtseq_id), val(wtseq)
         path plm_model_files
+        path plm_scorer_model_files
+        path onehot_scorer_model_files
         val preserved_regions
         val output_type
         val parallel_chains
@@ -53,13 +59,16 @@ process RunDirectedEvolutionTask {
     """
     set -euxo pipefail
     mkdir output
-    /opt/conda/bin/python /home/scripts/directed_evolution.py '${wtseq}' \
+    /opt/conda/bin/python /home/scripts/directed_evolution.py ${wtseq} \
+        ${wtseq_id}\
         output/ \
         --plm_expert_name_or_path=${plm_model_files} \
-        --preserved_regions ${preserved_regions} \
-        --output_type ${output_type} \
-        --parallel_chains ${parallel_chains} \
-        --n_steps ${n_steps} \
+        --plm_scorer_expert_name_or_path=${plm_scorer_model_files} \
+        --onehot_scorer_expert_name_or_path=${onehot_scorer_model_files} \
+        --preserved_regions ${preserved_regions}\
+        --output_type ${output_type}\
+        --parallel_chains ${parallel_chains}\
+        --n_steps ${n_steps}\
         --max_mutations ${max_mutations}
     """
 }
@@ -68,6 +77,8 @@ workflow {
     EvoProtGrad(
         Channel.fromPath(params.input_fasta),
         Channel.fromPath(params.plm_model_files),
+        Channel.fromPath(params.plm_scorer_model_files),
+        Channel.fromPath(params.onehot_scorer_model_files),
         Channel.value(params.preserved_regions),
         Channel.value(params.output_type),
         Channel.value(params.parallel_chains),
