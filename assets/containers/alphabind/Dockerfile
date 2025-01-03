@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 FROM nvcr.io/nvidia/clara/bionemo-framework:1.10
 WORKDIR /workspace/bionemo
 

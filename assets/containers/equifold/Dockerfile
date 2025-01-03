@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 ARG AWS_DEFAULT_REGION=us-east-1
 
 FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/huggingface-pytorch-training:1.13.1-transformers4.26.0-gpu-py39-cu117-ubuntu20.04

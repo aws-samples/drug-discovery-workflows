@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import argparse
 import logging
 import jsonlines
@@ -11,17 +14,16 @@ logging.basicConfig(
 
 
 def get_collected_results(args):
-
     rfdiffusion = {}
     logging.info(f"Loading generation results from {args.generation_results}")
-    for result in args.generation_results.split(' '):
+    for result in args.generation_results.split(" "):
         with jsonlines.open(result, "r") as reader:
             for obj in reader:
                 rfdiffusion[obj["id"]] = obj
 
     esmfold = {}
     logging.info(f"Loading protein folding results from {args.esmfold_results}")
-    for result in args.esmfold_results.split(' '):
+    for result in args.esmfold_results.split(" "):
         with jsonlines.open(result, "r") as reader:
             for obj in reader:
                 obj["esmfold_structure"] = os.path.join(obj["name"] + ".pdb")
@@ -29,7 +31,7 @@ def get_collected_results(args):
 
     ppl = {}
     logging.info(f"Loading pseudo perplexity results from {args.ppl_results}")
-    for result in args.ppl_results.split(' '):
+    for result in args.ppl_results.split(" "):
         with jsonlines.open(result, "r") as reader:
             for obj in reader:
                 ppl[obj["name"]] = obj
@@ -38,7 +40,7 @@ def get_collected_results(args):
     logging.info(
         f"Loading NanoBodyBuilder2 results from {args.nanobodybuilder2_results}"
     )
-    for result in args.nanobodybuilder2_results.split(' '):
+    for result in args.nanobodybuilder2_results.split(" "):
         with jsonlines.open(result, "r") as reader:
             for obj in reader:
                 obj["nanobodybuilder2_structure"] = os.path.join(obj["name"] + ".pdb")
@@ -46,7 +48,7 @@ def get_collected_results(args):
 
     additional = {}
     logging.info(f"Loading additional results from {args.additional_results}")
-    for result in args.additional_results.split(' '):
+    for result in args.additional_results.split(" "):
         with jsonlines.open(result, "r") as reader:
             for obj in reader:
                 additional[obj["name"]] = obj
