@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.12.0] - 2025-01-03
+
+### 2.12.0 Added
+
+- Added MMseqs2 workflow
+
+### 2.12.0 Changed
+
+- Updated AlphaFold2-Multimer workflow to support multiple input fasta files
+
+---
+
 ## [2.11.0] - 2024-12-18
 
 ### 2.11.0 Added

@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import argparse
 import biotite.structure as struc
 from biotite.structure.io.pdb import PDBFile
@@ -52,7 +55,6 @@ def to_pdb_string(atom_array):
 
 
 def calc_rmsd(scaffold_pdb, predicted_pdb, output_dir):
-
     scaffold_file = PDBFile.read(scaffold_pdb)
     scaffold_structure = struc.io.pdb.get_structure(scaffold_file)
     scaffold_structure = clean_structure(
@@ -65,7 +67,6 @@ def calc_rmsd(scaffold_pdb, predicted_pdb, output_dir):
     predicted_pdb_list = predicted_pdb.split(" ")
     output = []
     for pred in predicted_pdb_list:
-
         predicted_file = PDBFile.read(pred)
         name = "".join(predicted_file.get_remark("1")).strip()
         predicted_structure = struc.io.pdb.get_structure(predicted_file)

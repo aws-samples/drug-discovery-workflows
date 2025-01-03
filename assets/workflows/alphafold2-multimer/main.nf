@@ -33,7 +33,7 @@ workflow {
     // [5mlq, 5mlq.fasta]
     fasta_files = Channel
                   .fromPath(fasta_path)
-                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fasta")[0], filename) }
+                  .map { filename -> tuple ( filename.toString().split("/")[-1].split(".fa")[0], filename) }
 
     // 5nl6.fasta
     // 5mlq.fasta
@@ -143,7 +143,10 @@ process CheckAndValidateInputsTask {
 
     /opt/venv/bin/python \
     /opt/venv/lib/python3.8/site-packages/putils/check_and_validate_inputs.py \
-    --target_id=$fasta_basename --fasta_path=$fasta_path
+    --target_id=$fasta_basename --fasta_path=$fasta_path --output_prefix=$fasta_basename
+
+    ls -alR
+
     """
 }
 

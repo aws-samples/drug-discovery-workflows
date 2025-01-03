@@ -8,11 +8,24 @@ workflow MMSeqs2 {
     database_path
 
     main:
-    MMSeqs2PrepareDatabaseTask(file(database_path))
 
+    db_channel = Channel.fromPath(database_path)
+    db_channel.view()
+    MMSeqs2PrepareDatabaseTask(db_channel)
+
+    // Convert to one or many files
+    if (params.fasta_path[-1] == "/") {
+        fasta_path = params.fasta_path + "*"
+    } else {
+        fasta_path = params.fasta_path
+    }
+
+    fasta_channel = Channel.fromPath(fasta_path)
+    fasta_channel.view()
+    search_input = fasta_channel.combine(MMSeqs2PrepareDatabaseTask.out)
+    search_input.view()
     MMSeqs2SearchTask(
-        file(fasta_path),
-        MMSeqs2PrepareDatabaseTask.out
+        search_input
         )
 
     emit:
@@ -21,10 +34,9 @@ workflow MMSeqs2 {
 
 process MMSeqs2PrepareDatabaseTask {
     label 'mmseqs2'
-    cpus 2
-    memory '4 GB'
+    cpus 16
+    memory '32 GB'
     maxRetries 1
-    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
     path database_path
@@ -44,15 +56,14 @@ process MMSeqs2PrepareDatabaseTask {
 
 process MMSeqs2SearchTask {
     label 'mmseqs2'
-    cpus 8
-    memory '32 GB'
+    cpus 4
+    memory '16 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-tesla-a10g'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    path fasta_path
-    path database_path
+    tuple path(fasta_path), path(database_path)
 
     output:
     path "*.a3m", emit: msa
