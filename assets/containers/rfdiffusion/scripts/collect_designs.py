@@ -74,7 +74,6 @@ def main(args):
                     output.append(seq_dict)
             logging.info(f"Processed {i} sequences")
 
-
     write_seqs_to_jsonlines(output)
     write_seqs_to_fasta(output)
 
@@ -82,7 +81,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument(

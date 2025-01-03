@@ -1,10 +1,13 @@
-from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
-import torch
-import numpy as np
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import argparse
-import pyfastx
 import logging
+import numpy as np
+import pyfastx
+import torch
 from tqdm import tqdm
+from transformers import AutoTokenizer, AutoModel, BitsAndBytesConfig
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -20,7 +23,6 @@ def generate_embeddings(
     quant: bool = False,
     output_file: str = "embeddings.npy",
 ):
-
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     if quant and device != "cpu":
@@ -48,18 +50,21 @@ def generate_embeddings(
     total_batches = (len(text) // batch_size) + 1
     for n, batch in tqdm(
         enumerate([text[i : i + batch_size] for i in range(0, len(text), batch_size)]),
-        desc=f"Generating embeddings",
+        desc="Generating embeddings",
     ):
         print(f"Batch {n+1} of {total_batches}")
         inputs = tokenizer(
-            batch, return_tensors="pt", 
-            return_attention_mask=False, # avoid dtype error on attention_mask for AMPLIFY
-            truncation=True, padding=True, max_length=1024
+            batch,
+            return_tensors="pt",
+            return_attention_mask=False,  # avoid dtype error on attention_mask for AMPLIFY
+            truncation=True,
+            padding=True,
+            max_length=1024,
         ).to(device)
         with torch.inference_mode():
             predictions = model(**inputs, output_hidden_states=True)
         # take last hidden state as embedding
-        per_token_emb = predictions['hidden_states'][-1] 
+        per_token_emb = predictions["hidden_states"][-1]
         # Return mean embeddings after removing <cls> and <eos> tokens and converting to numpy.
         tmp.append(per_token_emb[:, 1:-1, :].cpu().numpy().mean(axis=1))
     output = np.vstack(tmp)
@@ -70,7 +75,6 @@ def generate_embeddings(
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "input_file",

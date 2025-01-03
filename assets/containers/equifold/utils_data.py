@@ -1,3 +1,7 @@
+# Copyright 2022 Genentech, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+
 from collections import defaultdict
 import os
 import numpy as np
@@ -272,9 +276,7 @@ def pdb_feats_to_data(pdb_feats, use_kabsch, real_pdb=False, dst_idx_offset=0):
     cg_resnums = []  # [Ncg]; for edge attributes
     cg_cgidxs = []  # [Ncg]; for node attributes
     cg_Xs = []  # [Ncg, N_CG_MAX, 3]
-    cg_atom_masks = (
-        []
-    )  # [Ncg, N_CG_MAX]; atom level mask; 1.0 if both atom experimentally present and belongs to the CG node else 0.0
+    cg_atom_masks = []  # [Ncg, N_CG_MAX]; atom level mask; 1.0 if both atom experimentally present and belongs to the CG node else 0.0
     cg_masks = []  # [Ncg]; CG level mask; 1.0 if the first three atoms present else 0.0
     for res, cgs in cg_dict.items():
         res_idx = resname_to_idx[res]
