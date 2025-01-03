@@ -1,0 +1,12 @@
+name: Boltz1
+description: "State-of-the-art open-source model to predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  yaml_path:
+    description: "YAML file containing input entities."
+    optional: false
+storageCapacity: 1200
+tags:
+  Name: "Boltz1"
+accelerators: GPU
