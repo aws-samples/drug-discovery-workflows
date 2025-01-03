@@ -3,9 +3,6 @@ description: "Predict multi-chain protein structures with AlphaFold2-Multimer"
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
-  target_id:
-    description: "The ID of the target being run."
-    optional: false
   fasta_path: 
     description: "Input file in multi-FASTA format."
     optional: false
