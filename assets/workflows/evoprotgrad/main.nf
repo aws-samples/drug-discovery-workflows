@@ -14,7 +14,7 @@ workflow EvoProtGrad {
     max_mutations
 
     main:
-    wtseq_ch = input_fasta.splitFasta()
+    wtseq_ch = input_fasta.splitFasta(record: [id: true, seqString: true])
         
     wtseq_ch.view()
     RunDirectedEvolutionTask(
@@ -82,7 +82,7 @@ workflow {
         Channel.fromPath(params.input_fasta),
         Channel.fromPath(params.plm_model_files),
         Channel.fromPath(params.plm_scorer_model_files),
-        Channel.value(params.plm_scorer_num_labels),
+        Channel.value(params.plm_scorer_num_labels.toInteger()),
         Channel.fromPath(params.onehot_scorer_model_files),
         Channel.value(params.preserved_regions),
         Channel.value(params.output_type),
