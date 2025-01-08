@@ -1,15 +1,17 @@
+# BioPhi
 
+## Build Docker image and push to ECR
 
-# Build Docker image and push to ECR
-```
+```bash
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 588738610715.dkr.ecr.us-east-1.amazonaws.com
 docker build -t biophi .
 docker tag biophi:latest 588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest
 docker push 588738610715.dkr.ecr.us-east-1.amazonaws.com/biophi:latest
 ```
 
-# Local testing using the Docker container
-```
+## Local testing using the Docker container
+
+```bash
 ## Download OASis database
 ## Download database file
 wget https://zenodo.org/record/5164685/files/OASis_9mers_v1.db.gz
@@ -32,8 +34,9 @@ biophi oasis /tmp/testab.fa \
      --output /tmp/oasis.xlsx
 ```
 
-# Creating an AHO private workflow
-```
+## Creating an AHO private workflow
+
+```bash
 cd aho_workflow
 zip definition.zip main.nf nextflow.config parameter-template.json
 aws omics create-workflow --engine NEXTFLOW \
@@ -45,10 +48,12 @@ aws omics create-workflow --engine NEXTFLOW \
 rm definition.zip
 ```
 
-# Running the AHO workflow
-To create a RUN with the name "ML-guided-DE_test" from the workflow we created above, 
+## Running the AHO workflow
+
+To create a RUN with the name "ML-guided-DE_test" from the workflow we created above,
 with the input params specified in `aho_workflow/params.json`, run:
-```
+
+```bash
 cd aho_workflow
 export ROLEARN=arn:aws:iam::588738610715:role/OmicsRunWorkflow
 export OUTPUTLOC=s3://hodgkin-spt-data-us-east-1/test_data/biophi/wf_output

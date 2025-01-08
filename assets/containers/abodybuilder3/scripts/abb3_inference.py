@@ -1,3 +1,6 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 import argparse
 from abodybuilder3.utils import string_to_input, add_atom37_to_output
 from abodybuilder3.lightning_module import LitABB3

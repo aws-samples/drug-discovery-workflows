@@ -1,12 +1,16 @@
-import pandas as pd
-import os
-import torch
-from omegaconf import OmegaConf
+# Copyright 2023 Kuhlman-Lab
+# Modifications copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
 from Bio.PDB import PDBParser
 from datasets import Mutation
+from omegaconf import OmegaConf
+import os
+import pandas as pd
 from protein_mpnn_utils import alt_parse_PDB
-from thermompnn_benchmarking import get_trained_model
 from SSM import get_ssm_mutations
+from thermompnn_benchmarking import get_trained_model
+import torch
 
 ALPHABET = "ACDEFGHIKLMNPQRSTVWYX"
 
@@ -19,7 +23,6 @@ def get_chains(pdb):
 
 
 def main(cfg, args):
-
     # define config for model loading
     config = {
         "training": {
