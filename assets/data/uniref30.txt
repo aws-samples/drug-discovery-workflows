@@ -1,1 +1,1 @@
-s3://omics-{{REGION}}/alphafold_multimer/uniref30/
+https://wwwuser.gwdguser.de/~compbiol/uniclust/2023_02/UniRef30_2023_02_hhsuite.tar.gz

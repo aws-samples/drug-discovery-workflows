@@ -2,7 +2,7 @@ from absl import logging
 from alphafold.data import parsers, pipeline, templates
 import numpy as np
 import os
-from typing import MutableMapping, Optional, Sequence, Union
+from typing import MutableMapping, Optional, Union
 from alphafold.data import msa_pairing
 from alphafold.data.pipeline_multimer import DataPipeline as MultimerDataPipeline
 from alphafold.data.tools import hhsearch, hmmsearch, jackhmmer, hhblits
@@ -120,7 +120,9 @@ class GenerateMonomerFeaturesDataPipeline:
 
         # Generate features from MSAs
         if bfd_msa:
-            msa_features = pipeline.make_msa_features((uniref90_msa, bfd_msa, mgnify_msa))
+            msa_features = pipeline.make_msa_features(
+                (uniref90_msa, bfd_msa, mgnify_msa)
+            )
         else:
             msa_features = pipeline.make_msa_features((uniref90_msa, mgnify_msa))
         logging.info(
@@ -137,7 +139,6 @@ class GenerateMonomerFeaturesDataPipeline:
 
 
 class GenerateMultimerFeaturesDataPipeline(MultimerDataPipeline):
-
     """Runs the alignment tools and assembles the input features."""
 
     def __init__(
@@ -236,7 +237,7 @@ class MonomerMSAPipeline:
         hhblits_binary_path: str,
         database_type: str,
         database_path: str,
-        database_path_2 = None,
+        database_path_2=None,
         cpu: int = 8,
         max_sto_hits: int = 501,
         use_precomputed_msas: bool = True,
@@ -252,15 +253,13 @@ class MonomerMSAPipeline:
                         # "bfd",
                         "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
                     ),
-                    # os.path.join(database_path, "uniref30", "UniRef30_2021_03"),
-                    os.path.join(database_path_2, "UniRef30_2021_03"),
+                    os.path.join(database_path_2, "UniRef30_2023_02"),
                 ],
                 n_cpu=cpu,
             )
         elif database_type == "uniref90":
             self.runner = jackhmmer.Jackhmmer(
                 binary_path=jackhmmer_binary_path,
-                # database_path=os.path.join(database_path, "uniref90.fasta"),
                 database_path=os.path.join(database_path),
                 n_cpu=cpu,
             )
@@ -273,7 +272,6 @@ class MonomerMSAPipeline:
         elif database_type == "mgnify":
             self.runner = jackhmmer.Jackhmmer(
                 binary_path=jackhmmer_binary_path,
-                # database_path=os.path.join(database_path, "mgy_clusters_2022_05.fa"),
                 database_path=os.path.join(database_path),
                 n_cpu=cpu,
             )

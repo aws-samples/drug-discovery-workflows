@@ -14,7 +14,7 @@
 # This script can help you download files from S3, run a command, and then
 # upload the results back up to S3
 #
-# Usage: 
+# Usage:
 # bash run.sh \
 #   && -i s3://mybucket/file.text:/home/user/file.txt \
 #   && -i s3://mybucket/myfolder/:/home/user/myfolder/ \
@@ -25,15 +25,15 @@
 set -e
 
 # Adapted from https://github.com/awslabs/aws-batch-helpers/blob/master/fetch-and-run/fetch_and_run.sh
-STARTTIME=`date +%s`
+STARTTIME=$(date +%s)
 BASENAME="${0##*/}"
 
-usage () {
-  if [ "${#@}" -ne 0 ]; then
-    echo "* ${*}"
-    echo
-  fi
-  cat <<ENDUSAGE
+usage() {
+    if [ "${#@}" -ne 0 ]; then
+        echo "* ${*}"
+        echo
+    fi
+    cat <<ENDUSAGE
 Usage:
 bash run.sh [options] <command> [parameters]
 
@@ -48,22 +48,21 @@ Options:
 
 ENDUSAGE
 
-  exit 2
+    exit 2
 }
 
 # Standard function to print an error and exit with a failing return code
-error_exit () {
-  echo "${BASENAME} - ${1}" >&2
-  exit 1
+error_exit() {
+    echo "${BASENAME} - ${1}" >&2
+    exit 1
 }
 
 # Function to cp files recursively if the last character is a "/"
-recursive_cp () {
-    if [ ${1:0-1} = "/" ]
-    then
-        aws s3 cp --recursive $2 $3;
+recursive_cp() {
+    if [ ${1:0-1} = "/" ]; then
+        aws s3 cp --recursive $2 $3
     else
-        aws s3 cp $2 $3;
+        aws s3 cp $2 $3
     fi
 }
 
@@ -75,25 +74,28 @@ inputs=()
 outputs=()
 while getopts 'i:o:' OPTION; do
     case "$OPTION" in
-        i)
-            inputs+=($OPTARG);;
-        o)
-            outputs+=($OPTARG);;
-        *)
-            usage
+    i)
+        inputs+=($OPTARG)
+        ;;
+    o)
+        outputs+=($OPTARG)
+        ;;
+    *)
+        usage
+        ;;
     esac
-done 
+done
 
 # Extract command and parameters from input
-shift "$(($OPTIND -1))"
+shift "$(($OPTIND - 1))"
 command=$@
 
 # Download from s3
-for download in ${inputs[@]}
-do
-    IFS=':'; splitArray=($download); unset IFS;
-    if [ ${splitArray[0]} = "s3" ]
-    then
+for download in ${inputs[@]}; do
+    IFS=':'
+    splitArray=($download)
+    unset IFS
+    if [ ${splitArray[0]} = "s3" ]; then
         src="${splitArray[0]}:${splitArray[1]}"
         dest=${splitArray[2]}
     else
@@ -107,11 +109,11 @@ echo "Running command '$command'"
 eval $command
 
 # Upload to s3
-for upload in ${outputs[@]}
-do
-    IFS=':'; splitArray=($upload); unset IFS;
-    if [ ${splitArray[1]} = "s3" ]
-    then
+for upload in ${outputs[@]}; do
+    IFS=':'
+    splitArray=($upload)
+    unset IFS
+    if [ ${splitArray[1]} = "s3" ]; then
         src=${splitArray[0]}
         dest="${splitArray[1]}:${splitArray[2]}"
     else
@@ -120,5 +122,5 @@ do
     fi
     recursive_cp $src $src $dest
 done
-ENDTIME=`date +%s`
-echo "Process completed in $((ENDTIME-STARTTIME)) sec."
+ENDTIME=$(date +%s)
+echo "Process completed in $((ENDTIME - STARTTIME)) sec."
