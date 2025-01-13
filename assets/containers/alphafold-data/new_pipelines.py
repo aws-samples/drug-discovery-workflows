@@ -252,8 +252,7 @@ class MonomerMSAPipeline:
                         # "bfd",
                         "bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt",
                     ),
-                    # os.path.join(database_path, "uniref30", "UniRef30_2021_03"),
-                    os.path.join(database_path_2, "UniRef30_2021_03"),
+                    os.path.join(database_path_2, "UniRef30_2023_02"),
                 ],
                 n_cpu=cpu,
             )
