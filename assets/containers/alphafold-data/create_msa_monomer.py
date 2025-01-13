@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Script to create MSAs for AlphaFold"""
+
 import json
 import os
 import shutil
@@ -12,7 +13,6 @@ from absl import app
 from absl import flags
 from absl import logging
 from new_pipelines import MonomerMSAPipeline
-from resource import getrusage, RUSAGE_SELF
 
 
 logging.set_verbosity(logging.INFO)
@@ -25,7 +25,9 @@ flags.DEFINE_enum(
     "Type of database to search against.",
 )
 flags.DEFINE_string("database_path", None, "Path to directory of supporting data.")
-flags.DEFINE_string("database_path_2", None, "Path to second directory of supporting data.")
+flags.DEFINE_string(
+    "database_path_2", None, "Path to second directory of supporting data."
+)
 
 flags.DEFINE_string(
     "output_dir", "output", "Path to a directory that will store the results."
@@ -76,11 +78,10 @@ def create_msas(
 
 
 def main(argv):
-
     metrics = {
         "process": "MSA Creation",
         "start_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime()),
-        "timings": {}
+        "timings": {},
     }
     t_start = time.time()
 
@@ -118,10 +119,10 @@ def main(argv):
 
     metrics["timings"].update({"total": round(time.time() - t_start, 3)})
     metrics.update({"end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime())})
-    # metrics.update({"peak_reserved_memory_gb": round(getrusage(RUSAGE_SELF).ru_maxrss / 1000000, 3)})
     metrics_output_path = os.path.join(FLAGS.output_dir, "metrics.json")
     with open(metrics_output_path, "w") as f:
         f.write(json.dumps(metrics))
+
 
 if __name__ == "__main__":
     flags.mark_flags_as_required(["fasta_path", "database_path"])

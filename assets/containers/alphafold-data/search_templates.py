@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Script to identify templates for AlphaFold"""
+
 import os
 import shutil
 import time
 from time import strftime, gmtime
-from resource import getrusage, RUSAGE_SELF
 import json
 from absl import app
 from absl import flags
@@ -76,15 +76,14 @@ def search_templates(
             "model_preset": FLAGS.model_preset,
             "cpu": FLAGS.cpu,
             "end_time": strftime("%d %b %Y %H:%M:%S +0000", gmtime()),
-            # "peak_reserved_memory_gb": round(getrusage(RUSAGE_SELF).ru_maxrss / 1000000, 3),
         }
     )
     metrics_output_path = os.path.join(FLAGS.output_dir, "metrics.json")
     with open(metrics_output_path, "w") as f:
         f.write(json.dumps(metrics))
 
-def main(argv):
 
+def main(argv):
     for tool_name in ("hhsearch", "hmmsearch", "hmmbuild"):
         if not FLAGS[f"{tool_name}_binary_path"].value:
             raise ValueError(
@@ -107,9 +106,7 @@ def main(argv):
         data_pipeline = TemplateSearchPipeline(
             template_searcher=hhsearch.HHSearch(
                 binary_path=FLAGS.hhsearch_binary_path,
-                databases=[
-                    os.path.join(FLAGS.database_path, "pdb70")
-                    ],
+                databases=[os.path.join(FLAGS.database_path, "pdb70")],
             ),
             cpu=FLAGS.cpu,
         )
