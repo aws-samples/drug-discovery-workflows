@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """Full AlphaFold protein structure prediction script."""
+
 import os
 import pathlib
 import pickle
@@ -17,7 +18,6 @@ from absl import logging
 from alphafold.data import templates
 from alphafold.data import parsers
 import numpy as np
-from resource import getrusage, RUSAGE_SELF
 
 from new_pipelines import (
     GenerateMonomerFeaturesDataPipeline,
@@ -44,7 +44,7 @@ flags.DEFINE_string("msa_dir", None, "Path to directory of .a3m, and .sto files.
 flags.DEFINE_string("template_hits", None, "Path to a .hhr or .sto ")
 
 flags.DEFINE_string(
-    "output_dir", None, "Path to a directory that will " "store the results."
+    "output_dir", None, "Path to a directory that will store the results."
 )
 flags.DEFINE_string(
     "kalign_binary_path", shutil.which("kalign"), "Path to the Kalign executable."
@@ -52,7 +52,7 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     "template_mmcif_dir",
     "pdb_mmcif",
-    "Path to a directory with " "template mmCIF structures, each named <pdb_id>.cif",
+    "Path to a directory with template mmCIF structures, each named <pdb_id>.cif",
 )
 flags.DEFINE_string(
     "max_template_date",
@@ -121,22 +121,6 @@ def generate_features(
         input_fasta_path=fasta_path, msa_output_dir=msa_dir
     )
 
-    # metrics.update(
-    #     {
-    #         # "template_count": feature_dict["template_domain_names"].shape[0],
-    #         "dedup_msa_size": int(feature_dict["num_alignments"][0]),
-    #     }
-    # )
-
-    # print('num alignments')
-    # print(feature_dict['num_alignments'])
-    # print('num templates')
-    # print(feature_dict['num_templates'])
-    # print('done')
-
-
-
-
     # Write out features as a pickled dictionary.
     features_output_path = os.path.join(output_dir, "features.pkl")
     logging.info(f"Writing features to {features_output_path}")
@@ -157,8 +141,8 @@ def generate_features(
     with open(metrics_output_path, "w") as f:
         f.write(json.dumps(metrics))
 
-def main(argv):
 
+def main(argv):
     for tool_name in ["kalign"]:
         if not FLAGS[f"{tool_name}_binary_path"].value:
             raise ValueError(

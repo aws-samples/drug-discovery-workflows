@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.14.0] - 2025-01-13
+
+### 2.14.0 Fixed
+
+- Updated Uniref30 database to most recent version (2023-02) to avoid known HHBlits issue described at https://github.com/google-deepmind/alphafold/issues/810.
+
+---
+
 ## [2.13.0] - 2025-01-08
 
 ### 2.13.0 Changed
