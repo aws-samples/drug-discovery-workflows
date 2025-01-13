@@ -1,7 +1,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023 as build
+FROM public.ecr.aws/amazonlinux/amazonlinux:2 as build
 
 COPY code /tmp/putils
 
