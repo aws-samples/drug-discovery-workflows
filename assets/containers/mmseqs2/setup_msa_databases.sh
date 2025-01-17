@@ -13,15 +13,6 @@ GPU=${GPU:-}
 mkdir -p -- "${WORKDIR}"
 cd "${WORKDIR}"
 
-# if [ ! -f DOWNLOADS_READY ]; then
-#   downloadFile "https://wwwuser.gwdg.de/~compbiol/colabfold/${UNIREF30DB}.tar.gz" "${UNIREF30DB}.tar.gz"
-#   downloadFile "https://wwwuser.gwdg.de/~compbiol/colabfold/colabfold_envdb_202108.tar.gz" "colabfold_envdb_202108.tar.gz"
-#   downloadFile "https://wwwuser.gwdg.de/~compbiol/colabfold/pdb100_230517.fasta.gz" "pdb100_230517.fasta.gz"
-#   downloadFile "https://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/pdb100_foldseek_230517.tar.gz" "pdb100_foldseek_230517.tar.gz"
-#   touch DOWNLOADS_READY
-# fi
-
-
 # Make MMseqs2 merge the databases to avoid spamming the folder with files
 export MMSEQS_FORCE_MERGE=1
 
@@ -38,7 +29,6 @@ if [ -n "${GPU}" ]; then
 fi
 
 if [ ! -f UNIREF30_READY ]; then
-  # tar xzvf "${UNIREF30DB}.tar.gz"
   mmseqs tsv2exprofiledb "${UNIREF30DB}" "${UNIREF30DB}_db" ${GPU_PAR}
   if [ -z "$MMSEQS_NO_INDEX" ]; then
     mmseqs createindex "${UNIREF30DB}_db" tmp1 --remove-tmp-files 1 ${GPU_INDEX_PAR}
@@ -53,7 +43,6 @@ if [ ! -f UNIREF30_READY ]; then
 fi
 
 if [ ! -f COLABDB_READY ]; then
-  # tar xzvf "colabfold_envdb_202108.tar.gz"
   mmseqs tsv2exprofiledb "colabfold_envdb_202108" "colabfold_envdb_202108_db" ${GPU_PAR}
   # TODO: split memory value for createindex?
   if [ -z "$MMSEQS_NO_INDEX" ]; then
