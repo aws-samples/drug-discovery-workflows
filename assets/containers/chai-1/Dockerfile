@@ -3,7 +3,7 @@
 
 ARG AWS_DEFAULT_REGION=us-east-1
 
-FROM 763104351884.dkr.ecr.us-east-1.amazonaws.com/pytorch-inference:2.5.1-gpu-py311-cu124-ubuntu22.04-ec2
+FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.5.1-gpu-py311-cu124-ubuntu22.04-ec2
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get autoremove -y \
