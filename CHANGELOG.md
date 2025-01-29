@@ -7,11 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.14.1] - 2025-01-29
+
+### 2.14.1 Fixed
+
+- Added missing region variable to Chai-1 base image.
+- Updated container build script to better handle missing remote repository credentials.
+
+---
+
 ## [2.14.0] - 2025-01-13
 
 ### 2.14.0 Fixed
 
-- Updated Uniref30 database to most recent version (2023-02) to avoid known HHBlits issue described at https://github.com/google-deepmind/alphafold/issues/810.
+- Updated Uniref30 database to most recent version (2023-02) to avoid known HHBlits issue described at <https://github.com/google-deepmind/alphafold/issues/810>.
 
 ---
 
