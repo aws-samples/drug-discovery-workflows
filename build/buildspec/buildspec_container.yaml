@@ -19,7 +19,18 @@ phases:
       - rm secrets.json && unset SECRET_VALUES
       - echo Logging in to AWS Deep Learning Containers ECR...
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com
-      - if [ -n "${NGC_CLI_API_KEY+x}" ]; then echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io; fi
+      - if [ -n "${NGC_CLI_API_KEY+x}" ]; 
+          then 
+          echo $NGC_CLI_API_KEY | docker login --username '$oauthtoken' --password-stdin nvcr.io; 
+        else 
+          echo "NGC_CLI_API_KEY is unset";
+          if [[ $NAME == *-nim ]];
+            then
+            echo "NGC_CLI_API_KEY required to build NIM containers, exiting";
+            JSON_DATA=$( jq -n --arg uid "$NAME" '{Status:"SUCCESS", Reason:"Configuration Complete","UniqueId":$uid, "Data":"Application has completed configuration."}' );
+            curl -X PUT -H "Content-Type:" --data-binary "$JSON_DATA" "$WAIT_CONDITION_HANDLE";
+          fi
+        fi
   build:
     commands:
       - echo "Checking for repository ${NAME}"
