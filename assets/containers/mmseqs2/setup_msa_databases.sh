@@ -2,7 +2,7 @@
 
 # Adapted from from https://github.com/sokrypton/ColabFold/blob/main/setup_databases.sh
 # Setup everything for using mmseqs locally
-# Set MMSEQS_NO_INDEX to skip the index creation step (not useful for colabfold_search in most cases)
+# Run using GPU=1 ./setup_databases.sh /path/to/db_folder
 set -ex
 
 WORKDIR="${1:-$(pwd)}"
@@ -20,7 +20,7 @@ GPU_PAR=""
 GPU_INDEX_PAR=""
 if [ -n "${GPU}" ]; then
   GPU_PAR="--gpu 1"
-  GPU_INDEX_PAR=" --split 1 --index-subset 2"
+  GPU_INDEX_PAR=" --split 1 --index-subset 2" # Possibly change the split to 0?
 
   if ! mmseqs --help | grep -q 'gpuserver'; then
     echo "The installed MMseqs2 has no GPU support, update to at least release 16"

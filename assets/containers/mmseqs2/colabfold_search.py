@@ -793,7 +793,139 @@ def mmseqs_search_pair(
     # fmt: on
 
 
-def main(args):
+def main():
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "query",
+        type=Path,
+        help="fasta files with the queries.",
+    )
+    parser.add_argument(
+        "dbbase",
+        type=Path,
+        help="The path to the database and indices you downloaded and created with setup_databases.sh",
+    )
+    parser.add_argument(
+        "base", type=Path, help="Directory for the results (and intermediate files)"
+    )
+    parser.add_argument(
+        "--prefilter-mode",
+        type=int,
+        default=0,
+        choices=[0, 1, 2],
+        help="Prefiltering algorithm to use: 0: k-mer (high-mem), 1: ungapped (high-cpu), 2: exhaustive (no prefilter, very slow). See wiki for more details: https://github.com/sokrypton/ColabFold/wiki#colabfold_search",
+    )
+    parser.add_argument(
+        "-s",
+        type=float,
+        default=None,
+        help="MMseqs2 sensitivity. Lowering this will result in a much faster search but possibly sparser MSAs. By default, the k-mer threshold is directly set to the same one of the server, which corresponds to a sensitivity of ~8.",
+    )
+    # dbs are uniref, templates and environmental
+    # We normally don't use templates
+    parser.add_argument(
+        "--db1", type=Path, default=Path("uniref30_2302_db"), help="UniRef database"
+    )
+    parser.add_argument("--db2", type=Path, default=Path(""), help="Templates database")
+    parser.add_argument(
+        "--db3",
+        type=Path,
+        default=Path("colabfold_envdb_202108_db"),
+        help="Environmental database",
+    )
+    parser.add_argument(
+        "--db4",
+        type=Path,
+        default=Path("spire_ctg10_2401_db"),
+        help="Environmental pairing database",
+    )
+
+    # poor man's boolean arguments
+    parser.add_argument(
+        "--use-env", type=int, default=1, choices=[0, 1], help="Use --db3"
+    )
+    parser.add_argument(
+        "--use-env-pairing", type=int, default=0, choices=[0, 1], help="Use --db4"
+    )
+    parser.add_argument(
+        "--use-templates", type=int, default=0, choices=[0, 1], help="Use --db2"
+    )
+    parser.add_argument(
+        "--filter",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help="Filter the MSA by pre-defined align_eval, qsc, max_accept",
+    )
+
+    # mmseqs params
+    parser.add_argument(
+        "--mmseqs",
+        type=Path,
+        default=Path("mmseqs"),
+        help="Location of the mmseqs binary.",
+    )
+    parser.add_argument(
+        "--expand-eval",
+        type=float,
+        default=math.inf,
+        help="e-val threshold for 'expandaln'.",
+    )
+    parser.add_argument(
+        "--align-eval", type=int, default=10, help="e-val threshold for 'align'."
+    )
+    parser.add_argument(
+        "--diff",
+        type=int,
+        default=3000,
+        help="filterresult - Keep at least this many seqs in each MSA block.",
+    )
+    parser.add_argument(
+        "--qsc",
+        type=float,
+        default=-20.0,
+        help="filterresult - reduce diversity of output MSAs using min score thresh.",
+    )
+    parser.add_argument(
+        "--max-accept",
+        type=int,
+        default=1000000,
+        help="align - Maximum accepted alignments before alignment calculation for a query is stopped.",
+    )
+    parser.add_argument(
+        "--pairing_strategy", type=int, default=0, help="pairaln - Pairing strategy."
+    )
+    parser.add_argument(
+        "--db-load-mode",
+        type=int,
+        default=0,
+        help="Database preload mode 0: auto, 1: fread, 2: mmap, 3: mmap+touch",
+    )
+    parser.add_argument(
+        "--unpack",
+        type=int,
+        default=1,
+        choices=[0, 1],
+        help="Unpack results to loose files or keep MMseqs2 databases.",
+    )
+    parser.add_argument(
+        "--threads", type=int, default=64, help="Number of threads to use."
+    )
+    parser.add_argument(
+        "--gpu",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="Whether to use GPU (1) or not (0). Control number of GPUs with CUDA_VISIBLE_DEVICES env var.",
+    )
+    parser.add_argument(
+        "--gpu-server",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="Whether to use GPU server (1) or not (0)",
+    )
+    args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
 
@@ -972,136 +1104,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "query",
-        type=Path,
-        help="fasta files with the queries.",
-    )
-    parser.add_argument(
-        "dbbase",
-        type=Path,
-        help="The path to the database and indices you downloaded and created with setup_databases.sh",
-    )
-    parser.add_argument(
-        "base", type=Path, help="Directory for the results (and intermediate files)"
-    )
-    parser.add_argument(
-        "--prefilter-mode",
-        type=int,
-        default=0,
-        choices=[0, 1, 2],
-        help="Prefiltering algorithm to use: 0: k-mer (high-mem), 1: ungapped (high-cpu), 2: exhaustive (no prefilter, very slow). See wiki for more details: https://github.com/sokrypton/ColabFold/wiki#colabfold_search",
-    )
-    parser.add_argument(
-        "-s",
-        type=float,
-        default=None,
-        help="MMseqs2 sensitivity. Lowering this will result in a much faster search but possibly sparser MSAs. By default, the k-mer threshold is directly set to the same one of the server, which corresponds to a sensitivity of ~8.",
-    )
-    # dbs are uniref, templates and environmental
-    # We normally don't use templates
-    parser.add_argument(
-        "--db1", type=Path, default=Path("uniref30_2302_db"), help="UniRef database"
-    )
-    parser.add_argument("--db2", type=Path, default=Path(""), help="Templates database")
-    parser.add_argument(
-        "--db3",
-        type=Path,
-        default=Path("colabfold_envdb_202108_db"),
-        help="Environmental database",
-    )
-    parser.add_argument(
-        "--db4",
-        type=Path,
-        default=Path("spire_ctg10_2401_db"),
-        help="Environmental pairing database",
-    )
-
-    # poor man's boolean arguments
-    parser.add_argument(
-        "--use-env", type=int, default=1, choices=[0, 1], help="Use --db3"
-    )
-    parser.add_argument(
-        "--use-env-pairing", type=int, default=0, choices=[0, 1], help="Use --db4"
-    )
-    parser.add_argument(
-        "--use-templates", type=int, default=0, choices=[0, 1], help="Use --db2"
-    )
-    parser.add_argument(
-        "--filter",
-        type=int,
-        default=1,
-        choices=[0, 1],
-        help="Filter the MSA by pre-defined align_eval, qsc, max_accept",
-    )
-
-    # mmseqs params
-    parser.add_argument(
-        "--mmseqs",
-        type=Path,
-        default=Path("mmseqs"),
-        help="Location of the mmseqs binary.",
-    )
-    parser.add_argument(
-        "--expand-eval",
-        type=float,
-        default=math.inf,
-        help="e-val threshold for 'expandaln'.",
-    )
-    parser.add_argument(
-        "--align-eval", type=int, default=10, help="e-val threshold for 'align'."
-    )
-    parser.add_argument(
-        "--diff",
-        type=int,
-        default=3000,
-        help="filterresult - Keep at least this many seqs in each MSA block.",
-    )
-    parser.add_argument(
-        "--qsc",
-        type=float,
-        default=-20.0,
-        help="filterresult - reduce diversity of output MSAs using min score thresh.",
-    )
-    parser.add_argument(
-        "--max-accept",
-        type=int,
-        default=1000000,
-        help="align - Maximum accepted alignments before alignment calculation for a query is stopped.",
-    )
-    parser.add_argument(
-        "--pairing_strategy", type=int, default=0, help="pairaln - Pairing strategy."
-    )
-    parser.add_argument(
-        "--db-load-mode",
-        type=int,
-        default=0,
-        help="Database preload mode 0: auto, 1: fread, 2: mmap, 3: mmap+touch",
-    )
-    parser.add_argument(
-        "--unpack",
-        type=int,
-        default=1,
-        choices=[0, 1],
-        help="Unpack results to loose files or keep MMseqs2 databases.",
-    )
-    parser.add_argument(
-        "--threads", type=int, default=64, help="Number of threads to use."
-    )
-    parser.add_argument(
-        "--gpu",
-        type=int,
-        default=0,
-        choices=[0, 1],
-        help="Whether to use GPU (1) or not (0). Control number of GPUs with CUDA_VISIBLE_DEVICES env var.",
-    )
-    parser.add_argument(
-        "--gpu-server",
-        type=int,
-        default=0,
-        choices=[0, 1],
-        help="Whether to use GPU server (1) or not (0)",
-    )
-    args = parser.parse_args()
-    main(args)
+    main()
