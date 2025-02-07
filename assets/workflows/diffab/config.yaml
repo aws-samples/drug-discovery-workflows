@@ -1,0 +1,40 @@
+name: DiffAb
+description: "DiffAb"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_pdb:
+    description: "Input PDB file"
+    optional: false
+  checkpoint_filename:
+    description: "Checkpoint filename"
+    optional: false
+  seed:
+    description: "Random seed for reproducibility"
+    optional: false
+  sample_structure:
+    description: "Sample structure from the input PDB file"
+    optional: false
+  sample_sequence:
+    description: "Sample sequence from the input PDB file"
+    optional: false
+  cdrs:
+    description: "CDR regions to sample"
+    optional: false
+  num_samples:
+    description: "Number of samples to generate"
+    optional: false
+
+  # From data stage in S3
+  model_weights:
+   description: "Model weights"
+   optional: true
+  sabdab_db:
+    description: "SAbDab database"
+    optional: true
+
+
+storageCapacity: 1200
+tags:
+  Name: "DiffAb"
+accelerators: GPU
