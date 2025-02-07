@@ -6,7 +6,7 @@ The following setup steps below assume you are starting from scratch and prefer 
 
 ## Running a workflow
 
-Pick your favorite small fasta file to run your fist end-to-end test. The following command can be done from the terminal or you can navigate to the AWS console. Note that DiffAb likely will work best using `STATIC` run storage due to low data volumes and faster startup times.
+Pick your favorite pdb file to run your fist end-to-end test. The following command can be done from the terminal or you can navigate to the AWS console. Note that DiffAb likely will work best using `STATIC` run storage due to low data volumes and faster startup times.
 
 ### Example params.json
 
