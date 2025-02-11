@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/cuda:12.6.3-runtime-amzn2023 as base
+FROM nvcr.io/nvidia/cuda:12.6.3-base-amzn2023 as base
 
 ARG PYTHON='python3.11'
 WORKDIR /home

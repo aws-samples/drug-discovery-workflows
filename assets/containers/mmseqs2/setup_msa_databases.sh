@@ -20,7 +20,7 @@ GPU_PAR=""
 GPU_INDEX_PAR=""
 if [ -n "${GPU}" ]; then
   GPU_PAR="--gpu 1"
-  GPU_INDEX_PAR=" --split 1 --index-subset 2" # Possibly change the split to 0?
+  GPU_INDEX_PAR=" --split 1 --index-subset 2"
 
   if ! mmseqs --help | grep -q 'gpuserver'; then
     echo "The installed MMseqs2 has no GPU support, update to at least release 16"
