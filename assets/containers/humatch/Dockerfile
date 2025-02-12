@@ -24,22 +24,9 @@ ENV PYTHONPATH=/opt/miniconda/lib/python3.8/site-packages:$PYTHONPATH
 
 WORKDIR /opt
 
-# Clone the ANARCI repository
-RUN git clone https://github.com/oxpig/ANARCI.git
-
-WORKDIR /opt/ANARCI
-
-# 79f6c575056dedef86cb8f405ebb039197923eec = master on 1/28/25
-RUN git checkout 79f6c575056dedef86cb8f405ebb039197923eec
-
 # Install ANARCI
-# https://github.com/oxpig/ANARCI/tree/master?tab=readme-ov-file#installation
 RUN conda install -c conda-forge biopython=1.85 -y \
-    && conda install -c bioconda hmmer=3.3.2 -y
-
-RUN python setup.py install
-
-WORKDIR /opt
+    && conda install -c bioconda anarci=2024.05.21 hmmer=3.3.2 -y
 
 # Install Humatch
 RUN git clone https://github.com/oxpig/Humatch.git
