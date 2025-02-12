@@ -39,6 +39,5 @@ COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=build /home/mmseqs/bin/mmseqs /usr/local/bin/mmseqs
 COPY setup_msa_databases.sh .
 COPY colabfold_search.py .
-COPY msa.sh .
 
 ENTRYPOINT []
