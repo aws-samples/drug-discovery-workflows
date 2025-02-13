@@ -1,1 +1,1 @@
-https://wwwuser.gwdg.de/~compbiol/colabfold/colabfold_envdb_202108.tar.gz
+s3://5d1a4b76751b4c8a994ce96bafd91ec9/colabfold_envdb/processed/

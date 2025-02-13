@@ -48,9 +48,9 @@ process MMSeqs2PrepareDatabaseTask {
     """
     set -euxo pipefail
     mkdir db
-    /usr/local/bin/entrypoint createdb $database_path tmpDB
-    /usr/local/bin/entrypoint makepaddedseqdb tmpDB db/gpuDB
-    /usr/local/bin/entrypoint createindex db/gpuDB tmp --index-subset 2
+    mmseqs createdb $database_path tmpDB
+    mmseqs makepaddedseqdb tmpDB db/gpuDB
+    mmseqs createindex db/gpuDB tmp --index-subset 2
     """
 }
 
@@ -71,9 +71,9 @@ process MMSeqs2SearchTask {
     script:
     """
     set -euxo pipefail
-    /usr/local/bin/entrypoint createdb $fasta_path queryDB
-    /usr/local/bin/entrypoint search queryDB $database_path/gpuDB result tmp --gpu 1
-    /usr/local/bin/entrypoint result2msa queryDB $database_path/gpuDB result ${fasta_path.baseName}.a3m --msa-format-mode 5
+    mmseqs createdb $fasta_path queryDB
+    mmseqs search queryDB $database_path/gpuDB result tmp --gpu 1
+    mmseqs result2msa queryDB $database_path/gpuDB result ${fasta_path.baseName}.a3m --msa-format-mode 5
     """
 }
 

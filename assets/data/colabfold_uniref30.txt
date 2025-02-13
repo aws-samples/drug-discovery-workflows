@@ -1,1 +1,1 @@
-https://wwwuser.gwdg.de/~compbiol/colabfold/uniref30_2302.tar.gz
+s3://5d1a4b76751b4c8a994ce96bafd91ec9/colabfold_uniref30/processed/
