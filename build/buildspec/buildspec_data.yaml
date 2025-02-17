@@ -55,10 +55,10 @@ phases:
           if [[ "$SOURCE_SCHEME" == "s3" ]]; then
             if [[ "$SOURCE_URI" =~ .*\/$ ]]; then
               echo "Recursive file sync from $SOURCE_URI"
-              aws s3 sync $SOURCE_URI $DESTINATION_URI/$FILENAME/
+              aws s3 sync --copy-props none $SOURCE_URI $DESTINATION_URI/$FILENAME/
             else
               echo "Single file download from $SOURCE_URI"
-              aws s3 cp $SOURCE_URI $DESTINATION_URI/$FILENAME/
+              aws s3 cp --copy-props none $SOURCE_URI $DESTINATION_URI/$FILENAME/
             fi
           elif [[ "$SOURCE_URI" =~ ^nvidia/[^/]+ ]]; then
             echo "Downloading ${SOURCE_URI} from NVIDIA NGC"
