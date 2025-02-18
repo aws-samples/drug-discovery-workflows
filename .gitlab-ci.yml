@@ -65,7 +65,7 @@ push-to-s3-dev:
 ################################
 
 test_cfn:
-  image: python:3.11
+  image: public.ecr.aws/docker/library/python:3.11
   stage: test
   timeout: 1h
   before_script:
