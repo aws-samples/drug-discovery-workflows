@@ -1,0 +1,60 @@
+name: Humatch
+description: "Humatch"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_csv:
+    description: "Input CSV file"
+    optional: false
+  max_edit:
+    description: "Maximum number of edits allowed"
+    optional: true
+  noise:
+    description: "Noise level"
+    optional: true
+  num_cpus:
+    description: "Number of CPUs to use"
+    optional: true
+  GL_target_score_H:
+    description: "Target score for GL model (Heavy chain)"
+    optional: true
+  GL_allow_CDR_mutations_H:
+    description: "Allow CDR mutations for GL model (Heavy chain)"
+    optional: true
+  GL_fixed_imgt_positions_H:
+    description: "Fixed IMGT positions for GL model (Heavy chain)"
+    optional: true
+  CNN_target_score_H:
+    description: "Target score for CNN model (Heavy chain)"
+    optional: true
+  CNN_allow_CDR_mutations_H:
+    description: "Allow CDR mutations for CNN model (Heavy chain)"
+    optional: true
+  CNN_fixed_imgt_positions_H:
+    description: "Fixed IMGT positions for CNN model (Heavy chain)"
+    optional: true
+  GL_target_score_L:
+    description: "Target score for GL model (Light chain)"
+    optional: true
+  GL_allow_CDR_mutations_L:
+    description: "Allow CDR mutations for GL model (Light chain)"
+    optional: true
+  GL_fixed_imgt_positions_L:
+    description: "Fixed IMGT positions for GL model (Light chain)"
+    optional: true
+  CNN_target_score_L:
+    description: "Target score for CNN model (Light chain)"
+    optional: true
+  CNN_allow_CDR_mutations_L:
+    description: "Allow CDR mutations for CNN model (Light chain)"
+    optional: true
+  CNN_fixed_imgt_positions_L:
+    description: "Fixed IMGT positions for CNN model (Light chain)"
+    optional: true
+  CNN_target_score_P:
+    description: "Target score for CNN model (P chain)"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "Humatch"
+accelerators: GPU
