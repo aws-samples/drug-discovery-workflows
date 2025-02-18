@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.15.0] - 2025-02-18
+
+### 2.15.0 Added
+
+- Added support for [DiffAb](https://www.biorxiv.org/content/10.1101/2022.07.10.499510v5.abstract) antigen-specific design model from Helixon ([PR 31](https://github.com/aws-samples/drug-discovery-workflows/pull/31))
+- Added support for [Humatch](https://github.com/oxpig/Humatch) mAb humanization model from Oxford Protein Informatics Group ([PR 32](https://github.com/aws-samples/drug-discovery-workflows/pull/32))
+
+### 2.15.0 Fixed
+
+- Update transformers version per CVE-2024-11393.
+
+---
+
 ## [2.14.1] - 2025-01-29
 
 ### 2.14.1 Fixed
