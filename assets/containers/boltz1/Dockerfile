@@ -28,15 +28,9 @@ RUN dnf install -y tar gzip gcc ${PYTHON}-devel \
     && /root/.local/bin/uv venv $VIRTUAL_ENV \
     && /root/.local/bin/uv pip install --no-cache-dir -r requirements.txt
 
-RUN curl -O https://mmseqs.com/latest/mmseqs-linux-gpu.tar.gz \
-    && tar xzvf mmseqs-linux-gpu.tar.gz \
-    && rm mmseqs-linux-gpu.tar.gz 
-
 ###############################################################################
 FROM base as runtime
 
 COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
-COPY --from=build /home/mmseqs/bin/mmseqs /usr/local/bin/mmseqs
-COPY colabfold_search.py .
 
 ENTRYPOINT []
