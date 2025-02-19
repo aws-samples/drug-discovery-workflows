@@ -1,9 +1,19 @@
 #!/bin/bash
 
-# usage: ./scripts/testrun.sh -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS [-g RUN_GROUP_ID]
+# usage: ./scripts/testrun.sh -c CONTAINER_NAME -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS [-g RUN_GROUP_ID]
 
 set -ex
-unset -v TIMESTAMP WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS RUN_GROUP_ID
+unset -v TIMESTAMP CONTAINER_NAME WORKFLOW_NAME ACCOUNT_ID REGION OMICS_EXECUTION_ROLE OUTPUT_BUCKET PARAMETERS RUN_GROUP_ID
+
+if ! command -v aws &>/dev/null; then
+  echo "Error: The AWS CLI could not be found. Please visit https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html for installation instructions."
+  exit 1
+fi
+
+if ! command -v jq &>/dev/null; then
+  echo "Error: jq not found. Please visit https://jqlang.github.io/jq/download/ for installation instructions."
+  exit 1
+fi
 
 TIMESTAMP=$(date +%s)
 
@@ -13,8 +23,9 @@ if [ -f ".aws/env" ]; then
 fi
 
 # Set variables from arguments if they are not already set
-while getopts 'w:a:r:o:b:p:g:' OPTION; do
+while getopts 'c:w:a:r:o:b:p:g:' OPTION; do
   case "$OPTION" in
+  c) CONTAINER_NAME="$OPTARG" ;;
   w) WORKFLOW_NAME="$OPTARG" ;;
   a) [ -z "$ACCOUNT_ID" ] && ACCOUNT_ID="$OPTARG" ;;
   r) [ -z "$REGION" ] && REGION="$OPTARG" ;;
@@ -27,9 +38,9 @@ while getopts 'w:a:r:o:b:p:g:' OPTION; do
 done
 
 # Check if the required variables are set
-if [ -z "$WORKFLOW_NAME" ] || [ -z "$ACCOUNT_ID" ] || [ -z "$REGION" ] || [ -z "$OMICS_EXECUTION_ROLE" ] || [ -z "$OUTPUT_BUCKET" ] || [ -z "$PARAMETERS" ]; then
+if [ -c "$CONTAINER_NAME" ] || [ -z "$WORKFLOW_NAME" ] || [ -z "$ACCOUNT_ID" ] || [ -z "$REGION" ] || [ -z "$OMICS_EXECUTION_ROLE" ] || [ -z "$OUTPUT_BUCKET" ] || [ -z "$PARAMETERS" ]; then
   echo "Error: Missing required arguments."
-  echo "Usage: $0 -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS"
+  echo "Usage: $0 -c CONTAINER_NAME -w WORKFLOW_NAME -a ACCOUNT_ID -r REGION -o OMICS_EXECUTION_ROLE -b OUTPUT_BUCKET -p PARAMETERS"
   exit 1
 fi
 
@@ -37,19 +48,20 @@ fi
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com # Deep Learning Container
 
-# rfdiffusion is the only workflow name that is 1:1 with container name
-if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
-  pushd assets/containers
-  bash ../workflows/$WORKFLOW_NAME/build_containers.sh $REGION $ACCOUNT_ID develop
-  popd
-else
-  docker build \
-    --platform linux/amd64 \
-    -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop \
-    -f assets/containers/$WORKFLOW_NAME/Dockerfile assets/containers/$WORKFLOW_NAME
+docker build \
+  --platform linux/amd64 \
+  -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$CONTAINER_NAME:develop \
+  -f assets/containers/$CONTAINER_NAME/Dockerfile assets/containers/$CONTAINER_NAME
 
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$WORKFLOW_NAME:develop
+if aws ecr describe-repositories --repository-names $CONTAINER_NAME >/dev/null 2>$?; then
+  echo "Repository $CONTAINER_NAME exists."
+else
+  echo "Repository $CONTAINER_NAME does not exist, creating..."
+  aws ecr create-repository --repository-name $CONTAINER_NAME >/dev/null
+  aws ecr set-repository-policy --repository-name $CONTAINER_NAME --policy-text '{"Version":"2012-10-17","Statement":[{"Sid":"omics workflow","Effect":"Allow","Principal":{"Service":"omics.amazonaws.com"},"Action":["ecr:GetDownloadUrlForLayer","ecr:BatchGetImage","ecr:BatchCheckLayerAvailability"]}]}' >/dev/null
 fi
+
+docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$CONTAINER_NAME:develop
 
 # Package the workflow
 mkdir -p tmp/assets/workflows/$WORKFLOW_NAME
@@ -77,10 +89,11 @@ start_run_command="aws omics start-run \
     --storage-capacity 9600 \
     --workflow-id $workflow_id \
     --name $WORKFLOW_NAME-dev-$TIMESTAMP \
-    --role-arn \"$OMICS_EXECUTION_ROLE\" \
-    --parameters \"$PARAMETERS\" \
+    --role-arn $OMICS_EXECUTION_ROLE \
+    --parameters $PARAMETERS \
     --region $REGION \
-    --output-uri s3://$OUTPUT_BUCKET/out"
+    --output-uri s3://$OUTPUT_BUCKET/out \
+    --query id --output text"
 
 # Add run-group-id if provided
 if [ -n "$RUN_GROUP_ID" ]; then
@@ -88,7 +101,8 @@ if [ -n "$RUN_GROUP_ID" ]; then
 fi
 
 # Execute the start-run command
-eval $start_run_command
+run_id=$(eval $start_run_command)
+aws omics get-run --id $run_id --region $REGION | jq '{"id", "status"}'
 
 # Cleanup
 rm -rf tmp
