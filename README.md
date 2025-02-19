@@ -13,13 +13,17 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [Alphafold2-Multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): From Google DeepMind. Predict the 3D structure of multi-chain protein complexes.
 - [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
 - [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
+- [AntiFold](https://github.com/oxpig/AntiFold): From Oxford Protein Informatics Group. Antibody inverse folding.
+- [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
 - [BioPhi](https://github.com/Merck/BioPhi): From Merck. Automated humanization and humanness evaluation.
 - [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
-- [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
+- [DiffAb](https://github.com/luost26/diffab): From Helixon. Antigen-specific protein design.
 - [EquiFold](https://github.com/Genentech/equifold): From Prescient Design, a Genentech accelerator. Predict protein structures with an novel coarse-grained structure representation.
 - [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
 - [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
 - [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
+- [Humatch](https://github.com/oxpig/Humatch):  From Oxford Protein Informatics Group. Humanize antibodies.
+- [MMseqs2](https://github.com/soedinglab/MMseqs2): From Max Planck Institute. Ultra fast and sensitive sequence search and clustering suite.
 - [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
 - [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
 - [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
@@ -79,9 +83,9 @@ aws secretsmanager create-secret \
 
 To add a new module, fork the repository. There are three main components:
 
-* **Containers:** contains the required information/data to build Docker images for specific tasks
-* **Data:** contains links to parameters and other reference data used by workflow models
-* **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
+- **Containers:** contains the required information/data to build Docker images for specific tasks
+- **Data:** contains links to parameters and other reference data used by workflow models
+- **Workflows:** Specifc workflows, such as AlphaFold-Multimer that contain the `main.nf` script.
 
 ```txt
 assets/
@@ -112,34 +116,27 @@ You can lint this repositories NextFlow code using the AWS provided tool [awslab
 make lint
 ```
 
-Also see [.github/workflows](./.github/workflows/) for other linting tools that have been setup as GitHub Actions workflows.
-
 ### Development Test Script
 
 The `scripts/testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
 
 Prerequisites:
 
-* S3 bucket with input data
-* S3 bucket to store outputs, can be the same as the input bucket
-* HealthOmics execution role with access to the buckets `testparams/rfdiffusion.params.json`:
-
-```sh
-{
-  "input_pdb": "s3://mybucket/rfdiffusion/6cm4.pdb"
-}
-```
+- S3 bucket with input data
+- S3 bucket to store outputs, can be the same as the input bucket
+- HealthOmics execution role with access to the buckets :
 
 Example run with full argument list:
 
 ```sh
 ./scripts/testrun.sh \
--w rfdiffusion \
--a 123456789012 \
--r us-east-1 \
--o "arn:aws:iam::123456789012:role/healthomics-dev-role" \
--b mybucket \
--p file://testparams/rfdiffusion.params.json
+  -c "rfdiffusion" \
+  -w "rfdiffusion-proteinmpnn" \
+  -a "123456789123" \
+  -r "us-east-1"\
+  -o "arn:aws:iam::123456789123:role/my-omics-role" \
+  -b "123456789123-my-omics-bucket" \
+  -p file://test_data/rfdiffusion_test.json
 ```
 
 Or create an `.aws/env` file to simplify the arguments:
@@ -147,23 +144,23 @@ Or create an `.aws/env` file to simplify the arguments:
 ```sh
 ACCOUNT_ID=123456789012
 REGION=us-east-1
-OMICS_EXECUTION_ROLE=arn:aws:iam::123456789012:role/healthomics-dev-role
-OUTPUT_BUCKET=mybucket
+OMICS_EXECUTION_ROLE=arn:aws:iam::123456789123:role/my-omics-role
+OUTPUT_BUCKET=123456789123-my-omics-bucket
 ```
 
 and then:
 
 ```sh
-./scripts/testrun.sh -w rfdiffusion -p testparams/rfdiffusion.params.json
+./scripts/testrun.sh -c "rfdiffusion" -w "rfdiffusion-proteinmpnn" -p file://test_data/rfdiffusion_test.json
 ```
 
 `s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
 
 We currently support three types of data sources:
 
-* s3: Records that begin with `s3` will be downloaded using the AWS CLI.
-* HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
-* NVIDIA NGC: Records that begin with `nvidia` will be downloaded using the NCG CLI IF credentials are provided via the `-s` option in `delpoy.sh`.
-* Other: All other records will be downloaded using `wget` to an s3 mountpoint.
+- s3: Records that begin with `s3` will be downloaded using the AWS CLI.
+- HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
+- NVIDIA NGC: Records that begin with `nvidia` will be downloaded using the NCG CLI IF credentials are provided via the `-s` option in `delpoy.sh`.
+- Other: All other records will be downloaded using `wget` to an s3 mountpoint.
 
 The `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}. You can also reference your deployment S3 bucket with {{S3_BUCKET_NAME}} to access data downloaded during stack creation.
