@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.15.1] - 2025-02-19
+
+### 2.15.1 Fixed
+
+- Updated container build logic in scripts/testrun.sh
+- Added missing modules to README
+
+---
+
 ## [2.15.0] - 2025-02-18
 
 ### 2.15.0 Added
