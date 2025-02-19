@@ -35,6 +35,7 @@ fi
 
 # Login to ECR
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin 763104351884.dkr.ecr.$REGION.amazonaws.com # Deep Learning Container
 
 # rfdiffusion is the only workflow name that is 1:1 with container name
 if [ "$WORKFLOW_NAME" != "rfdiffusion" ]; then  
