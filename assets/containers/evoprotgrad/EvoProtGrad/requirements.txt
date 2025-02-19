@@ -1,2 +1,2 @@
-transformers[torch]==4.38.0
+transformers[torch]>=4.48.0
 pandas
