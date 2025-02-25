@@ -9,6 +9,7 @@ ARG PYTHON_VERSION=3.9
 ARG ANARCI_VERSION=2024.05.21
 ARG HMMER_VERSION=3.3.2
 ARG PEP_PATCH_VERSION=0.2.0
+ARG BIOPYTHON_VERSION=1.85
 
 # Update package lists and install required packages
 RUN apt-get update && apt-get install -y \
@@ -39,7 +40,7 @@ ENV PYTHONPATH=/opt/miniconda/lib/python${PYTHON_VERSION}/site-packages:$PYTHONP
 WORKDIR /opt
 
 # Install ANARCI
-RUN conda install -c conda-forge biopython=1.85 -y \
+RUN conda install -c conda-forge biopython=${BIOPYTHON_VERSION} -y \
     && conda install -c bioconda anarci=${ANARCI_VERSION} hmmer=${HMMER_VERSION} -y
 
 # Install APBS
