@@ -9,10 +9,10 @@ parameterTemplate:
 
   electrostatic_parm:
     description: "PARM: mdtraj compatible topology file"
-    optional: false
+    optional: true
   electrostatic_crd:
     description: "CRD: a coordinate file"
-    optional: false
+    optional: true
   probe_radius:
     description: "probe radius in Angstrom. Default is 1.4"
     optional: true
@@ -55,13 +55,13 @@ parameterTemplate:
 
   hydrophobicity_parm:
     description: "PARM: any file recognized by mdtraj as a topology with bonds (e.g., a PDB file with CONECT records)"
-    optional: false
+    optional: true
   hydrophobicity_crd:
     description: "CRD: a structure file or trajecotry (e.g., the same PDB file or an XTC trajectory)"
-    optional: false
+    optional: true
   scale:
     description: "Hydrophobicity scale in table format, or \"crippen\" or \"eisenberg\", or \"rdkit-crippen\". For rdkit-crippen, parm needs to be in PDB format, and a SMILES file must be supplied with --smiles."
-    optional: false
+    optional: true
   smiles:
     description: "SMILES for rdkit-crippen. Use e.g. @smiles.txt to read them from a file."
     optional: true
