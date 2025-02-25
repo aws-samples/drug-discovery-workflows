@@ -1,0 +1,10 @@
+numpy==2.0.2
+scipy==1.13.1
+pandas==2.2.3
+scikit-image==0.24.0
+git+https://github.com/liedllab/gisttools.git@3b7d362d020e3b8c620e407de21bf58c760b7692
+plyfile==1.1
+matplotlib==3.9.4
+pdb2pqr==3.6.2
+biopython==1.85
+rdkit==2024.9.5
