@@ -26,11 +26,7 @@ RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test
 RUN apt-get update && apt-get install -y g++-11 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yq for YAML config overrides
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && \
-    chmod +x /usr/bin/yq
-
-# Install Miniconda and Python 3.9
+# Install Miniconda and Python
 # https://repo.anaconda.com/miniconda/
 RUN curl -O https://repo.anaconda.com/miniconda/${MINICONDA_VERSION}.sh \
     && bash ${MINICONDA_VERSION}.sh -f -b -p /opt/miniconda \
