@@ -12,6 +12,12 @@ parameterTemplate:
   envdb_db_path:
     description: "Path to S3 folder containing indexed ennvironment (e.g. colabfold_envdb_202108_db) data."
     optional: true    
+  pdb100_db_path:
+    description: "Path to S3 folder containing indexed pdb (e.g. pdb100_230517_db) data."
+    optional: true     
+  is_complex:
+    description: "Whether to process the query a complex or single chains."
+    optional: true   
   filter:
     description: "Filter the MSA by pre-defined align_eval, qsc, max_accept."
     optional: true        
