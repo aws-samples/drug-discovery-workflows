@@ -57,7 +57,8 @@ workflow ColabfoldSearch {
         )
 
     emit:
-    ColabfoldSearchTask.out
+    ColabfoldSearchTask.out.msa
+    ColabfoldSearchTask.out.template_hits
 }
 
 process ColabfoldSearchTask {
@@ -75,6 +76,7 @@ process ColabfoldSearchTask {
 
     output:
     path "output/*.a3m", emit: msa
+    path "output/*.m8", emit: template_hits
 
     script:
     """
