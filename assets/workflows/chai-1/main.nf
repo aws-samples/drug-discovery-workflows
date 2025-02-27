@@ -55,6 +55,7 @@ process Chai1Task {
         path fasta_file
         path msa_directory
         path template_hits
+        path constraint_path
         path pdb, stageAs: 'pdb/*'
         path model_parameters
         val recycle_msa_subsample
