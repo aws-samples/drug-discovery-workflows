@@ -3,15 +3,46 @@ description: "This workflow predicts the 3D structures for one or more biomolecu
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
-  fasta_path:
-    description: "Input file in FASTA format containing two records: one for the heavy chain sequence and a second for the light chain sequence."
+  fasta_file:
+    description: "Path to .fasta containing input sequences"
     optional: false
-  num_diffn_timesteps:
-    description: "Number of diffusion steps. Defaults to 200."
+  msa_directory:
+    description: "Optional path to folder containing .a3m files of MSA hits"
+    optional: true
+  constraint_path:
+    description: "Optional path to .csv file containing restraints information"
+    optional: true
+  template_hits_path: 
+    description: "Optional path to .m8 file containing template hits"
+    optional: true
+  pdb_divided_path:
+    description: "Optional path to folder containing snapshot of divided structures from rcsb pdb"
+    optional: true
+  pdb_obsolete_path:
+    description: "Optional path to folder containing snapshot of obsolete structures from rcsb pdb"
+    optional: true
+  model_parameters:
+    description: "Path to folder containiner Chai-1 model parameters."
+    optional: true    
+  recycle_msa_subsample:
+    description: "Number of msa subsample recycles. Defaults to 0."
     optional: true
   num_trunk_recycles:
     description: "Number of trunk recycles. Defaults to 3."
     optional: true
+  num_diffn_timesteps:
+    description: "Number of diffusion steps. Defaults to 200."
+    optional: true
+  num_diffn_samples:
+    description: "Number of diffusion samples. Defaults to 5."
+    optional: true    
+  num_trunk_samples:
+    description: "Number of trunk samples. Defaults to 1."
+    optional: true
+  seed:
+    description: "Seed value. Defaults to none."
+    optional: true
+
 storageCapacity: 1200
 tags:
   Name: "Chai1"
