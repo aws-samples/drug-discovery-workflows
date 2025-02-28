@@ -6,7 +6,6 @@ workflow Chai1 {
     take:
         fasta_file
         msa_directory
-        constraint_path
         template_hits_path
         pdb_divided_path
         pdb_obsolete_path
@@ -27,7 +26,6 @@ workflow Chai1 {
     Chai1Task(
         fasta_file,
         msa_directory,
-        constraint_path,
         template_hits_path,
         pdb_snapshot_channel,
         model_parameters,
@@ -55,7 +53,6 @@ process Chai1Task {
         path fasta_file
         path msa_directory
         path template_hits
-        path constraint_path
         path pdb, stageAs: 'pdb/*'
         path model_parameters
         val recycle_msa_subsample
@@ -73,10 +70,9 @@ process Chai1Task {
     set -euxo pipefail
     mkdir output
 
-    # Do something with the constraint_path?
 
-    CHAI_DOWNLOADS_DIR=${model_parameters} \
-    PDB_TEMPLATE_DIR=pdb\
+    export CHAI_DOWNLOADS_DIR=${model_parameters}
+    export PDB_TEMPLATE_DIR=pdb
     chai-lab fold \
     --msa-directory ${msa_directory} \
     --template-hits-path ${template_hits} \
@@ -89,7 +85,6 @@ workflow {
     Chai1(
         params.fasta_file,
         params.msa_directory,
-        params.constraint_path,
         params.template_hits_path,
         params.pdb_divided_path,
         params.pdb_obsolete_path,

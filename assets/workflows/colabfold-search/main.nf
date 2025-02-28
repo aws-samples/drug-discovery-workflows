@@ -22,7 +22,7 @@ workflow ColabfoldSearch {
 
     main:
 
-    query_channel = Channel.fromPath(query)
+    // query_channel = Channel.fromPath(query)
 
     if (params.uniref30_db_path[-1] == "/") {
         uniref30_db_path = params.uniref30_db_path + "*"
@@ -51,7 +51,8 @@ workflow ColabfoldSearch {
     db_channel = uniref30_db_channel.concat(envdb_db_channel, pdb100_db_channel).collect()
 
     ColabfoldSearchTask(
-        query_channel,
+        // query_channel,
+        query,
         db_channel,
         is_complex
         )

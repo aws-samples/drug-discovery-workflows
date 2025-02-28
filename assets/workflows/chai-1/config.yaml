@@ -9,9 +9,6 @@ parameterTemplate:
   msa_directory:
     description: "Optional path to folder containing .a3m files of MSA hits"
     optional: true
-  constraint_path:
-    description: "Optional path to .csv file containing restraints information"
-    optional: true
   template_hits_path: 
     description: "Optional path to .m8 file containing template hits"
     optional: true
