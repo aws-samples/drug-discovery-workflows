@@ -126,6 +126,15 @@ Prerequisites:
 - S3 bucket to store outputs, can be the same as the input bucket
 - HealthOmics execution role with access to the buckets :
 
+Example of rfdiffusion_test.json:
+```
+{
+        "target_pdb": "s3://YOUR-S3-BUCKET/pdb/6CM4_clean.pdb",
+        "hotspot_residues": "[A30,A33,A34]",
+        "scaffold_pdb": "s3://YOUR-S3-BUCKET/pdb/6CM4_clean_scanffold.pdb"
+}
+```
+
 Example run with full argument list:
 
 ```sh
@@ -155,6 +164,7 @@ and then:
 ```
 
 `s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
+
 
 We currently support three types of data sources:
 
