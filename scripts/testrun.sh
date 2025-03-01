@@ -74,6 +74,10 @@ sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGI
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
 
+sed -i "s|{{S3_BUCKET_NAME}}|$OUTPUT_BUCKET|g" assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+sed -i "s|{{rfdiffusion:latest}}|$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$CONTAINER_NAME:develop|g" ./assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+
+
 zip -r drug-discovery-workflows.zip .
 
 popd
