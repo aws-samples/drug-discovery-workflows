@@ -14,40 +14,71 @@ include {
 } from './unpack'
 
 workflow AlphaFold2Monomer {
+
+    take:
+        fasta_path
+        uniref30_database_src
+        alphafold_model_parameters
+        bfd_database_a3m_ffdata
+        bfd_database_a3m_ffindex
+        bfd_database_cs219_ffdata
+        bfd_database_cs219_ffindex
+        bfd_database_hhm_ffdata
+        bfd_database_hhm_ffindex
+        pdb70_src
+        pdb_seqres_src
+        pdb_mmcif_src1
+        pdb_mmcif_src2
+        pdb_mmcif_src3
+        pdb_mmcif_src4
+        pdb_mmcif_src5
+        pdb_mmcif_src6
+        pdb_mmcif_src7
+        pdb_mmcif_src8
+        pdb_mmcif_src9
+        pdb_mmcif_obsolete
+        db_pathname
+        uniref90_database_src
+        mgnify_database_src
+        random_seed
+        run_relax
+
+    main:
+
     //Convert to files
-    if (params.fasta_path[-1] == '/') {
-        fasta_path = params.fasta_path + '*'
+    if (fasta_path[-1] == '/') {
+        fasta_path = fasta_path + '*'
     } else {
-        fasta_path = params.fasta_path
+        fasta_path = fasta_path
     }
 
     fasta_files = Channel
                   .fromPath(fasta_path)
                   .map { filename -> tuple(filename.toString().split('/')[-1].split('.fasta')[0], filename) }
 
-    uniref30 = Channel.fromPath(params.uniref30_database_src).first()
-    alphafold_model_parameters = Channel.fromPath(params.alphafold_model_parameters).first()
+    uniref30 = Channel.fromPath(uniref30_database_src).first()
+    alphafold_model_parameters = Channel.fromPath(alphafold_model_parameters).first()
 
-    UnpackBFD(params.bfd_database_a3m_ffdata,
-              params.bfd_database_a3m_ffindex,
-              params.bfd_database_cs219_ffdata,
-              params.bfd_database_cs219_ffindex,
-              params.bfd_database_hhm_ffdata,
-              params.bfd_database_hhm_ffindex)
-    UnpackPdb70nSeqres(params.pdb70_src, params.pdb_seqres_src, params.db_pathname)
-    UnpackMMCIF(params.pdb_mmcif_src1,
-                params.pdb_mmcif_src2,
-                params.pdb_mmcif_src3,
-                params.pdb_mmcif_src4,
-                params.pdb_mmcif_src5,
-                params.pdb_mmcif_src6,
-                params.pdb_mmcif_src7,
-                params.pdb_mmcif_src8,
-                params.pdb_mmcif_src9,
-                params.pdb_mmcif_obsolete)
+    UnpackBFD(bfd_database_a3m_ffdata,
+              bfd_database_a3m_ffindex,
+              bfd_database_cs219_ffdata,
+              bfd_database_cs219_ffindex,
+              bfd_database_hhm_ffdata,
+              bfd_database_hhm_ffindex)
+    UnpackPdb70nSeqres(pdb70_src, pdb_seqres_src, db_pathname)
+    UnpackMMCIF(pdb_mmcif_src1,
+                pdb_mmcif_src2,
+                pdb_mmcif_src3,
+                pdb_mmcif_src4,
+                pdb_mmcif_src5,
+                pdb_mmcif_src6,
+                pdb_mmcif_src7,
+                pdb_mmcif_src8,
+                pdb_mmcif_src9,
+                pdb_mmcif_obsolete)
 
-    SearchUniref90(fasta_files, params.uniref90_database_src)
-    SearchMgnify(fasta_files, params.mgnify_database_src)
+    SearchUniref90(fasta_files, uniref90_database_src)
+    SearchMgnify(fasta_files, mgnify_database_src)
     SearchBFD(fasta_files, UnpackBFD.out.db_folder, uniref30)
 
     SearchTemplatesTask(SearchUniref90.out.msa, UnpackPdb70nSeqres.out.db_folder)
@@ -64,9 +95,12 @@ workflow AlphaFold2Monomer {
 
     model_nums = Channel.of(0, 1, 2, 3, 4)
     features = GenerateFeaturesTask.out.features.combine(model_nums)
-    AlphaFoldInference(features, alphafold_model_parameters, params.random_seed, params.run_relax)
+    AlphaFoldInference(features, alphafold_model_parameters, random_seed, run_relax)
 
-    MergeRankings(AlphaFoldInference.out.results.groupTuple(by: 0))
+    merged = MergeRankings(AlphaFoldInference.out.results.groupTuple(by: 0))
+
+   emit:
+   merged
 }
 
 process GenerateFeaturesTask {
@@ -173,5 +207,32 @@ process MergeRankings {
 }
 
 workflow {
-    AlphaFold2Monomer()
+    AlphaFold2Monomer(
+        params.fasta_path,
+        params.uniref30_database_src,
+        params.alphafold_model_parameters,
+        params.bfd_database_a3m_ffdata,
+        params.bfd_database_a3m_ffindex,
+        params.bfd_database_cs219_ffdata,
+        params.bfd_database_cs219_ffindex,
+        params.bfd_database_hhm_ffdata,
+        params.bfd_database_hhm_ffindex,
+        params.pdb70_src,
+        params.pdb_seqres_src,
+        params.pdb_mmcif_src1,
+        params.pdb_mmcif_src2,
+        params.pdb_mmcif_src3,
+        params.pdb_mmcif_src4,
+        params.pdb_mmcif_src5,
+        params.pdb_mmcif_src6,
+        params.pdb_mmcif_src7,
+        params.pdb_mmcif_src8,
+        params.pdb_mmcif_src9,
+        params.pdb_mmcif_obsolete,
+        params.db_pathname,
+        params.uniref90_database_src,
+        params.mgnify_database_src,
+        params.random_seed,
+        params.run_relax
+    )
 }
