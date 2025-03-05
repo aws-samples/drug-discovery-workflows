@@ -21,6 +21,8 @@ def download_cif_file(
         return outfile
 
     if "PDB_TEMPLATE_DIR" in os.environ:
+        from shutil import copyfile
+
         pdb_id = pdb_id.lower()
         div = pdb_id[1:3]
         target_path = (
@@ -30,7 +32,7 @@ def download_cif_file(
             / (pdb_id + ".cif.gz")
         )
         retrieved_path = Path(outfile)
-        retrieved_path.symlink_to(target_path)
+        copyfile(target_path, retrieved_path)
     else:
         source_url = f"https://files.rcsb.org/download/{pdb_id}.cif.gz"
         logging.info(f"Fetching {source_url} -> {outfile}")

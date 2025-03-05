@@ -1,1 +1,0 @@
-s3://5d1a4b76751b4c8a994ce96bafd91ec9/pdb_divided/

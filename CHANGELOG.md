@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.16.0] - TBD
+
+### 2.16.0 Added
+
+- Added support for Colabfold-search workflow to generate MSA files
+
+---
+
 ## [2.15.1] - 2025-02-19
 
 ### 2.15.1 Fixed

@@ -1,5 +1,6 @@
 .DS_Store
 .scratch
+.old_scratch
 .venv
 __pycache__
 delete_all_*.py

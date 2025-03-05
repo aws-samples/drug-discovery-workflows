@@ -15,8 +15,10 @@ ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 FROM base as build
 
 ARG PYTHON
+ARG CHAI_VERSION="0.6.0"
 
 COPY requirements.txt .
+COPY rcsb.py .
 
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_NO_CACHE=1
@@ -29,6 +31,12 @@ RUN dnf install -y cmake ${PYTHON}-devel \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
     && /root/.local/bin/uv venv $VIRTUAL_ENV \
     && /root/.local/bin/uv pip install --no-cache-dir -U -r requirements.txt
+
+# Install chai from source 
+RUN curl -Lo /tmp/chai.zip "https://github.com/chaidiscovery/chai-lab/archive/refs/tags/v${CHAI_VERSION}.zip" \
+    && unzip /tmp/chai.zip -d /tmp \
+    && cp /home/rcsb.py /tmp/chai-lab-0.6.0/chai_lab/data/io/rcsb.py \
+    && /root/.local/bin/uv pip install --no-cache-dir /tmp/chai-lab-0.6.0
 
 # Compile kalign2 from source
 RUN pushd /tmp && \
@@ -48,9 +56,10 @@ FROM base as runtime
 COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=build /usr/local/bin/kalign /usr/local/bin/kalign
 ENV PATH="$PATH:/$VIRTUAL_ENV"
-COPY scripts/ /home/scripts/
+COPY scripts /home/scripts
 COPY rcsb.py $VIRTUAL_ENV/lib/python3.11/site-packages/chai_lab/data/io/
 WORKDIR /home/scripts
+RUN touch /home/scripts/NO_MSA /home/scripts/NO_TEMPLATE /home/scripts/NO_PDB /home/scripts/NO_CONSTRAINTS
 
 # https://pytorch.org/docs/stable/notes/cuda.html#environment-variables
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True

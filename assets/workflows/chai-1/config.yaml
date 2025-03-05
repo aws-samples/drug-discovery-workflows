@@ -12,13 +12,13 @@ parameterTemplate:
   template_hits_path: 
     description: "Optional path to .m8 file containing template hits"
     optional: true
-  pdb_divided_path:
-    description: "Optional path to folder containing snapshot of divided structures from rcsb pdb"
+  constraints_path:
+    description: "Optional path to .csv file containing constraints information"
     optional: true
-  pdb_obsolete_path:
-    description: "Optional path to folder containing snapshot of obsolete structures from rcsb pdb"
+  pdb_snapshot_path:
+    description: "Optional path to folder containing snapshot structures from rcsb pdb"
     optional: true
-  model_parameters:
+  chai1_parameters:
     description: "Path to folder containiner Chai-1 model parameters."
     optional: true    
   recycle_msa_subsample:
