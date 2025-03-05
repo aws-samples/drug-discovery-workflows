@@ -20,7 +20,7 @@ workflow Chai1 {
     main:
 
     // If no template hits are provided, don't import the pdb snapshot
-    pdb_snapshot_path = template_hits_path != '/home/scripts/NO_TEMPLATE' ?  pdb_snapshot_path : '/home/scripts/NO_PDB'
+    pdb_snapshot_path = template_hits_path != '/opt/scripts/NO_TEMPLATE' ?  pdb_snapshot_path : '/opt/scripts/NO_PDB'
     
     chai1_parameters = Channel.fromPath(chai1_parameters)
 
@@ -39,8 +39,11 @@ workflow Chai1 {
         seed,
     )
 
+    Chai1Task.out.collect().set { chai_output }
+    chai_output.view()
+
     emit:
-    Chai1Task.out
+    chai_output
 }
 
 process Chai1Task {
@@ -67,7 +70,7 @@ process Chai1Task {
         val seed
 
     output:
-        path 'output/*'
+        path 'chai_output/*'
 
     script:
         def run_w_msas = msa_directory.name != 'NO_MSA' ? 1 : 0
@@ -79,7 +82,7 @@ process Chai1Task {
         fold_options = run_w_constraints == 1 ? "$fold_options --constraint-path $constraints_path" : fold_options
         """
         set -euxo pipefail
-        mkdir output
+        mkdir chai_output
         
         # Put parameters in the right spot
         ln -s  $chai1_parameters models_v2
@@ -89,11 +92,9 @@ process Chai1Task {
         export PDB_TEMPLATE_DIR=${pdb}
         export CHAI_DOWNLOADS_DIR=\$(pwd)
 
-        ls -lahR
-
         # Parse colab results
         if [[ $run_w_msas -eq 1 ]]; then
-          /opt/venv/bin/python /home/scripts/parse_colab_search.py $msa_directory \
+          /opt/venv/bin/python /opt/scripts/parse_colab_search.py $msa_directory \
           --envdb_unpaired_path $msa_directory/bfd.mgnify30.metaeuk30.smag30.a3m \
           --uniref_unpaired_path $msa_directory/uniref.a3m \
           --paired_path $msa_directory/pair.a3m
@@ -101,7 +102,7 @@ process Chai1Task {
 
         chai-lab fold \
         ${fold_options} \
-        ${fasta_file} output
+        ${fasta_file} chai_output
         """
 }
 

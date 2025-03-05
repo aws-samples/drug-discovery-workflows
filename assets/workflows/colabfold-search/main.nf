@@ -22,7 +22,6 @@ workflow ColabfoldSearch {
 
     main:
 
-    // query_channel = Channel.fromPath(query)
 
     if (params.uniref30_db_path[-1] == "/") {
         uniref30_db_path = params.uniref30_db_path + "*"
@@ -51,15 +50,18 @@ workflow ColabfoldSearch {
     db_channel = uniref30_db_channel.concat(envdb_db_channel, pdb100_db_channel).collect()
 
     ColabfoldSearchTask(
-        // query_channel,
         query,
         db_channel,
         is_complex
         )
 
+    ColabfoldSearchTask.out.msa.collect().set { msa }
+    ColabfoldSearchTask.out.template_hits.collect().set { template_hits }
+
+
     emit:
-    ColabfoldSearchTask.out.msa
-    ColabfoldSearchTask.out.template_hits
+    msa
+    template_hits
 }
 
 process ColabfoldSearchTask {
@@ -76,18 +78,23 @@ process ColabfoldSearchTask {
     val is_complex
 
     output:
-    path "output/*.a3m", emit: msa
-    path "output/*.m8", emit: template_hits
+    path "*.a3m", emit: msa
+    path "*.m8", emit: template_hits
 
     script:
     """
     set -euxo pipefail
-    mkdir output
+    # mkdir output
+
+    # Remove any model-specific content in the description
+
+    # Produces a new, "clean.fasta" file
+    bash /home/clean_fasta.sh ${query} 
 
     bash /home/msa.sh \
       /usr/local/bin/mmseqs \
-      ${query} \
-      output \
+      clean.fasta \
+      . \
       db/uniref30_2302_db \
       db/pdb100_230517 \
       db/colabfold_envdb_202108_db \
@@ -96,8 +103,8 @@ process ColabfoldSearchTask {
     if [[ ${is_complex} -eq 1 ]]; then
       bash /home/pair.sh \
         /usr/local/bin/mmseqs \
-        ${query} \
-        output \
+        clean.fasta \
+        . \
         db/uniref30_2302_db \
         "" 0 1 0 1
     fi

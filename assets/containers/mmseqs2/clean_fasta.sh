@@ -2,8 +2,8 @@
 
 # Check if input file is provided
 if [ $# -ne 1 ]; then
-    echo "Usage: $0 <input_file>"
-    exit 1
+  echo "Usage: $0 <input_file>"
+  exit 1
 fi
 
 # Get input file name and path
@@ -11,15 +11,14 @@ input_file="$1"
 
 # Check if input file exists
 if [ ! -f "$input_file" ]; then
-    echo "Error: File '$input_file' not found"
-    exit 1
+  echo "Error: File '$input_file' not found"
+  exit 1
 fi
 
-# Create output filename with "_clean" appended
+# Create output filename
 filename=$(basename -- "$input_file")
 extension="${filename##*.}"
-filename_no_ext="${filename%.*}"
-output_file="${filename_no_ext}_clean.${extension}"
+output_file="clean.${extension}"
 
 # Process the file with our awk command
 awk '
@@ -45,6 +44,6 @@ awk '
   !/^>/ {
     if (skip == 0) print
   }
-' "$input_file" > "$output_file"
+' "$input_file" >"$output_file"
 
 echo "Processing complete. Output saved to: $output_file"

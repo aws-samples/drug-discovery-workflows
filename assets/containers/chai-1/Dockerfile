@@ -56,10 +56,10 @@ FROM base as runtime
 COPY --from=build $VIRTUAL_ENV $VIRTUAL_ENV
 COPY --from=build /usr/local/bin/kalign /usr/local/bin/kalign
 ENV PATH="$PATH:/$VIRTUAL_ENV"
-COPY scripts /home/scripts
+COPY scripts /opt/scripts
 COPY rcsb.py $VIRTUAL_ENV/lib/python3.11/site-packages/chai_lab/data/io/
-WORKDIR /home/scripts
-RUN touch /home/scripts/NO_MSA /home/scripts/NO_TEMPLATE /home/scripts/NO_PDB /home/scripts/NO_CONSTRAINTS
+WORKDIR /opt/scripts
+RUN touch /opt/scripts/NO_MSA /opt/scripts/NO_TEMPLATE /opt/scripts/NO_PDB /opt/scripts/NO_CONSTRAINTS
 
 # https://pytorch.org/docs/stable/notes/cuda.html#environment-variables
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
