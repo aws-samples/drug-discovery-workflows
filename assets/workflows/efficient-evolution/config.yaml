@@ -1,0 +1,21 @@
+name: Efficient Evolution
+description: "Efficient evolution from general protein language models"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  sequence_fasta:
+    description: "Protein sequence"
+    optional: false
+  model_weights:
+    description: "Model weights"
+    optional: true
+  model_names:
+    description: "Type of language model (e.g., esm1b, esm1v1). Default is ['esm1b', 'esm1v1', 'esm1v2', 'esm1v3', 'esm1v4', 'esm1v5']"
+    optional: true
+  alpha:
+    description: "alpha stringency parameter"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "Efficient Evolution"
+accelerators: GPU
