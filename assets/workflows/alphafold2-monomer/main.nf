@@ -95,12 +95,18 @@ workflow AlphaFold2Monomer {
 
     model_nums = Channel.of(0, 1, 2, 3, 4)
     features = GenerateFeaturesTask.out.features.combine(model_nums)
-    AlphaFoldInference(features, alphafold_model_parameters, random_seed, run_relax)
+    inference_results = AlphaFoldInference(features, alphafold_model_parameters, random_seed, run_relax)
 
-    merged = MergeRankings(AlphaFoldInference.out.results.groupTuple(by: 0))
+    merged_rankings = MergeRankings(inference_results.results.groupTuple(by: 0))
+
+    inference = inference_results.results.collect()
+    rankings = merged_rankings.rankings.collect()
+    top_hit = merged_rankings.top_hit.collect()
 
    emit:
-   merged
+    inference
+    rankings
+    top_hit
 }
 
 process GenerateFeaturesTask {
