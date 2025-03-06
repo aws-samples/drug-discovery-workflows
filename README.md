@@ -32,6 +32,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 ### E2E Workflows
 
 - [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope using RFDiffusion, ProteinMPNN, ESMFold, AMPLIFY, and NanobodyBuilder2.
+- [Predict Protein Complexes](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/predict-protein-complexes): Predict the structure of biomolecular complexes, including proteins, DNA, RNA, and small molecules.
 
 ## Deployment
 

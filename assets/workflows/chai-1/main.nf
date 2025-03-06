@@ -4,57 +4,50 @@ nextflow.enable.dsl = 2
 
 workflow Chai1 {
     take:
-        fasta_path
-        num_diffn_timesteps
+        fasta_file
+        msa_directory
+        template_hits_path
+        constraints_path
+        pdb_snapshot_path
+        chai1_parameters
+        recycle_msa_subsample
         num_trunk_recycles
-        bond_loss_input_proj
-        confidence_head
-        conformers_v1
-        diffusion_module
-        feature_embedding
-        token_embedder
-        trunk
-        esm2_config
-        esm2_pytorch_model_00001_of_00002
-        esm2_pytorch_model_00002_of_00002
-        esm2_pytorch_model_bin_index
-        esm2_special_tokens_map
-        esm2_tokenizer_config
-        esm2_vocab
+        num_diffn_timesteps
+        num_diffn_samples
+        num_trunk_samples
+        seed
 
     main:
+
+    // If no template hits are provided, don't import the pdb snapshot
+    pdb_snapshot_path = template_hits_path != '/opt/scripts/NO_TEMPLATE' ?  pdb_snapshot_path : '/opt/scripts/NO_PDB'
+    
+    chai1_parameters = Channel.fromPath(chai1_parameters)
+
     Chai1Task(
-        fasta_path,
-        num_diffn_timesteps,
+        fasta_file,
+        msa_directory,
+        template_hits_path,
+        constraints_path,
+        pdb_snapshot_path,
+        chai1_parameters,
+        recycle_msa_subsample,
         num_trunk_recycles,
-        bond_loss_input_proj,
-        confidence_head,
-        conformers_v1,
-        diffusion_module,
-        feature_embedding,
-        token_embedder,
-        trunk,
-        esm2_config,
-        esm2_pytorch_model_00001_of_00002,
-        esm2_pytorch_model_00002_of_00002,
-        esm2_pytorch_model_bin_index,
-        esm2_special_tokens_map,
-        esm2_tokenizer_config,
-        esm2_vocab
+        num_diffn_timesteps,
+        num_diffn_samples,
+        num_trunk_samples,
+        seed,
     )
 
-    Chai1Task.out.cif.set { cif }
-    Chai1Task.out.npz.set { npz }
-    Chai1Task.out.metrics.set { metrics }
+    Chai1Task.out.collect().set { chai_output }
 
     emit:
-    cif
-    npz
-    metrics
+    chai_output
 }
 
 process Chai1Task {
     label 'chai1'
+    debug true
     cpus 4
     memory '16 GB'
     maxRetries 1
@@ -62,72 +55,69 @@ process Chai1Task {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-        path fasta_path
-        val num_diffn_timesteps
+        path fasta_file
+        path msa_directory
+        path template_hits
+        path constraints_path
+        path pdb
+        path chai1_parameters
+        val recycle_msa_subsample
         val num_trunk_recycles
-        path bond_loss_input_proj
-        path confidence_head
-        path conformers_v1
-        path diffusion_module
-        path feature_embedding
-        path token_embedder
-        path trunk
-        path esm2_config
-        path esm2_pytorch_model_00001_of_00002
-        path esm2_pytorch_model_00002_of_00002
-        path esm2_pytorch_model_bin_index
-        path esm2_special_tokens_map
-        path esm2_tokenizer_config
-        path esm2_vocab
+        val num_diffn_timesteps
+        val num_diffn_samples
+        val num_trunk_samples
+        val seed
 
     output:
-    path 'output/*.cif', emit: cif
-    path 'output/*.npz', emit: npz
-    path 'output/*.json', emit: metrics
+        path 'chai_output/*'
 
     script:
-    """
-    set -euxo pipefail
-    
-    mkdir models_v2
-    ln -t models_v2 $bond_loss_input_proj $confidence_head $diffusion_module $feature_embedding $token_embedder $trunk
-    
-    mkdir -p facebook/esm2_t36_3B_UR50D
-    ln -t facebook/esm2_t36_3B_UR50D \
-        $esm2_config $esm2_pytorch_model_00001_of_00002 \
-        $esm2_pytorch_model_00002_of_00002 \
-        $esm2_pytorch_model_bin_index \
-        $esm2_special_tokens_map \
-        $esm2_tokenizer_config \
-        $esm2_vocab
-
-    mkdir output
-    CHAI_DOWNLOADS_DIR=\$(pwd) /opt/conda/bin/python /home/scripts/predict_structure.py $fasta_path \
-        --num_diffn_timesteps=$num_diffn_timesteps \
-        --num_trunk_recycles=$num_trunk_recycles \
-        --output_dir='output' 
+        def run_w_msas = msa_directory.name != 'NO_MSA' ? 1 : 0
+        def run_w_templates = template_hits.name != 'NO_TEMPLATE' ? 1 : 0
+        def run_w_constraints = constraints_path.name != 'NO_CONSTRAINTS' ? 1 : 0
+        def fold_options = ''
+        fold_options = run_w_msas == 1 ? "$fold_options --msa-directory $msa_directory" : fold_options
+        fold_options = run_w_templates == 1 ? "$fold_options --template-hits-path $template_hits" : fold_options
+        fold_options = run_w_constraints == 1 ? "$fold_options --constraint-path $constraints_path" : fold_options
+        """
+        set -euxo pipefail
+        mkdir chai_output
         
-    """
+        # Put parameters in the right spot
+        ln -s  $chai1_parameters models_v2
+        ln -s  $chai1_parameters/conformers_v1.apkl \$(pwd)
+        ln -s  $chai1_parameters/facebook facebook
+
+        export PDB_TEMPLATE_DIR=${pdb}
+        export CHAI_DOWNLOADS_DIR=\$(pwd)
+
+        # Parse colab results
+        if [[ $run_w_msas -eq 1 ]]; then
+          /opt/venv/bin/python /opt/scripts/parse_colab_search.py $msa_directory \
+          --envdb_unpaired_path $msa_directory/bfd.mgnify30.metaeuk30.smag30.a3m \
+          --uniref_unpaired_path $msa_directory/uniref.a3m \
+          --paired_path $msa_directory/pair.a3m
+        fi
+
+        chai-lab fold \
+        ${fold_options} \
+        ${fasta_file} chai_output
+        """
 }
 
 workflow {
     Chai1(
-        Channel.fromPath(params.fasta_path),
-        Channel.value(params.num_diffn_timesteps),
-        Channel.value(params.num_trunk_recycles),
-        Channel.fromPath(params.bond_loss_input_proj),
-        Channel.fromPath(params.confidence_head),
-        Channel.fromPath(params.conformers_v1),
-        Channel.fromPath(params.diffusion_module),
-        Channel.fromPath(params.feature_embedding),
-        Channel.fromPath(params.token_embedder),
-        Channel.fromPath(params.trunk),
-        Channel.fromPath(params.esm2_config),
-        Channel.fromPath(params.esm2_pytorch_model_00001_of_00002),
-        Channel.fromPath(params.esm2_pytorch_model_00002_of_00002),
-        Channel.fromPath(params.esm2_pytorch_model_bin_index),
-        Channel.fromPath(params.esm2_special_tokens_map),
-        Channel.fromPath(params.esm2_tokenizer_config),
-        Channel.fromPath(params.esm2_vocab)
+        params.fasta_file,
+        params.msa_directory,
+        params.template_hits_path,
+        params.constraints_path,
+        params.pdb_snapshot_path,
+        params.chai1_parameters,
+        params.recycle_msa_subsample,
+        params.num_trunk_recycles,
+        params.num_diffn_timesteps,
+        params.num_diffn_samples,
+        params.num_trunk_samples,
+        params.seed
     )
 }

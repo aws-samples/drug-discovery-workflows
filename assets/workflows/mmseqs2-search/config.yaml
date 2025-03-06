@@ -1,5 +1,5 @@
 name: MMseqs2
-description: "MMseqs2: ultra fast and sensitive search and clustering suite"
+description: "Ultra fasta sequence search using MMseqs2."
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:

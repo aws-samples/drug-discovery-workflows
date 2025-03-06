@@ -1,0 +1,54 @@
+name: Colabfold-Search
+description: "Colabfold workflow for MSA generation using MMseqs2."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  query:
+    description: "Path to S3 object or folder containing query sequences."
+    optional: false
+  uniref30_db_path:
+    description: "Path to S3 folder containing indexed uniref (e.g. uniref30_2302_db) data."
+    optional: true
+  envdb_db_path:
+    description: "Path to S3 folder containing indexed ennvironment (e.g. colabfold_envdb_202108_db) data."
+    optional: true    
+  pdb100_db_path:
+    description: "Path to S3 folder containing indexed pdb (e.g. pdb100_230517_db) data."
+    optional: true     
+  is_complex:
+    description: "Whether to process the query a complex or single chains."
+    optional: true   
+  filter:
+    description: "Filter the MSA by pre-defined align_eval, qsc, max_accept."
+    optional: true        
+  expand_eval:
+    description: "e-val threshold for 'expandaln'."
+    optional: true
+  align_eval:
+    description: "e-val threshold for 'align'."
+    optional: true            
+  diff:  
+    description: "filterresult - Keep at least this many seqs in each MSA block."
+    optional: true
+  qsc:
+    description: "filterresult - reduce diversity of output MSAs using min score thresh."
+    optional: true
+  max_accept:
+    description: "align - Maximum accepted alignments before alignment calculation for a query is stopped."
+    optional: true
+  pairing_strategy:
+    description: "pairaln - Pairing strategy. 0: pair maximal per species, 1: pair only if all chains are covered per species [0]"
+    optional: true    
+  db_load_mode:
+    description: "Database preload mode 0: auto, 1: fread, 2: mmap, 3: mmap+touch"
+    optional: true    
+  unpack:
+    description: "Unpack results to loose files (1) or keep MMseqs2 databases (0)."
+    optional: true        
+  gpu_server:
+    description: "Whether to use GPU server (1) or not (0). Only needed for processing a large number of inputs."
+    optional: true            
+storageCapacity: 1200
+tags:
+  Name: "Colabfold-Search"
+accelerators: GPU
