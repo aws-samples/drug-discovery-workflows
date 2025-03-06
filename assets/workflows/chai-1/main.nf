@@ -40,7 +40,6 @@ workflow Chai1 {
     )
 
     Chai1Task.out.collect().set { chai_output }
-    chai_output.view()
 
     emit:
     chai_output

@@ -41,8 +41,9 @@ workflow PredictProteinComplexes {
     main:
 
     is_complex = 1
-    msa_directory = '/home/scripts/NO_MSA'
-    template_hits_path = '/home/scripts/NO_TEMPLATE' 
+    msa_directory = '/opt/scripts/NO_MSA'
+    template_hits_path = '/opt/scripts/NO_TEMPLATE' 
+    
 
     if(use_msa == 1 || use_templates == 1){
 
@@ -76,7 +77,13 @@ workflow PredictProteinComplexes {
         if(use_templates == 1){
             ColabfoldSearch.out.template_hits.collect().set { template_hits_path }
         }
+        else{
+            pdb_snapshot_path = '/opt/scripts/NO_TEMPLATE' 
+        }
 
+    }
+    else{
+        pdb_snapshot_path = '/opt/scripts/NO_TEMPLATE' 
     }
 
     Chai1(
