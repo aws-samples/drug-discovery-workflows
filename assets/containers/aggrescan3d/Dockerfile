@@ -1,10 +1,11 @@
-FROM ubuntu:20.04
+FROM public.ecr.aws/ubuntu/ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG MINICONDA_VERSION=Miniconda2-py27_4.8.3-Linux-x86_64
 ARG AGGRESCAN3D_VERSION=1.0.2
 ARG CABS_VERSION=0.9.14
+ARG PYTHON_VERSION=2.7
 
 # Update package lists and install required packages
 RUN apt-get update && apt-get install -y \
@@ -22,7 +23,7 @@ RUN curl -O https://repo.anaconda.com/miniconda/${MINICONDA_VERSION}.sh \
 
 # Set up environment variables
 ENV PATH=/opt/miniconda/bin:$PATH
-ENV PYTHONPATH=/opt/miniconda/lib/python2.7/site-packages:$PYTHONPATH
+ENV PYTHONPATH=/opt/miniconda/lib/python${PYTHON_VERSION}/site-packages:$PYTHONPATH
 
 WORKDIR /opt
 
