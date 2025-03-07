@@ -3,4 +3,4 @@ matplotlib
 seaborn
 xformers==0.0.28.post1
 tape-proteins==0.5
-deepspeed==0.9.5
+deepspeed==0.15.1
