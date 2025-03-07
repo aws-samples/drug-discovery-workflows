@@ -29,9 +29,9 @@ jobs:
       #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
       #     aws-region: us-east-1
 
-      - name: Login to Amazon ECR Public
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+      # - name: Login to Amazon ECR Public
+      #   run: |
+      #     aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
       - name: Run Nextflow Linter
         run: |
