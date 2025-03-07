@@ -2,18 +2,22 @@ FROM public.ecr.aws/ubuntu/ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG MINICONDA_VERSION=Miniconda2-py27_4.8.3-Linux-x86_64
-ARG AGGRESCAN3D_VERSION=1.0.2
-ARG CABS_VERSION=0.9.14
-ARG PYTHON_VERSION=2.7
+ARG MINICONDA_VERSION=Miniconda3-latest-Linux-x86_64
+ARG PYTHON_VERSION=3.10
+ARG CONDA_PYTHON_VERSION=3.10.8
+ARG DEEPSTABP_VERSION=da616fff398a3fd077d0ba64cd69c9de60531bb0
+ARG PIP_VERSION=24.0
 
 # Update package lists and install required packages
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     wget \
+    unzip \
     tree \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Install Miniconda and Python
 # https://repo.anaconda.com/miniconda/
@@ -27,18 +31,22 @@ ENV PYTHONPATH=/opt/miniconda/lib/python${PYTHON_VERSION}/site-packages:$PYTHONP
 
 WORKDIR /opt
 
-# Install Aggrescan3D
-RUN conda install -c lcbio aggrescan3d=${AGGRESCAN3D_VERSION}
+# Install 
+RUN git clone https://git.nfdi4plants.org/f_jung/deepstabp.git
 
-# FoldX (optional) ommited due to licensing issues
+WORKDIR /opt/deepstabp
 
-# Install CABS-flex
-RUN apt-get update && apt-get install gfortran csh -y && rm -rf /var/lib/apt/lists/*
+RUN git checkout ${DEEPSTABP_VERSION}
 
-# Omited modeller due to licensing issues
-# RUN conda install -c salilab modeller
+RUN conda create -n "deepstabp" python=${CONDA_PYTHON_VERSION}
 
-RUN conda install -c lcbio cabs=${CABS_VERSION}
+# Set default environment
+ENV PATH=/opt/miniconda/envs/deepstabp/bin:$PATH
 
-# Fixes 'ImportError: Failed to import any qt binding' error
-RUN mkdir -p ~/.config/matplotlib && echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc
+RUN pip install pip==${PIP_VERSION}
+
+COPY requirements.txt /opt/deepstabp/requirements.txt
+
+RUN pip install -r requirements.txt
+
+CMD ["/bin/bash"]
