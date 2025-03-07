@@ -1,0 +1,30 @@
+name: ProteinMPNN-ddG
+description: "ProteinMPNN-ddG"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_pdb:
+    description: "Input PDB file"
+    optional: false
+  chains:
+    description: "Chains to load from PDB as prediction context, separated by commas e.g. `A,B`. Default is 'A'"
+    optional: true
+  chain_to_predict:
+    description: "Chain to predict mutations of, defaults to the first chain in --chains if not specified. Default is None"
+    optional: true
+  seed:
+    description: "Random seed. Default is 42"
+    optional: true
+  nrepeats:
+    description: "Runs model multiple times with different seeds (split from input seed) for averaged prediction. Default is 1"
+    optional: true
+  model_name:
+    description: "ProteinMPNN model name: v_48_002, v_48_010, v_48_020, v_48_030; v_48_010=version with 48 edges 0.10A noise. Default is v_48_020"
+    optional: true
+  without_ddg_correction:
+    description: "Whether to not apply correction for ddG. Default is False"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "ProteinMPNN-ddG"
+accelerators: GPU
