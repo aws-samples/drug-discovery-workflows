@@ -1,0 +1,127 @@
+name: PEP-Patch
+description: "PEP-Patch: surface_analyses"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  mode:
+    description: "Mode: electrostatic, hydrophobicity, or both"
+    optional: true
+
+  electrostatic_parm:
+    description: "PARM: mdtraj compatible topology file"
+    optional: true
+  electrostatic_crd:
+    description: "CRD: a coordinate file"
+    optional: true
+  probe_radius:
+    description: "probe radius in Angstrom. Default is 1.4"
+    optional: true
+  patch_cutoff:
+    description: "Cutoff for positive and negative patches. Default is 2 -2"
+    optional: true
+  integral_cutoff:
+    description: "Cutoffs for \"high\" and \"low\" integrals. Default is 0.3 -0.3"
+    optional: true
+  surface_type:
+    description: "Which type of molecular surface to produce. Default is \"sas\" of 'sas', 'ses', 'gauss'"
+    optional: true
+  pos_patch_cmap:
+    description: "Matplotlib colormap for .ply positive patches output. Default is \"tab20c\""
+    optional: true
+  neg_patch_cmap:
+    description: "Matplotlib colormap for .ply negative patches output. Default is \"tab20c\""
+    optional: true
+  electrostatic_ply_cmap:
+    description: "Matplotlib colormap for .ply potential output. Default is \"coolwarm_r\""
+    optional: true
+  n_patches:
+    description: "Restrict output to n patches. Positive values output n largest patches, negative n smallest patches. Default is 0"
+    optional: true
+  size_cutoff:
+    description: "Restrict output to patches with an area of over s A^2. If s = 0, no cutoff is applied (default). Default is 0"
+    optional: true
+  gauss_shift:
+    description: "Default is 0.1"
+    optional: true
+  gauss_scale:
+    description: "Default is 1.0"
+    optional: true
+  check_cdrs:
+    description: "Check CDRs for patches. Default is False"
+    optional: true
+  ply_clim:
+    description: "Colorscale limits for .ply output. Default is None, nargs=2"
+    optional: true
+
+  hydrophobicity_parm:
+    description: "PARM: any file recognized by mdtraj as a topology with bonds (e.g., a PDB file with CONECT records)"
+    optional: true
+  hydrophobicity_crd:
+    description: "CRD: a structure file or trajecotry (e.g., the same PDB file or an XTC trajectory)"
+    optional: true
+  scale:
+    description: "Hydrophobicity scale in table format, or \"crippen\" or \"eisenberg\", or \"rdkit-crippen\". For rdkit-crippen, parm needs to be in PDB format, and a SMILES file must be supplied with --smiles."
+    optional: true
+  smiles:
+    description: "SMILES for rdkit-crippen. Use e.g. @smiles.txt to read them from a file."
+    optional: true
+  stride:
+    description: "Default is 1"
+    optional: true
+  surftype:
+    description: "Controls the grouping of SASA for surface-area based scores (--surfscore, --sap, --sh). choices=('normal', 'sc_norm', 'atom_norm'), default='normal'"
+    optional: true
+  group_heavy:
+    description: "Default is False"
+    optional: true
+  surfscore:
+    description: "Enable Surface Score related options. Default is False"
+    optional: true
+  sap:
+    description: "Enable SAP related options. Default is False"
+    optional: true
+  blur_rad:
+    description: "Blur radius [nm]. Default is 0.5"
+    optional: true
+  sh:
+    description: "Compute surrounding hydrophobicity arrording to https://www.nature.com/articles/275673a0. Default is False"
+    optional: true
+  sh_rad:
+    description: "Radius for surrounding hydrophobicity [nm]. Default is 0.8"
+    optional: true
+  potential:
+    description: "Enable Hydrophobic potential options. Default is False"
+    optional: true
+  rmax:
+    description: "Default is 0.3"
+    optional: true
+  solv_rad:
+    description: "Default is 0.14"
+    optional: true
+  grid_spacing:
+    description: "Grid spacing for the surface definition in NANOMETERS [nm]. Default is 0.05"
+    optional: true
+  rcut:
+    description: "rcut parameter for Heiden weighting function [nm]. Default is 0.5"
+    optional: true
+  alpha:
+    description: "alpha parameter for Heiden weighting function [nm^-1]. Default is 15.0"
+    optional: true
+  blur_sigma:
+    description: "Sigma for distance to gaussian surface [nm]. Default is 0.6"
+    optional: true
+  patches:
+    description: "Output patches instead of hydrophobic potential"
+    optional: true
+  patch_min:
+    description: "Minimum vertex value to count as a patch. Default is 0.12"
+    optional: true
+  hydrophobic_ply_cmap:
+    description: "Matplotlib colormap for .ply hydrophobicity output. Default is \"coolwarm_r\""
+    optional: true
+  
+
+storageCapacity: 1200
+tags:
+  Name: "PEP-Patch"
+accelerators: GPU
