@@ -200,7 +200,7 @@ Resources:
         BuildSpec: build/buildspec/buildspec_data.yaml
         Location: !Sub "${S3BucketName}/build/code/code.zip"
         Type: S3
-      TimeoutInMinutes: 480
+      TimeoutInMinutes: 720
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -282,8 +282,8 @@ Resources:
     Condition: WaitForCodeBuildCondition
     Properties:
       Handle: !Ref CodeBuildWaitHandle
-      Timeout: 28800
-      Count: !GetAtt StartCodeBuildData.ArtifactCount
+      Timeout: 43200
+      Count: !GetAtt StartCodeBuildData.ArtifactCount    
 
 Outputs:
   CodeBuildDataProject:

@@ -10,5 +10,4 @@ tmp/
 .nextflow*
 stack-outputs.json
 test_data
-linter-rules-for-nextflow
 build/cloudformation/packaged.yaml
