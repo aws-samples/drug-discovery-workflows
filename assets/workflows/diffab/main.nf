@@ -17,12 +17,15 @@ workflow DiffAb {
         params.num_samples
     )
 
-    DesignPDB(
+    design_out = DesignPDB(
         Channel.fromPath(params.input_pdb),
         config_and_deps.config,
         config_and_deps.checkpoint,
         config_and_deps.extracted_sabdab_db,
     )
+
+    emit:
+    design_out
 }
 
 
