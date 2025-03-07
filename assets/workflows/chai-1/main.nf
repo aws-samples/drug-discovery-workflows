@@ -47,7 +47,6 @@ workflow Chai1 {
 
 process Chai1Task {
     label 'chai1'
-    debug true
     cpus 4
     memory '16 GB'
     maxRetries 1

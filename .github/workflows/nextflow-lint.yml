@@ -2,12 +2,8 @@ name: Nextflow Linter
 
 on:
   push:
-    # paths:
-      # - "assets/workflows/**/*.nf"
     branches: ["main"]
   pull_request:
-    # paths:
-      # - "assets/workflows/**/*.nf"
     branches: ["main"]
 
 jobs:
@@ -17,21 +13,9 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write # Required for AWS authentication
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-      #     aws-region: us-east-1
-
-      # - name: Login to Amazon ECR Public
-      #   run: |
-      #     aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
       - name: Run Nextflow Linter
         run: |

@@ -90,11 +90,11 @@ workflow {
     // 
     // Combine/gather the search results into channels per original fasta file
     msa_tuples = fasta_files
-                .join(SearchUniref90.out.fasta_basename_with_msa.groupTuple())
-                .join(SearchMgnify.out.fasta_basename_with_msa.groupTuple())
-                .join(SearchUniprot.out.fasta_basename_with_msa.groupTuple())
-                .join(SearchBFD.out.fasta_basename_with_msa.groupTuple())
-                .join(SearchTemplatesTask.out.fasta_basename_with_msa.groupTuple())
+                .join(SearchUniref90.out.fasta_basename_with_msa.groupTuple(), failOnMismatch: false, failOnDuplicate: false)
+                .join(SearchMgnify.out.fasta_basename_with_msa.groupTuple(), failOnMismatch: false, failOnDuplicate: false)
+                .join(SearchUniprot.out.fasta_basename_with_msa.groupTuple(), failOnMismatch: false, failOnDuplicate: false)
+                .join(SearchBFD.out.fasta_basename_with_msa.groupTuple(), failOnMismatch: false, failOnDuplicate: false)
+                .join(SearchTemplatesTask.out.fasta_basename_with_msa.groupTuple(), failOnMismatch: false, failOnDuplicate: false)
 
     // Per original fasta file, move all of the search result files (ArrayList of files) into single directory structure: msa/A, msa/B, ... 
     // Emit the first two elements of msa_tuples, and a single merged msa/ directory
