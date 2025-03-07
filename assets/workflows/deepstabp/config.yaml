@@ -1,0 +1,21 @@
+name: deepSTABp
+description: "deepSTABp: A deep learning approach for the prediction of thermal protein stability"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_fasta:
+    description: "Input FASTA file"
+    optional: false
+  model_weights:
+    description: "Model weights dir"
+    optional: true
+  growth_temp:
+    description: "Growth temperature. Default: 22"
+    optional: true
+  measurement_type:
+    description: "Measurement type. Default: 'Cell'"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "deepSTABp"
+accelerators: GPU
