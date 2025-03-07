@@ -1,6 +1,7 @@
 // Utilities to unpack/organize certain MSA databases
 
 process UnpackBFD {
+    label 'data'
     cpus 2
     memory '4 GB'
     // Don't publish - we don't want copies of the databases
@@ -32,6 +33,7 @@ process UnpackBFD {
 }
 
 process UnpackUniprot {
+    label 'data'
     cpus 4
     memory '8 GB'
     // Don't publish - we don't want copies of the databases
@@ -83,6 +85,7 @@ process UnpackPdb70nSeqres {
 }
 
 process UnpackMMCIF {
+    label 'data'
     cpus 2
     memory '4 GB'
     // Don't publish - we don't want copies of the databases

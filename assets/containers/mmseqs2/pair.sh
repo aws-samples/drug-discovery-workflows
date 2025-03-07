@@ -1,15 +1,33 @@
-#!/bin/bash -e
+#!/bin/bash -ex
+
+#Example usage
+# bash pair.sh \
+#   /usr/local/bin/mmseqs \
+#   /home/fasta/4ZQK_1.fasta \
+#   /home/msa \
+#   /home/data/uniref30_2302_db \
+#   /home/data/pdb100_230517 \
+#   /home/data/colabfold_envdb_202108_db \
+#   1 1 1 1 0 1MMSEQS="$1"
+
 MMSEQS="$1"
 QUERY="$2"
-BASE="$4"
-DB1="$5"
-DB2="$6"
-USE_ENV="$7"
-USE_PAIRWISE="$8"
-PAIRING_STRATEGY="$9"
+BASE="$3"
+DB1="$4"
+DB2="$5"
+USE_ENV="$6"
+USE_PAIRWISE="$7"
+PAIRING_STRATEGY="$8"
+GPU="$9"
+
 SEARCH_PARAM="--num-iterations 3 --db-load-mode 2 -a --k-score 'seq:96,prof:80' -e 0.1 --max-seqs 10000"
 EXPAND_PARAM="--expansion-mode 0 -e inf --expand-filter-clusters 0 --max-seq-id 0.95"
 export MMSEQS_CALL_DEPTH=1
+
+if [ "${GPU}" = "1" ]; then
+  SEARCH_PARAM="$SEARCH_PARAM --gpu ${GPU} --prefilter-mode 1"
+fi
+
 "${MMSEQS}" createdb "${QUERY}" "${BASE}/qdb" --shuffle 0 --dbtype 1
 "${MMSEQS}" search "${BASE}/qdb" "${DB1}" "${BASE}/res" "${BASE}/tmp" $SEARCH_PARAM
 if [ "${USE_PAIRWISE}" = "1" ]; then

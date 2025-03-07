@@ -1,4 +1,6 @@
 #!/bin/bash -ex
+
+# From https://github.com/sokrypton/ColabFold/blob/main/setup_databases.sh
 # Setup everything for using mmseqs locally
 # Set MMSEQS_NO_INDEX to skip the index creation step (not useful for colabfold_search in most cases)
 ARIA_NUM_CONN=8
@@ -71,8 +73,8 @@ if [ ! -f PDB_MMCIF_READY ]; then
     mkdir -p pdb/divided
     mkdir -p pdb/obsolete
     if [ -n "${PDB_AWS_DOWNLOAD}" ]; then
-        aws s3 cp --no-sign-request --recursive s3://pdbsnapshots/${PDB_AWS_SNAPSHOT}/pub/pdb/data/structures/divided/mmCIF/ pdb/divided/
-        aws s3 cp --no-sign-request --recursive s3://pdbsnapshots/${PDB_AWS_SNAPSHOT}/pub/pdb/data/structures/obsolete/mmCIF/ pdb/obsolete/
+        aws s3 cp --quiet --no-sign-request --recursive s3://pdbsnapshots/${PDB_AWS_SNAPSHOT}/pub/pdb/data/structures/divided/mmCIF/ pdb/divided/
+        aws s3 cp --quiet --no-sign-request --recursive s3://pdbsnapshots/${PDB_AWS_SNAPSHOT}/pub/pdb/data/structures/obsolete/mmCIF/ pdb/obsolete/
     fi
     rsync -rlpt -v -z --delete --port=${PDB_PORT} ${PDB_SERVER}/data/structures/divided/mmCIF/ pdb/divided
     rsync -rlpt -v -z --delete --port=${PDB_PORT} ${PDB_SERVER}/data/structures/obsolete/mmCIF/ pdb/obsolete

@@ -8,8 +8,12 @@ Predict the structure of biomolecule complexes (Proteins, amino acids, and/or li
 
 ```mermaid
 
-flowchart TD
-  A[Split FASTA file into chunks of n sequences] --> B[Predict complex structure] --> C[Return structure]
-  A --> D[Predict complex structure] --> E[Return structure]
+flowchart LR
+    A[FASTA file] --> E(Chai-1)
+    B["(Optional) Constraints file"] --> E
+    C["(Optional) MSA files"] --> E
+    D["(Optional) template file"] --> E
+    E --> E1((Structure Predictions))
+
 
 ```

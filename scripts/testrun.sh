@@ -31,6 +31,7 @@ while getopts 'c:w:a:r:o:b:p:g:' OPTION; do
   r) [ -z "$REGION" ] && REGION="$OPTARG" ;;
   o) [ -z "$OMICS_EXECUTION_ROLE" ] && OMICS_EXECUTION_ROLE="$OPTARG" ;;
   b) [ -z "$OUTPUT_BUCKET" ] && OUTPUT_BUCKET="$OPTARG" ;;
+  f) [ -z "$REF_DATA_BUCKET" ] && REF_DATA_BUCKET="$OPTARG" ;;
   p) PARAMETERS="$OPTARG" ;;
   g) [ -z "$RUN_GROUP_ID" ] && RUN_GROUP_ID="$OPTARG" ;;
   *) exit 1 ;;
@@ -70,9 +71,15 @@ pushd tmp
 
 cp -r ../assets/workflows/$WORKFLOW_NAME/* assets/workflows/$WORKFLOW_NAME
 
+# Replace ECR URLs (legacy config)
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.wdl 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.nf 2>/dev/null || true
 sed -i "" -E "s/[0-9]{12}\.dkr\.ecr\.(us-[a-z]*-[0-9])/$ACCOUNT_ID.dkr.ecr.$REGION/g" ./assets/workflows/$WORKFLOW_NAME/*.config assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+
+# Replace {{S3_BUCKET_NAME}} and container strings like {{openfold:latest}}
+# Always use develop tag in this script
+sed -i='' "s/{{\s*\([A-Za-z0-9_-]*\):[A-Za-z0-9_-]*\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1:develop/g" ./assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
+sed -i='' "s/{{S3_BUCKET_NAME}}/$REF_DATA_BUCKET/g" ./assets/workflows/$WORKFLOW_NAME/*.config 2>/dev/null || true
 
 zip -r drug-discovery-workflows.zip .
 

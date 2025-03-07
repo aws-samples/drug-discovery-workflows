@@ -1,5 +1,6 @@
 .DS_Store
 .scratch
+.old_scratch
 .venv
 __pycache__
 delete_all_*.py
@@ -9,5 +10,4 @@ tmp/
 .nextflow*
 stack-outputs.json
 test_data
-linter-rules-for-nextflow
 build/cloudformation/packaged.yaml

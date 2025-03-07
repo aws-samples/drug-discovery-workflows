@@ -53,14 +53,14 @@ process GenerateConfigAndPrepDependencies {
         // Ensure that the paths are quoted correctly in bash to handle spaces
         def quoteEscape = { param -> param.toString().replaceAll('"', '\\"') } 
         def quoteParam = { param -> "\"${quoteEscape(param)}\"" }
-        def quoteList = { list -> list.collect { quoteParam(it) }.join(' ') }
+        def quoteList = { list -> list.collect { quoteParam(it) }.join(' ', failOnMismatch: false, failOnDuplicate: false) }
         
         """
         set -euxo pipefail
 
         # Extract the trained models and sabdab db to be returned
         mkdir -p ./trained_models
-        cp ${model_weights.join(' ')} ./trained_models
+        cp ${model_weights.join(' ', failOnMismatch: false, failOnDuplicate: false)} ./trained_models
         unzip ${sabdab_db} -d .
 
         # Generate the configuration file for DiffAb

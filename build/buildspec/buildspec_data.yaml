@@ -97,7 +97,7 @@ phases:
               tar -xf $HOME/s3/$KEY/*.tar -C $HOME/s3/$KEY --skip-old-files --warning=existing-file
             elif [[ "$SOURCE_URI" =~ .*\.gz$ ]]; then
               echo "Extracting file"
-              gunzip -k $HOME/s3/$KEY/*.gz
+              gunzip -k $HOME/s3/$KEY/*.gz 2>/dev/null || true
             fi;
           fi;          
         done <$BUILD_CONTEXT

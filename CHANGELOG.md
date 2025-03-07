@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.0] - 2025-03-07
+
+### 2.17.0 Added
+
+- Added support for OpenFold2
+
+---
+
+## [2.16.0] - 2025-03-06
+
+### 2.16.0 Added
+
+- Added support for Colabfold-search workflow to generate MSA files.
+- Added protein complex prediction workflow.
+
+### 2.16.0 Changed
+
+- Updated Chai-1 workflow to support MSA, template, and constraint files.
+- Updated the indexed Uniref30 data source to S3.
+
+---
+
 ## [2.15.1] - 2025-02-19
 
 ### 2.15.1 Fixed

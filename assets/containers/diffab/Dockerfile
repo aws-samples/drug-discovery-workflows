@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM public.ecr.aws/ubuntu/ubuntu:20.04
 
 # Update package lists and install required packages
 RUN apt-get update && apt-get install -y \

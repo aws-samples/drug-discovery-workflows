@@ -129,7 +129,7 @@ process GenerateConfig {
     // Ensure that the paths are quoted correctly in bash to handle spaces
     def quoteEscape = { param -> param.toString().replaceAll('"', '\\"') } 
     def quoteParam = { param -> "\"${quoteEscape(param)}\"" }
-    def quoteList = { list -> list.collect { quoteParam(it) }.join(' ') }
+    def quoteList = { list -> list.collect { quoteParam(it) }.join(' ', failOnMismatch: false, failOnDuplicate: false) }
     
     """
     set -euxo pipefail

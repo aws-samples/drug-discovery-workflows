@@ -25,6 +25,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [Humatch](https://github.com/oxpig/Humatch):  From Oxford Protein Informatics Group. Humanize antibodies.
 - [MMseqs2](https://github.com/soedinglab/MMseqs2): From Max Planck Institute. Ultra fast and sensitive sequence search and clustering suite.
 - [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
+- [OpenFold2](https://github.com/aqlaboratory/openfold): From Columbia University. Trainable, memory-efficient, and GPU-friendly PyTorch reproduction of AlphaFold 2.
 - [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
 - [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
 - [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN): From the University of North Carolina School of Medicine. Predict changes in thermodynamic stability for protein point mutants.
@@ -32,6 +33,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 ### E2E Workflows
 
 - [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope using RFDiffusion, ProteinMPNN, ESMFold, AMPLIFY, and NanobodyBuilder2.
+- [Predict Protein Complexes](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/predict-protein-complexes): Predict the structure of biomolecular complexes, including proteins, DNA, RNA, and small molecules.
 
 ## Deployment
 
@@ -146,7 +148,11 @@ ACCOUNT_ID=123456789012
 REGION=us-east-1
 OMICS_EXECUTION_ROLE=arn:aws:iam::123456789123:role/my-omics-role
 OUTPUT_BUCKET=123456789123-my-omics-bucket
+REF_DATA_BUCKET=my-deployment-bucket
+
 ```
+
+`REF_DATA_BUCKET` should be the same bucket you specified during the CloudFormation deployment: `deploy.sh -b "my-deployment-bucket"`.
 
 and then:
 

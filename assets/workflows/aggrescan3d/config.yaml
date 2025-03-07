@@ -1,0 +1,17 @@
+name: Aggrescan3D
+description: "Aggrescan3D"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_pdb:
+    description: "Input PDB file"
+    optional: false
+  chain:
+    description: "Only consider a specific protein chain while performing the simulation ignoring the rest of protein chains (if available). If not provided, all of the protein's chains are taken for the Aggrescan3D analysis. Default is None."
+    optional: true
+  distance:
+    description: "Distance cutoff used in calculations. This is the maximum distance in Angstroms from the central residue at which other residues will be considered in Aggrescan3D calculations. Default is 5."
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "Aggrescan3D"

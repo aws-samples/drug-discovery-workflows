@@ -1,15 +1,28 @@
-#!/bin/bash -e
+#!/bin/bash -ex
+
+#Example usage
+# bash msa.sh \
+#   /usr/local/bin/mmseqs \
+#   /home/fasta/4ZQK_1.fasta \
+#   /home/msa \
+#   /home/data/uniref30_2302_db \
+#   /home/data/pdb100_230517 \
+#   /home/data/colabfold_envdb_202108_db \
+#   1 1 1 1 0 1
+
 MMSEQS="$1"
 QUERY="$2"
-BASE="$4"
-DB1="$5"
-DB2="$6"
-DB3="$7"
-USE_ENV="$8"
-USE_TEMPLATES="$9"
-FILTER="${10}"
-TAXONOMY="${11}"
-M8OUT="${12}"
+BASE="$3"
+DB1="$4"
+DB2="$5"
+DB3="$6"
+USE_ENV="$7"
+USE_TEMPLATES="$8"
+FILTER="${9}"
+TAXONOMY="${10}"
+M8OUT="${11}"
+GPU="${12}"
+
 EXPAND_EVAL=inf
 ALIGN_EVAL=10
 DIFF=3000
@@ -26,8 +39,18 @@ export MMSEQS_CALL_DEPTH=1
 SEARCH_PARAM="--num-iterations 3 --db-load-mode 2 -a --k-score 'seq:96,prof:80' -e 0.1 --max-seqs 10000"
 FILTER_PARAM="--filter-min-enable 1000 --diff ${DIFF} --qid 0.0,0.2,0.4,0.6,0.8,1.0 --qsc 0 --max-seq-id 0.95"
 EXPAND_PARAM="--expansion-mode 0 -e ${EXPAND_EVAL} --expand-filter-clusters ${FILTER} --max-seq-id 0.95"
+TEMPLATE_PARAM="--db-load-mode 2 -a -e 0.1"
+
+if [ "${GPU}" = "1" ]; then
+  SEARCH_PARAM="$SEARCH_PARAM --gpu ${GPU} --prefilter-mode 1"
+  TEMPLATE_PARAM="$TEMPLATE_PARAM --gpu ${GPU} --prefilter-mode 1"
+else
+  TEMPLATE_PARAM="$TEMPLATE_PARAM -s 7.5"
+fi
+
+echo $SEARCH_PARAM
 mkdir -p "${BASE}"
-"${MMSEQS}" createdb "${QUERY}" "${BASE}/qdb" --dbtype 1
+"${MMSEQS}" createdb "${QUERY}" "${BASE}/qdb" --shuffle 0 --dbtype 1
 "${MMSEQS}" search "${BASE}/qdb" "${DB1}" "${BASE}/res" "${BASE}/tmp1" $SEARCH_PARAM
 "${MMSEQS}" mvdb "${BASE}/tmp1/latest/profile_1" "${BASE}/prof_res"
 "${MMSEQS}" lndb "${BASE}/qdb_h" "${BASE}/prof_res_h"
@@ -59,7 +82,7 @@ fi
 (
 
 if [ "${USE_TEMPLATES}" = "1" ]; then
-  "${MMSEQS}" search "${BASE}/prof_res" "${DB2}" "${BASE}/res_pdb" "${BASE}/tmp2" --db-load-mode 2 -s 7.5 -a -e 0.1
+  "${MMSEQS}" search "${BASE}/prof_res" "${DB2}" "${BASE}/res_pdb" "${BASE}/tmp2" ${TEMPLATE_PARAM}
   "${MMSEQS}" convertalis "${BASE}/prof_res" "${DB2}.idx" "${BASE}/res_pdb" "${BASE}/pdb70.m8" --format-output query,target,fident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,cigar --db-load-mode 2
   "${MMSEQS}" rmdb "${BASE}/res_pdb"
 fi
