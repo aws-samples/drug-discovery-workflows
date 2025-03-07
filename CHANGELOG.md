@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.0] - 2025-03-07
+
+### 2.17.0 Added
+
+- Added support for OpenFold2
+
+---
+
 ## [2.16.0] - 2025-03-06
 
 ### 2.16.0 Added

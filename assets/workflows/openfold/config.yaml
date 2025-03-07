@@ -1,0 +1,23 @@
+name: OpenFold
+description: "Predict single-chain protein structures with OpenFold"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  mmseq_db:
+    optional: true
+    description: "mmseq db"
+  pdb70:
+    optional: true
+    description: "pdb70"
+  openfold_checkpoint:
+    optional: true
+    description: "openfold_checkpoint"
+  pdb_mmcif_files:
+    optional: true
+    description: "pdb_mmcif_files"
+  fasta_dir:
+    optional: false
+    description: "fasta_dir"
+storageCapacity: 4800
+tags:
+  Name: "OpenFold"
