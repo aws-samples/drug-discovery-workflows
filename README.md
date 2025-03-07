@@ -9,15 +9,20 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 ### Modules
 
 - [ABodyBuilder3](https://github.com/Exscientia/abodybuilder3): From Exscientia. Predict the 3D structure of antibody heavy and light chains.
+- [Aggrescan3D](https://academic.oup.com/nar/article/47/W1/W300/5485072): From University of Warsaw and Biologia Molecular Universitat Autònoma de Barcelona. Predict protein stability.
+- [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
 - [Alphafold2-Monomer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-monomer): From Google DeepMind. Predict the 3D structure of one or more single-chain proteins
 - [Alphafold2-Multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): From Google DeepMind. Predict the 3D structure of multi-chain protein complexes.
-- [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
 - [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
 - [AntiFold](https://github.com/oxpig/AntiFold): From Oxford Protein Informatics Group. Antibody inverse folding.
 - [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
 - [BioPhi](https://github.com/Merck/BioPhi): From Merck. Automated humanization and humanness evaluation.
+- [Boltz-1](https://github.com/jwohlwend/boltz): From MIT. Predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules.
 - [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
+- [Colabfold-Search](https://github.com/sokrypton/ColabFold): Iterative MSA search algorithm using MMseqs2.
+- [DeepSTABp](https://csb-deepstabp.bio.rptu.de/): From RPTU. Predict protein stability.
 - [DiffAb](https://github.com/luost26/diffab): From Helixon. Antigen-specific protein design.
+- [Efficient Evolution](https://github.com/brianhie/efficient-evolution): From Stanford University. Rapid protein evolution
 - [EquiFold](https://github.com/Genentech/equifold): From Prescient Design, a Genentech accelerator. Predict protein structures with an novel coarse-grained structure representation.
 - [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
 - [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
@@ -26,6 +31,8 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [MMseqs2](https://github.com/soedinglab/MMseqs2): From Max Planck Institute. Ultra fast and sensitive sequence search and clustering suite.
 - [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
 - [OpenFold2](https://github.com/aqlaboratory/openfold): From Columbia University. Trainable, memory-efficient, and GPU-friendly PyTorch reproduction of AlphaFold 2.
+- [PEP-Patch](https://pubs.acs.org/doi/10.1021/acs.jcim.3c01490): From University of Innsbruck. Predict protein electrostatics.
+- [ProteinMPNN-ddG](https://www.tamarind.bio/tools/proteinmpnn-ddg): From Pepton. Inverse folding model of protein stability.
 - [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
 - [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
 - [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN): From the University of North Carolina School of Medicine. Predict changes in thermodynamic stability for protein point mutants.
@@ -117,56 +124,3 @@ You can lint this repositories NextFlow code using the AWS provided tool [awslab
 ```bash
 make lint
 ```
-
-### Development Test Script
-
-The `scripts/testrun.sh` script can be used to invoke NextFlow workflows in this repository, for development purposes, with the specified param json file. Be sure to create a file with your desired input params, for which the Omics exeution role has S3 access.
-
-Prerequisites:
-
-- S3 bucket with input data
-- S3 bucket to store outputs, can be the same as the input bucket
-- HealthOmics execution role with access to the buckets :
-
-Example run with full argument list:
-
-```sh
-./scripts/testrun.sh \
-  -c "rfdiffusion" \
-  -w "rfdiffusion-proteinmpnn" \
-  -a "123456789123" \
-  -r "us-east-1"\
-  -o "arn:aws:iam::123456789123:role/my-omics-role" \
-  -b "123456789123-my-omics-bucket" \
-  -p file://test_data/rfdiffusion_test.json
-```
-
-Or create an `.aws/env` file to simplify the arguments:
-
-```sh
-ACCOUNT_ID=123456789012
-REGION=us-east-1
-OMICS_EXECUTION_ROLE=arn:aws:iam::123456789123:role/my-omics-role
-OUTPUT_BUCKET=123456789123-my-omics-bucket
-REF_DATA_BUCKET=my-deployment-bucket
-
-```
-
-`REF_DATA_BUCKET` should be the same bucket you specified during the CloudFormation deployment: `deploy.sh -b "my-deployment-bucket"`.
-
-and then:
-
-```sh
-./scripts/testrun.sh -c "rfdiffusion" -w "rfdiffusion-proteinmpnn" -p file://test_data/rfdiffusion_test.json
-```
-
-`s3:<BUCKET NAME SPECIFIED IN CFN>/ref-data/<FILENAME WITHOUT EXTENSION>/...`
-
-We currently support three types of data sources:
-
-- s3: Records that begin with `s3` will be downloaded using the AWS CLI.
-- HuggingFace Hub: Records that look like the canonical `organization/project` HuggingFace ID will be cloned, packaged into a .tar file, and copied to s3 using a mountpoint.
-- NVIDIA NGC: Records that begin with `nvidia` will be downloaded using the NCG CLI IF credentials are provided via the `-s` option in `delpoy.sh`.
-- Other: All other records will be downloaded using `wget` to an s3 mountpoint.
-
-The `workflows` contains the HeathOmics workflow files (.wdl and .nf) and supporting files to create private workflows. The deployment process will attempt to deploy every subfolder here as a HealthOmics workflow deployment package without any further configuration. Just drop in your modules and deploy! To reference a private docker image in your workflow files, replace the uri with a {{MyContainer}} placeholder, where "MyContainer" is the name of your repository. For containers you define in the `modules/containers` folder, this will be the folder name. The deployment pipeline will automatically replace the placeholder with the correct ECR URI for your account and region. For example, if you want to use the "biolambda" container, use {{biolambda}}. You can also append an image tag, like {{biolambda:latest}}. You can also reference your deployment S3 bucket with {{S3_BUCKET_NAME}} to access data downloaded during stack creation.
