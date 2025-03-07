@@ -53,10 +53,10 @@ workflow AlphaFold2Monomer {
     SearchTemplatesTask(SearchUniref90.out.msa, UnpackPdb70nSeqres.out.db_folder)
 
     msa_tuples = fasta_files
-                 .join(SearchUniref90.out.msa)
-                 .join(SearchMgnify.out.msa)
-                 .join(SearchBFD.out.msa)
-                 .join(SearchTemplatesTask.out.pdb_hits)
+                 .join(SearchUniref90.out.msa, failOnMismatch: false, failOnDuplicate: false)
+                 .join(SearchMgnify.out.msa, failOnMismatch: false, failOnDuplicate: false)
+                 .join(SearchBFD.out.msa, failOnMismatch: false, failOnDuplicate: false)
+                 .join(SearchTemplatesTask.out.pdb_hits, failOnMismatch: false, failOnDuplicate: false)
 
     GenerateFeaturesTask(msa_tuples,
                          UnpackMMCIF.out.db_folder,
