@@ -2,12 +2,12 @@ name: Nextflow Linter
 
 on:
   push:
-    paths:
-      - "assets/workflows/**/*.nf"
+    # paths:
+      # - "assets/workflows/**/*.nf"
     branches: ["main"]
   pull_request:
-    paths:
-      - "assets/workflows/**/*.nf"
+    # paths:
+      # - "assets/workflows/**/*.nf"
     branches: ["main"]
 
 jobs:
