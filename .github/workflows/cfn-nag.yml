@@ -1,0 +1,28 @@
+# The cfn-nag tool looks for patterns in CloudFormation templates that may indicate insecure infrastructure. Roughly speaking, it will look for:
+# - IAM rules that are too permissive (wildcards)
+# - Security group rules that are too permissive (wildcards)
+# - Access logs that aren't enabled
+# - Encryption that isn't enabled
+# - Password literals
+
+# See https://github.com/stelligent/cfn_nag for more information
+
+name: cfn-nag
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+
+jobs:
+  cfn-lint:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: cfn_nag Scan
+        uses: stelligent/cfn_nag@master
+        with:
+          input_path: build/cloudformation
