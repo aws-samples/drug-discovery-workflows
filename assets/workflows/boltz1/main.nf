@@ -4,12 +4,12 @@ nextflow.enable.dsl = 2
 
 workflow Boltz1 {
     take:
-    yaml_path
+    input_path
     boltz1_parameters
 
     main:
 
-    input_channel = Channel.fromPath(yaml_path)
+    input_channel = Channel.fromPath(input_path)
     boltz1_parameters = Channel.fromPath(boltz1_parameters)
 
     input_channel.view()
@@ -30,7 +30,7 @@ process Boltz1Task {
     maxRetries 1
 
     input:
-    path yaml_path
+    path input_path
     path boltz1_parameters
 
     output:
@@ -43,14 +43,14 @@ process Boltz1Task {
     /opt/conda/bin/boltz \
     --cache $boltz1_parameters \
     --out_dir output \
-    $yaml_path
+    $input_path
       
     """
 }
 
 workflow {
     Boltz1(
-        params.yaml_path,
+        params.input_path,
         params.boltz1_parameters
     )
 }

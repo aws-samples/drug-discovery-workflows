@@ -3,12 +3,12 @@ description: "State-of-the-art open-source model to predict biomolecular structu
 engine: NEXTFLOW
 main: main.nf
 parameterTemplate:
-  yaml_path:
-    description: "YAML file containing input entities."
+  input_path:
+    description: "Path to fasta or yaml input file."
     optional: false
   boltz1_parameters:
     description: "Path to folder containiner Boltz-1 model parameters."
-    optional: false    
+    optional: true    
 storageCapacity: 1200
 tags:
   Name: "Boltz1"
