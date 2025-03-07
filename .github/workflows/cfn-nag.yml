@@ -10,17 +10,15 @@
 name: cfn-nag
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   cfn-lint:
     permissions:
       contents: read # for actions/checkout to fetch code
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: cfn_nag Scan
