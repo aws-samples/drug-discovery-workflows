@@ -40,7 +40,7 @@ process Boltz1Task {
     """
     set -euxo pipefail
     mkdir output
-    /opt/conda/bin/boltz \
+    /opt/venv/bin/boltz predict \
     --cache $boltz1_parameters \
     --out_dir output \
     $input_path
