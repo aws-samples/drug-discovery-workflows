@@ -1,4 +1,4 @@
-# Colabfold workflow for MSA generation using MMseqs2
+# Predict Protein Complex Structures
 
 ## Summary
 
