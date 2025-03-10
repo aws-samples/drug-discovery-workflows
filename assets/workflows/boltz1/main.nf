@@ -25,9 +25,11 @@ workflow Boltz1 {
 
 process Boltz1Task {
     label 'boltz1'
-    cpus 8
+    cpus 4
     memory '16 GB'
     maxRetries 1
+    accelerator 1, type: 'nvidia-tesla-a10g'
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
     path input_path
@@ -40,7 +42,7 @@ process Boltz1Task {
     """
     set -euxo pipefail
     mkdir output
-    /opt/conda/bin/boltz \
+    /opt/venv/bin/boltz predict \
     --cache $boltz1_parameters \
     --out_dir output \
     $input_path
