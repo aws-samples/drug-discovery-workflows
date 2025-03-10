@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.18.1] - 2025-03-010
+
+### 2.18.1 Fixed
+
+- Fixed typo in Boltz-1 parameter URI
+
+---
+
 ## [2.18.0] - 2025-03-07
 
 ### 2.18.0 Added
