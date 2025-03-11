@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 process SearchUniref90 {
     tag "${record_id}"
-    label 'data'
+    label 'alphafold'
     cpus { 8 * Math.pow(2, task.attempt) }
     memory { 32.GB * Math.pow(2, task.attempt) }
     maxRetries 3
@@ -25,7 +25,7 @@ process SearchUniref90 {
 
     mkdir -p output_${record_id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_record_path \
       --database_type=uniref90 \
       --database_path=$database_path \
@@ -39,7 +39,7 @@ process SearchUniref90 {
 
 process SearchMgnify {
     tag "${record_id}"
-    label 'data'
+    label 'alphafold'
     cpus { 8 * Math.pow(2, task.attempt) }
     memory { 64.GB * Math.pow(2, task.attempt) }
     maxRetries 3
@@ -61,7 +61,7 @@ process SearchMgnify {
     
     mkdir -p output_${record_id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_record_path \
       --database_type=mgnify \
       --database_path=$database_path \
@@ -75,7 +75,7 @@ process SearchMgnify {
 
 process SearchUniprot {
     tag "${record_id}"
-    label 'data'
+    label 'alphafold'
     cpus 8
     memory '32 GB'
     publishDir "/mnt/workflow/pubdir/${fasta_basename}/msa"
@@ -96,7 +96,7 @@ process SearchUniprot {
 
     mkdir -p output_${record_id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_record_path \
       --database_type=uniprot \
       --database_path=$database_path \
@@ -110,7 +110,7 @@ process SearchUniprot {
 
 process SearchBFD {
     tag "${record_id}"
-    label 'data'
+    label 'alphafold'
 
     cpus { 8 * Math.pow(2, task.attempt) }
     memory { 64.GB * Math.pow(2, task.attempt) }
@@ -135,7 +135,7 @@ process SearchBFD {
     cat $fasta_record_path
     mkdir -p output_${record_id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=$fasta_record_path \
       --database_type=bfd \
       --database_path=$bfd_database_folder \
@@ -150,7 +150,7 @@ process SearchBFD {
 
 process SearchTemplatesTask {
     tag "${record_id}"
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '8 GB'
     publishDir "/mnt/workflow/pubdir/${fasta_basename}/msa"
@@ -169,7 +169,7 @@ process SearchTemplatesTask {
 
     mkdir -p output_${record_id}
 
-    /opt/venv/bin/python /opt/search_templates.py \
+    /opt/venv39-afdata/bin/python /opt/search_templates.py \
           --msa_path=$msa_path \
           --output_dir=output_${record_id} \
           --database_path=$pdb_db_folder \
@@ -184,7 +184,7 @@ process SearchTemplatesTask {
 // Combine/rename results from parallel searches as AlphaFold expects
 process CombineSearchResults {
     tag "${fasta_basename}"
-    label 'data'
+    label 'alphafold'
     cpus 4
     memory '8 GB'
     publishDir "/mnt/workflow/pubdir/${fasta_basename}/msa"
@@ -209,11 +209,11 @@ process CombineSearchResults {
     echo "<<<<<<<<<<<<<<<<<<<"
 
     mkdir -p msa
-    /opt/venv/bin/python /opt/update_locations.py msa _uniref90_hits.sto $uniref90_msas
-    /opt/venv/bin/python /opt/update_locations.py msa _mgnify_hits.sto $mgnify_msas
-    /opt/venv/bin/python /opt/update_locations.py msa _uniprot_hits.sto $uniprot_msas
-    /opt/venv/bin/python /opt/update_locations.py msa _bfd_hits.a3m $bfd_msas
-    /opt/venv/bin/python /opt/update_locations.py msa _pdb_hits.sto $template_hits
+    /opt/venv39-afdata/bin/python /opt/update_locations.py msa _uniref90_hits.sto $uniref90_msas
+    /opt/venv39-afdata/bin/python /opt/update_locations.py msa _mgnify_hits.sto $mgnify_msas
+    /opt/venv39-afdata/bin/python /opt/update_locations.py msa _uniprot_hits.sto $uniprot_msas
+    /opt/venv39-afdata/bin/python /opt/update_locations.py msa _bfd_hits.a3m $bfd_msas
+    /opt/venv39-afdata/bin/python /opt/update_locations.py msa _pdb_hits.sto $template_hits
 
     echo "***********************"
     ls -alR msa/

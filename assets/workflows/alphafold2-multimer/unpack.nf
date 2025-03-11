@@ -1,7 +1,7 @@
 // Utilities to unpack/organize certain MSA databases
 
 process UnpackBFD {
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '4 GB'
     // Don't publish - we don't want copies of the databases
@@ -34,7 +34,7 @@ process UnpackBFD {
 
 
 process UnpackUniprot {
-    label 'data'
+    label 'alphafold'
     cpus 4
     memory '8 GB'
     // Don't publish - we don't want copies of the databases
@@ -58,7 +58,7 @@ process UnpackUniprot {
 
 
 process UnpackPdb70nSeqres {
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '4 GB'
     // Don't publish - we don't want copies of the databases
@@ -81,14 +81,14 @@ process UnpackPdb70nSeqres {
     mv $pdb70_src/* $base_database_path/pdb/
     
     # filter strange sequences containing 0
-    /opt/venv/bin/python /opt/filter_pdb.py $pdb_seqres_src $base_database_path/pdb/pdb_seqres.txt
+    /opt/venv39-afdata/bin/python /opt/filter_pdb.py $pdb_seqres_src $base_database_path/pdb/pdb_seqres.txt
     ls -laR $base_database_path/pdb/
     """
 }
 
 
 process UnpackMMCIF {
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '4 GB'
     // Don't publish - we don't want copies of the databases
@@ -133,7 +133,7 @@ process UnpackMMCIF {
 
 process UnpackRecords {
     tag "${id}"
-    label 'protutils'
+    label 'alphafold'
     cpus 2
     memory '4 GB'
     publishDir "/mnt/workflow/pubdir/${id}/input"

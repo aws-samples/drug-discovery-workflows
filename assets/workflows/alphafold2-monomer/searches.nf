@@ -2,7 +2,7 @@ nextflow.enable.dsl = 2
 
 process SearchUniref90 {
     tag "${id}"
-    label 'data'
+    label 'alphafold'
     cpus 8
     memory '32 GB'
     publishDir "/mnt/workflow/pubdir/${id}/msa"
@@ -23,7 +23,7 @@ process SearchUniref90 {
 
     mkdir -p output_${id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=${id}.fa \
       --database_type=uniref90 \
       --database_path=$database_path \
@@ -37,7 +37,7 @@ process SearchUniref90 {
 
 process SearchMgnify {
     tag "${id}"
-    label 'data'
+    label 'alphafold'
     cpus 8
     memory '64 GB'
     publishDir "/mnt/workflow/pubdir/${id}/msa"
@@ -57,7 +57,7 @@ process SearchMgnify {
     cat ${id}.fa
     mkdir -p output_${id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=${id}.fa \
       --database_type=mgnify \
       --database_path=$database_path \
@@ -71,7 +71,7 @@ process SearchMgnify {
 
 process SearchBFD {
     tag "${id}"
-    label 'data'
+    label 'alphafold'
 
     cpus { 8 * Math.pow(2, task.attempt) }
     memory { 64.GB * Math.pow(2, task.attempt) }
@@ -96,7 +96,7 @@ process SearchBFD {
     cat ${id}.fa
     mkdir -p output_${id}
 
-    /opt/venv/bin/python /opt/create_msa_monomer.py \
+    /opt/venv39-afdata/bin/python /opt/create_msa_monomer.py \
       --fasta_path=${id}.fa \
       --database_type=bfd \
       --database_path=$bfd_database_folder \
@@ -112,7 +112,7 @@ process SearchBFD {
 
 process SearchTemplatesTask {
     tag "${id}"
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '8 GB'
     publishDir "/mnt/workflow/pubdir/${id}/msa"
@@ -131,7 +131,7 @@ process SearchTemplatesTask {
 
     mkdir -p output_${id}
 
-    /opt/venv/bin/python /opt/search_templates.py \
+    /opt/venv39-afdata/bin/python /opt/search_templates.py \
           --msa_path=$msa_path \
           --output_dir=output_${id} \
           --database_path=$pdb_db_folder \
