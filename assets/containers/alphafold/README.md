@@ -1,4 +1,4 @@
-# AlphaFold Data Container
+# AlphaFold Container
 
 ## Desccription
 
@@ -9,7 +9,7 @@ Dockerfile and supporting scripts to run AlphaFold data pre-processing jobs. Inc
 ```bash
 
 git clone https://github.com/aws-samples/drug-discovery-workflows
-cd drug-discovery-workflows/assets/containers/alphafold-data
-docker build . -t alphafold-data
+cd drug-discovery-workflows/assets/containers/alphafold
+docker build . -t alphafold
 
 ```
