@@ -14,6 +14,7 @@ from evo_prot_grad.models import plm_regressor as plmr
 from transformers import AutoModel, EsmForMaskedLM, AutoModelForMaskedLM, AutoTokenizer
 import numpy as np
 from typing import List, Tuple, Optional
+import ast
 import pandas as pd
 from s3_utils import download_s3_folder
 
@@ -36,26 +37,26 @@ def _parse_args():
     )
     parser.add_argument(
         "--plm_expert_name_or_path",
-        help="Protein language model to use, specify 'None' to skip",
-        default="chandar-lab/AMPLIFY_350M",
+        help="Protein language model to use, default to None",
+        default=None,
         type=str,
     )
     parser.add_argument(
         "--bert_expert_name_or_path",
-        help="Bert model to use, specify 'None' to skip",
-        default="None",
+        help="Bert model to use, default to None",
+        default=None,
         type=str,
     )
     parser.add_argument(
         "--onehot_scorer_expert_name_or_path",
-        help="OnehotCNN-based property scoring model to use, specify 'None' to skip",
-        default='None',
+        help="OnehotCNN-based property scoring model to use, default to None",
+        default=None,
         type=str,
     )
     parser.add_argument(
         "--plm_scorer_expert_name_or_path",
-        help="PLM-based property scoring model to use, specify 'None' to skip",
-        default='None',
+        help="PLM-based property scoring model to use, default to None",
+        default=None,
         type=str,
     )
     parser.add_argument(
@@ -93,10 +94,11 @@ def _parse_args():
         action='store_true', 
         help='Enable verbose output'
     )
-    parser.add_argument('--preserved_regions',
-                        help="Regions not to mutate, list of tuples",
-                        default=None,
-                        type=list,
+    parser.add_argument(
+        '--preserved_regions',
+        help="Regions to preserve during evolution, format: [(start1, end1), (start2, end2)]",
+        default=None,
+        type=str
     )
     return parser.parse_known_args()
 
@@ -111,9 +113,12 @@ def get_expert_list(args):
     expert_list = []
     ## TODO: currently supporting only one "generator" model in the chain of experts, 
     # need to figure out if can support multiple at the same time
-    assert ((args.plm_expert_name_or_path != 'None') ^ (args.bert_expert_name_or_path != 'None')),\
-        "Currently support ONLY ONE generator model (e.g. EITHER ESM or Bert) in the expert chain"
-    if args.plm_expert_name_or_path != "None":
+    has_plm = args.plm_expert_name_or_path is not None
+    has_bert = args.bert_expert_name_or_path is not None
+    assert has_plm ^ has_bert, "Please provide at least ONE PLM model to run directed evolution; Currently support ONLY ONE PLM model (e.g. EITHER ESM or Bert) in the expert chain"
+
+    if args.plm_expert_name_or_path is not None:
+        # PLM expert handling
         if args.plm_expert_name_or_path.startswith('s3://'):
             # if model files are stored on s3, download them into container
             plm_mdl_dir = os.path.join(os.environ['TMPDIR'], 
@@ -149,7 +154,8 @@ def get_expert_list(args):
         else:
             raise ValueError("Only implemented experts for ESM2 and Amplify pLMs")
         expert_list.append(plm_expert)
-    elif args.bert_expert_name_or_path != "None":
+    elif args.bert_expert_name_or_path is not None:
+        # Bert expert handling
         bert_expert = evo_prot_grad.get_expert(
             'bert',
             scoring_strategy='pseudolikelihood_ratio', 
@@ -159,7 +165,8 @@ def get_expert_list(args):
         )
         expert_list.append(bert_expert)
     
-    if args.onehot_scorer_expert_name_or_path != "None":
+    if args.onehot_scorer_expert_name_or_path is not None:
+        # Onehot scorer expert handling
         if args.onehot_scorer_expert_name_or_path.startswith('s3://'):
             # if model files are stored on s3, download them into container
             onehot_scorer_mdl_dir = os.path.join(os.environ['TMPDIR'], 
@@ -181,7 +188,8 @@ def get_expert_list(args):
         )
         expert_list.append(onehot_scorer_expert)
         
-    if args.plm_scorer_expert_name_or_path != "None":
+    if args.plm_scorer_expert_name_or_path is not None:
+        # PLM scorer expert handling
         assert args.plm_scorer_num_labels, "Must provide number of outputs for plm scorer model"
         if args.plm_scorer_expert_name_or_path.startswith('s3://'):
             # if model files are stored on s3, download them into container
@@ -234,9 +242,17 @@ def run_evo_prot_grad(args):
     # temp_fasta_path = "./temp_input_sequence.fasta"
     # with open(temp_fasta_path, "w") as file:
     #     file.write(fasta_format_sequence)
+    print(args)
 
     expert_list = get_expert_list(args)
     print(expert_list)
+    
+    if (args.preserved_regions is not None) and (args.preserved_regions != 'None'):
+        preserved_regions = ast.literal_eval(args.preserved_regions)
+        assert isinstance(preserved_regions, list), "preserved_regions must be a list of tuples"
+    else:
+        preserved_regions = None
+    
     # Initialize Directed Evolution with the specified experts
     directed_evolution = evo_prot_grad.DirectedEvolution(
         #wt_fasta=temp_fasta_path,
@@ -246,6 +262,7 @@ def run_evo_prot_grad(args):
         parallel_chains=args.parallel_chains,
         n_steps=args.n_steps,
         max_mutations=args.max_mutations,
+        preserved_regions=preserved_regions,
         verbose=args.verbose                 
     )
     # print(dir(directed_evolution))
