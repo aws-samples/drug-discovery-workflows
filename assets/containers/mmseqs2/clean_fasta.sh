@@ -18,7 +18,8 @@ fi
 # Create output filename
 filename=$(basename -- "$input_file")
 extension="${filename##*.}"
-output_file="clean.${extension}"
+# output_file="clean.${extension}"
+output_file="clean.fasta"
 
 # Process the file with our awk command
 awk '
