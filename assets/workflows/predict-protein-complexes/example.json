@@ -1,0 +1,6 @@
+{
+    "query": "s3://my-ddw-deployment-bucket/ref-data/chai/8cyo.fasta",
+    "constraints_path": "s3://my-ddw-deployment-bucket/ref-data/chai/8cyo.restraints",
+    "use_msa": 1,
+    "use_templates": 1
+}
