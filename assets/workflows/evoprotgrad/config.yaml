@@ -31,7 +31,7 @@ parameterTemplate:
     description: "Either 'best', 'last' or 'all'. Default is 'all'."
     optional: true     
   preserved_regions:
-    description: "List of (start,end) tuples for preserved regions, e.g. '1,5 6,10 55,97'."
+    description: "Regions to preserve during evolution, format: [(start1, end1), (start2, end2)]"
     optional: true
 storageCapacity: 1200
 tags:

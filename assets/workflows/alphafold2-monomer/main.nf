@@ -111,7 +111,7 @@ workflow AlphaFold2Monomer {
 
 process GenerateFeaturesTask {
     tag "${id}"
-    label 'data'
+    label 'alphafold'
     cpus 2
     memory '8 GB'
     publishDir "/mnt/workflow/pubdir/${id}/features"
@@ -139,7 +139,7 @@ process GenerateFeaturesTask {
     cp -p $bfd_msa msa/
     cp -p $template_hits msa/
 
-    /opt/venv/bin/python /opt/generate_features.py \
+    /opt/venv39-afdata/bin/python /opt/generate_features.py \
       --fasta_paths=$fasta_path \
       --msa_dir=msa \
       --template_mmcif_dir="$pdb_mmcif_folder" \
@@ -154,7 +154,7 @@ process GenerateFeaturesTask {
 process AlphaFoldInference {
     tag "${id}_${modelnum}"
     errorStrategy 'retry'
-    label 'predict'
+    label 'alphafold'
     cpus { 2 * Math.pow(2, task.attempt) }
     memory { 8.GB * Math.pow(2, task.attempt) }
     accelerator 1, type: 'nvidia-tesla-a10g'
@@ -177,7 +177,7 @@ process AlphaFoldInference {
     tar -xvf $alphafold_model_parameters -C model/params
     export XLA_PYTHON_CLIENT_MEM_FRACTION=4.0
     export TF_FORCE_UNIFIED_MEMORY=1
-    /opt/conda/bin/python /app/alphafold/predict.py \
+    /opt/conda/bin/python /app/alphafoldv2.3.2/predict.py \
       --target_id=$id --features_path=$features --model_preset=monomer_ptm \
       --model_dir=model --random_seed=$random_seed --output_dir=output_model_${modelnum} \
       --run_relax=${run_relax} --use_gpu_relax=${run_relax} --model_num=$modelnum
@@ -192,7 +192,7 @@ process MergeRankings {
     cpus 2
     memory 4.GB
     publishDir "/mnt/workflow/pubdir/${id}"
-    label 'data'
+    label 'alphafold'
 
     input:
     tuple val(id), path(results)
@@ -206,7 +206,7 @@ process MergeRankings {
     mkdir -p output
     echo ${results}
     # Create top hit
-    /opt/venv/bin/python /opt/merge_rankings.py --output_dir output/ --model_dirs ${results}
+    /opt/venv39-afdata/bin/python /opt/merge_rankings.py --output_dir output/ --model_dirs ${results}
     mv output/top_hit* .
     mv output/rankings.json .
     """
