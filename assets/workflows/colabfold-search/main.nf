@@ -66,10 +66,10 @@ workflow ColabfoldSearch {
 
 process ColabfoldSearchTask {
     label 'colabfold_search'
-    cpus 16
-    memory '60 GB'
+    cpus 64
+    memory '510 GB'
     maxRetries 1
-    accelerator 1, type: 'nvidia-tesla-a10g'
+    accelerator 1, type: 'nvidia-l40s'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
