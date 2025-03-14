@@ -50,7 +50,7 @@ process Chai1Task {
     cpus 4
     memory '16 GB'
     maxRetries 1
-    accelerator 1, type: 'nvidia-tesla-a10g'
+    accelerator 1, type: 'nvidia-l4-a10g'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
