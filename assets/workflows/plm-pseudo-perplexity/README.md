@@ -1,8 +1,8 @@
-# Calculate Pseudo Perplexity with AMPLIFY
+# Calculate Pseudo Perplexity with ESM2 or AMPLIFY
 
 ## Summary
 
-Calculates the pseudo perplexity of one or more protein sequences using the AMPLIFY pLM.
+Calculates the pseudo perplexity of one or more protein sequences using the pLM ESM2 or AMPLIFY.
 
 ## Workflow
 
