@@ -2,7 +2,7 @@
 
 nextflow.enable.dsl = 2
 
-workflow AMPLIFY {
+workflow PLMPPL {
     take:
     fasta_path
     model_parameters
@@ -44,7 +44,7 @@ process PPLTask {
 }
 
 workflow {
-    AMPLIFY(
+    PLMPPL(
         Channel.fromPath(params.fasta_path),
         Channel.value(params.model_parameters),
         Channel.value(params.model_type)
