@@ -6,6 +6,12 @@ parameterTemplate:
   fasta_path:
     description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
     optional: false
+  model_parameters:
+    description: "Path to PLM model files to load"
+    optional: true
+  model_type:
+    description: "Type of model architecture, can be 'ESM' or 'AMPLIFY'"
+    optional: true
 storageCapacity: 1200
 tags:
   Name: "AMPLIFYPPL"
