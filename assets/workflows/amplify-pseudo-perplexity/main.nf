@@ -6,9 +6,10 @@ workflow AMPLIFY {
     take:
     fasta_path
     model_parameters
+    model_type
 
     main:
-    PPLTask(fasta_path, model_parameters)
+    PPLTask(fasta_path, model_parameters, model_type)
     PPLTask.out.ppl_results.set { ppl_results }
 
     emit:
@@ -24,8 +25,9 @@ process PPLTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    each fasta_path
+    path fasta_path
     path model_parameters
+    val model_type
 
     output:
     path "*.jsonl", emit: ppl_results
@@ -35,7 +37,8 @@ process PPLTask {
     set -euxo pipefail
     /opt/conda/bin/python /home/scripts/calculate_ppl.py $fasta_path \
         --output_dir "." \
-        --pretrained_model_name_or_path $model_parameters
+        --pretrained_model_name_or_path $model_parameters \
+        --model_type $model_type
     mv ppl.jsonl ppl_${task.index}.jsonl
     """
 }
@@ -43,6 +46,7 @@ process PPLTask {
 workflow {
     AMPLIFY(
         Channel.fromPath(params.fasta_path),
-        Channel.fromPath(params.model_parameters)
+        Channel.value(params.model_parameters),
+        Channel.value(params.model_type)
     )
 }
