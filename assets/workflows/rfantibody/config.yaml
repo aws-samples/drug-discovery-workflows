@@ -1,0 +1,40 @@
+name: RFantibody
+description: "RFantibody"
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  target_pdb:
+    description: "A path to the target structure that we wish to design antibodies against. This is commonly a cropped target structure to reduce the computational expense of running the pipeline."
+    optional: false
+  framework_pdb:
+    description: "A path to the HLT-formatted antibody framework that we wish to use for our design."
+    optional: false
+  hotspot_res:
+    description: "A list of hotspot residues that define our epitope. These are provided in the same format as in vanilla RFdiffusion."
+    optional: false
+  design_loops:
+    description: "A dictionary that maps each CDR loop to a range of allowed loop lengths."
+    optional: false
+  num_designs:
+    description: "The number of designs we should generate."
+    optional: false
+  is_hlt:
+    description: "Whether the framework is in HLT format."
+    optional: true
+  heavy_chain_id:
+    description: "The chain ID of the heavy chain in the target structure."
+    optional: true
+  light_chain_id:
+    description: "The chain ID of the light chain in the target structure."
+    optional: true
+  target_chains:
+    description: "Target chain ID(s), comma-separated."
+    optional: true
+  model_weights:
+    description: "Model weights"
+    optional: true
+
+storageCapacity: 1200
+tags:
+  Name: "RFantibody"
+accelerators: GPU

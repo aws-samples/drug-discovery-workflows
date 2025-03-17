@@ -1,0 +1,3 @@
+https://files.ipd.uw.edu/pub/RFantibody/RFdiffusion_Ab.pt
+https://files.ipd.uw.edu/pub/RFantibody/ProteinMPNN_v48_noise_0.2.pt
+https://files.ipd.uw.edu/pub/RFantibody/RF2_ab.pt
