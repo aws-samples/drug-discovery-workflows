@@ -1,7 +1,7 @@
 pandas==1.5.1
 numpy==1.24.1
 Bio==1.5.3
-pytorch_lightning==1.7.7
+pytorch_lightning==2.4.0
 torch==1.13.0
 torchmetrics==0.11.4
 transformers==4.48.0
