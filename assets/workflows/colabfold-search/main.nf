@@ -67,7 +67,7 @@ workflow ColabfoldSearch {
 process ColabfoldSearchTask {
     label 'colabfold_search'
     cpus 64
-    memory '510 GB'
+    memory '480 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-l40s'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
@@ -108,6 +108,8 @@ process ColabfoldSearchTask {
         db/uniref30_2302_db \
         "" 0 1 0 1
     fi
+
+    rm clean.fasta
 
     """
 }
