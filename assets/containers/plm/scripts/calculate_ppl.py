@@ -7,7 +7,7 @@ import logging
 import math
 import numpy as np
 import pyfastx
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer, EsmForMaskedLM
 import torch
 from tqdm import tqdm
 import os
@@ -34,16 +34,23 @@ def batch_tokenize_mask(dataset, tokenizer, batch_size):
 def compute_pseudo_perplexity(
     seqs: list,
     pretrained_model_name_or_path: str = "chandar-lab/AMPLIFY_120M_base",
+    model_type: str = "AMPLIFY",
     batch_size: int = 8,
     output_dir: str = "output",
     fp16: bool = True,
 ):
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-
-    model = AutoModel.from_pretrained(
-        pretrained_model_name_or_path, trust_remote_code=True
-    )
+    if model_type == "AMPLIFY":
+        model = AutoModel.from_pretrained(
+            pretrained_model_name_or_path, trust_remote_code=True
+        )
+    elif model_type == "ESM":
+        model = EsmForMaskedLM.from_pretrained(
+            pretrained_model_name_or_path, trust_remote_code=True
+        )
+    else:
+        raise Exception("Only 'ESM' and 'AMPLIFY' model_type is implemented")
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path, trust_remote_code=True
     )
@@ -75,8 +82,8 @@ def compute_pseudo_perplexity(
 
     results = []
 
-    for name, ppl in zip([seq[0] for seq in seqs], ppl_values):
-        results.append({"name": name, "pseudo_perplexity": ppl})
+    for name, s, ppl in zip([seq[0] for seq in seqs], [seq[1] for seq in seqs], ppl_values):
+        results.append({"name": name, "sequence": s, "pseudo_perplexity": ppl})
 
     with jsonlines.open(output_file, mode="w") as writer:
         writer.write_all(results)
@@ -96,6 +103,12 @@ if __name__ == "__main__":
         "--pretrained_model_name_or_path",
         help="pLM model to use",
         default="chandar-lab/AMPLIFY_120M_base",
+        type=str,
+    )
+    parser.add_argument(
+        "--model_type",
+        help="Type of model architecture, can be 'ESM' or 'AMPLIFY'.",
+        default="AMPLIFY",
         type=str,
     )
     parser.add_argument(
@@ -119,6 +132,7 @@ if __name__ == "__main__":
     compute_pseudo_perplexity(
         seqs,
         args.pretrained_model_name_or_path,
+        args.model_type,
         args.batch_size,
         args.output_dir,
     )
