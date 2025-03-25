@@ -53,7 +53,7 @@ workflow RoseTTAFold2 {
     main:
         predictions = RoseTTAFold2Predict(
             Channel.fromPath(pdbdir),
-            Channel.fromPath(model_weights)
+            Channel.fromPath(model_weights).collect()
         )
 
     emit:
