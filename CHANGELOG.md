@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.18.1] - 2025-03-010
+## [2.19.0] - 2025-03-25
+
+### 2.19.0 Added
+
+- Added support for RFAntibody
+
+### 2.19.0 Changed
+
+- Merge AlphaFold containers
+- Extend PPL calcualtions to include ESM2
+
+### 2.19.0 Fixed
+
+- Fix bug related to processing MSA and template search results for Chai-1
+
+---
+
+## [2.18.1] - 2025-03-10
 
 ### 2.18.1 Fixed
 
