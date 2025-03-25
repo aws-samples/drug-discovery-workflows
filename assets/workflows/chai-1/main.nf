@@ -48,7 +48,7 @@ workflow Chai1 {
 process Chai1Task {
     label 'chai1'
     cpus 4
-    memory '16 GB'
+    memory '30 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-l4-a10g'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
@@ -75,13 +75,13 @@ process Chai1Task {
         def run_w_templates = template_hits.name != 'NO_TEMPLATE' ? 1 : 0
         def run_w_constraints = constraints_path.name != 'NO_CONSTRAINTS' ? 1 : 0
         def fold_options = ''
-        fold_options = run_w_msas == 1 ? "$fold_options --msa-directory $msa_directory" : fold_options
+        fold_options = run_w_msas == 1 ? "$fold_options --msa-directory \$(pwd)" : fold_options
         fold_options = run_w_templates == 1 ? "$fold_options --template-hits-path $template_hits" : fold_options
         fold_options = run_w_constraints == 1 ? "$fold_options --constraint-path $constraints_path" : fold_options
         """
         set -euxo pipefail
         mkdir chai_output
-        
+
         # Put parameters in the right spot
         ln -s  $chai1_parameters models_v2
         ln -s  $chai1_parameters/conformers_v1.apkl \$(pwd)
@@ -92,10 +92,12 @@ process Chai1Task {
 
         # Parse colab results
         if [[ $run_w_msas -eq 1 ]]; then
-          /opt/venv/bin/python /opt/scripts/parse_colab_search.py $msa_directory \
-          --envdb_unpaired_path $msa_directory/bfd.mgnify30.metaeuk30.smag30.a3m \
-          --uniref_unpaired_path $msa_directory/uniref.a3m \
-          --paired_path $msa_directory/pair.a3m
+            /opt/venv/bin/python /opt/scripts/parse_colab_search.py \
+            \$(pwd) \
+            $msa_directory/bfd.mgnify30.metaeuk30.smag30.a3m \
+            $msa_directory/uniref.a3m \
+            $msa_directory/pair.a3m \
+            --parquet
         fi
 
         chai-lab fold \
