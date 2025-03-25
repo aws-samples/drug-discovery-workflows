@@ -67,7 +67,7 @@ workflow ColabfoldSearch {
 process ColabfoldSearchTask {
     label 'colabfold_search'
     cpus 64
-    memory '480 GB'
+    memory '486 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-l40s'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
