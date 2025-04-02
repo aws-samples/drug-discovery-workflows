@@ -13,19 +13,19 @@ parameterTemplate:
     description: "Retrieve the lists of residues for each entry."
     optional: true
   n_filters:
-    description: "Number of filters to use in the convolutional layers. References model weight filename in ANTIPASTI/checkpoints/full_ags_all_modes"
+    description: "Number of filters to use in the convolutional layers. Supports values: 0, 4"
     optional: true
   filter_size:
-    description: "Size of the filters to use in the convolutional layers. References model weight filename in ANTIPASTI/checkpoints/full_ags_all_modes"
+    description: "Size of the filters to use in the convolutional layers. Supports values: 0, 4"
     optional: true
   pooling_size:
-    description: "Size of the pooling layers. References model weight filename in ANTIPASTI/checkpoints/full_ags_all_modes"
+    description: "Size of the pooling layers. Supports values: 0, 1, 2"
     optional: true
   n_max_epochs:
-    description: "Number of epochs that trained the model. References model weight filename in ANTIPASTI/checkpoints/full_ags_all_modes"
+    description: "Number of epochs that trained the model. Supported values: 1044, 1075, 1400, 1490, 771, 769, 935"
     optional: true
   modes:
-    description: "Number of modes to use in the normal mode correlation maps. 'all' or integer"
+    description: "Number of modes to use in the normal mode correlation maps. Only supports 'all' for now"
     optional: true
   stage:
     description: "Stage of the workflow to run. 'training' or 'predict'"

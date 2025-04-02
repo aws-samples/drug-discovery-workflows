@@ -210,6 +210,7 @@ if __name__ == "__main__":
             )
             input_shape = preprocessed_data.test_x.shape[-1]
 
+            # Validate the inputs
             path = (
                 "../checkpoints/full_ags_all_modes/model_epochs_"
                 + str(n_max_epochs)
@@ -223,6 +224,11 @@ if __name__ == "__main__":
                 + str(filter_size)
                 + ".pt"
             )
+
+            # Validate the inputs
+            if not os.path.exists(path):
+                raise FileNotFoundError(f"Checkpoint file {path} does not exist. Ensure arguments: n_max_epochs, modes, pooling_size, n_filters, and filter_size are correct.")
+
             model, optimiser, _, train_losses, test_losses = load_checkpoint(path, input_shape)
             model.eval()
 

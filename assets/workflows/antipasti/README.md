@@ -15,6 +15,41 @@ Pick your favorite pdb file to run your fist end-to-end test. The following comm
     "input_pdb": "s3://my-bucket/antipasti/8hn7.pdb"
 }
 ```
+
+Also supports directory and wildcard inputs. For example, `s3://my-bucket/antipasti/*.pdb` or `3://my-bucket/antipasti/` will run all PDB files in the directory. 
+
+Other inputs with default values (see `nextflow.conf`) are used to build a model weight file path:
+
+```
+model_epochs_1044_modes_all_pool_1_filters_4_size_4.pt
+model_epochs_1075_modes_all_pool_1_filters_4_size_4.pt
+model_epochs_1400_modes_all_pool_0_filters_0_size_0.pt
+model_epochs_1490_modes_all_pool_0_filters_0_size_0.pt
+model_epochs_771_modes_all_pool_2_filters_4_size_4.pt
+model_epochs_796_modes_all_pool_2_filters_4_size_4.pt
+model_epochs_935_modes_all_pool_1_filters_4_size_4.pt
+```
+
+They must be used in combination to create a value model weight file path that matches one of the above.
+
+e.g. 
+
+```python
+path = (
+    "../checkpoints/full_ags_all_modes/model_epochs_"
+    + str(n_max_epochs)
+    + "_modes_"
+    + str(modes)
+    + "_pool_"
+    + str(pooling_size)
+    + "_filters_"
+    + str(n_filters)
+    + "_size_"
+    + str(filter_size)
+    + ".pt"
+)
+```
+
 ### Running the Workflow
 
 Replace `$ROLEARN`, `$OUTPUTLOC`, `$PARAMS`, `$WFID` as appropriate. Also modify the `params.json` to point to where your FASTA resides.
