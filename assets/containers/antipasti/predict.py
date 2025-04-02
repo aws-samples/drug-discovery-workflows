@@ -27,8 +27,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test_pdb",
         type=str,
+        nargs="+",  # Accept multiple PDB IDs as a list
         required=True,
-        help="PDB ID of the antibody to predict binding affinity.",
+        help="List of PDB IDs of the antibodies to predict binding affinity.",
     )
     parser.add_argument(
         "--output_csv",
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     # Assign arguments to variables
     test_data_path = args.test_data_path
     structures_path = args.structures_path
-    test_pdb = args.test_pdb
+    test_pdb_list = args.test_pdb  # This is now a list of PDB IDs
     output_csv = args.output_csv
     renew_maps = args.renew_maps
     renew_residues = args.renew_residues
@@ -183,53 +184,60 @@ if __name__ == "__main__":
     test_residues_path = "list_of_residues/"
     test_structure_path = "structure/"
 
-    preprocessed_data = Preprocessing(
-        dccm_map_path=dccm_map_path,
-        modes=modes,
-        pathological=pathological,
-        renew_maps=renew_maps,
-        renew_residues=renew_residues,
-        stage=stage,
-        test_data_path=test_data_path,
-        test_dccm_map_path=test_dccm_map_path,
-        test_residues_path=test_residues_path,
-        test_structure_path=test_structure_path,
-        test_pdb_id=test_pdb,
-        structures_path=structures_path,
-        # alphafold=True,
-    )
-    input_shape = preprocessed_data.test_x.shape[-1]
-
-    path = (
-        "../checkpoints/full_ags_all_modes/model_epochs_"
-        + str(n_max_epochs)
-        + "_modes_"
-        + str(modes)
-        + "_pool_"
-        + str(pooling_size)
-        + "_filters_"
-        + str(n_filters)
-        + "_size_"
-        + str(filter_size)
-        + ".pt"
-    )
-    model, optimiser, _, train_losses, test_losses = load_checkpoint(path, input_shape)
-    model.eval()
-
-    # We convert to the torch format
-    test_sample = torch.from_numpy(
-        preprocessed_data.test_x.reshape(1, 1, input_shape, input_shape).astype(
-            np.float32
-        )
-    )
-
-    out_val = model(test_sample)[0].detach().numpy()[0, 0]
-    print("The output value is " + str(out_val))
-    print("So the predicted binding affinity is " + str(10**out_val))
-
-    # Create CSV output for the predicted binding affinity data
+    # Open the output CSV file for writing
     output_file = os.path.join(os.getcwd(), output_csv)
     with open(output_file, "w") as f:
         f.write("PDB ID,Out Value,Predicted Binding Affinity\n")
-        f.write(f"{test_pdb},{str(out_val)},{str(10**out_val)}\n")
-    print(f"Predicted binding affinity saved to {output_file}")
+
+        for test_pdb in test_pdb_list:
+            # get base name (no extension)
+            test_pdb_base = os.path.splitext(os.path.basename(test_pdb))[0]
+
+            preprocessed_data = Preprocessing(
+                dccm_map_path=dccm_map_path,
+                modes=modes,
+                pathological=pathological,
+                renew_maps=renew_maps,
+                renew_residues=renew_residues,
+                stage=stage,
+                test_data_path=test_data_path,
+                test_dccm_map_path=test_dccm_map_path,
+                test_residues_path=test_residues_path,
+                test_structure_path=test_structure_path,
+                test_pdb_id=test_pdb_base,
+                structures_path=structures_path,
+                # alphafold=True,
+            )
+            input_shape = preprocessed_data.test_x.shape[-1]
+
+            path = (
+                "../checkpoints/full_ags_all_modes/model_epochs_"
+                + str(n_max_epochs)
+                + "_modes_"
+                + str(modes)
+                + "_pool_"
+                + str(pooling_size)
+                + "_filters_"
+                + str(n_filters)
+                + "_size_"
+                + str(filter_size)
+                + ".pt"
+            )
+            model, optimiser, _, train_losses, test_losses = load_checkpoint(path, input_shape)
+            model.eval()
+
+            # We convert to the torch format
+            test_sample = torch.from_numpy(
+                preprocessed_data.test_x.reshape(1, 1, input_shape, input_shape).astype(
+                    np.float32
+                )
+            )
+
+            out_val = model(test_sample)[0].detach().numpy()[0, 0]
+            print(f"The output value for {test_pdb_base} is " + str(out_val))
+            print(f"So the predicted binding affinity for {test_pdb_base} is " + str(10**out_val))
+
+            # Write the result to the CSV file
+            f.write(f"{test_pdb_base},{str(out_val)},{str(10**out_val)}\n")
+
+    print(f"Predicted binding affinities saved to {output_file}")

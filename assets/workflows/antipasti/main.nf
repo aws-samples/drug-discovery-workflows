@@ -18,9 +18,18 @@ workflow ANTIPASTI {
         Channel.fromPath(sabdab_db),
     )
 
+    // Convert to one or many files
+    if (input_pdb[-1] == "/") {
+        input_pdb = input_pdb + "*"
+    } else {
+        input_pdb = input_pdb
+    }
+
+    pdb_files = Channel.fromPath(input_pdb)
+
     scores = PredictBindingAffinity(
-        Channel.fromPath(input_pdb),
-        renew_maps,
+        pdb_files.collect(),
+        renew_maps, 
         renew_residues,
         n_filters,
         filter_size,
@@ -58,7 +67,6 @@ process PrepDependencies {
 }
 
 process PredictBindingAffinity {
-    tag "${input_pdb}"
     label "antipasti"
 
     // omics.c.4xlarge
@@ -68,7 +76,7 @@ process PredictBindingAffinity {
     publishDir "/mnt/workflow/pubdir"
 
     input:
-        path input_pdb
+        val input_pdb
         val renew_maps
         val renew_residues
         val n_filters
@@ -92,7 +100,7 @@ process PredictBindingAffinity {
 
     tree .
 
-    cp ${input_pdb} /opt/ANTIPASTI/notebooks/test_data/structure/
+    cp ${input_pdb.join(' ')} /opt/ANTIPASTI/notebooks/test_data/structure/
 
     extracted_sabdab_db_realpath=\$(realpath ${extracted_sabdab_db})
 
@@ -101,7 +109,7 @@ process PredictBindingAffinity {
     python /opt/predict.py \
         --test_data_path /opt/ANTIPASTI/notebooks/test_data/ \
         --structures_path \$extracted_sabdab_db_realpath/chothia/ \
-        --test_pdb ${input_pdb.baseName} \
+        --test_pdb ${input_pdb.join(' ')} \
         ${renew_residues_cli} \
         ${renew_maps_cli} \
         --n_filters ${n_filters} \

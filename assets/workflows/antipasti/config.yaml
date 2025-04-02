@@ -6,7 +6,7 @@ parameterTemplate:
   input_pdb:
     description: "Input PDB structure file, an antibody in complex with an antigen"
     optional: false
-  rewnew_maps:
+  renew_maps:
     description: "Compute all the normal mode correlation maps."
     optional: true
   renew_residues:
