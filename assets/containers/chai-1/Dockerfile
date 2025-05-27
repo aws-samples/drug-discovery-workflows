@@ -15,7 +15,7 @@ ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 FROM base as build
 
 ARG PYTHON
-ARG CHAI_VERSION="0.6.0"
+ARG CHAI_VERSION="0.6.1"
 
 COPY requirements.txt .
 COPY rcsb.py .
@@ -35,8 +35,8 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
 # Install chai from source 
 RUN curl -Lo /tmp/chai.zip "https://github.com/chaidiscovery/chai-lab/archive/refs/tags/v${CHAI_VERSION}.zip" \
     && unzip /tmp/chai.zip -d /tmp \
-    && cp /home/rcsb.py /tmp/chai-lab-0.6.0/chai_lab/data/io/rcsb.py \
-    && /root/.local/bin/uv pip install --no-cache-dir /tmp/chai-lab-0.6.0
+    && cp /home/rcsb.py /tmp/chai-lab-${CHAI_VERSION}/chai_lab/data/io/rcsb.py \
+    && /root/.local/bin/uv pip install --no-cache-dir /tmp/chai-lab-${CHAI_VERSION}
 
 # Compile kalign2 from source
 RUN pushd /tmp && \
