@@ -1,6 +1,6 @@
 pandas==2.2.1
 matplotlib
 seaborn
-xformers==0.0.28.post1
+xformers==0.0.30
 tape-proteins==0.5
 deepspeed==0.15.1
