@@ -36,7 +36,8 @@ phases:
       - echo "Checking for repository ${NAME}"
       - if aws ecr describe-repositories --repository-names $NAME > /dev/null 2>$?;
         then
-        echo "Repository $NAME exists.";
+        echo "Repository $NAME exists. Updating policy";
+        aws ecr set-repository-policy --repository-name $NAME --policy-text '{"Version":"2012-10-17","Statement":[{"Sid":"omics workflow","Effect":"Allow","Principal":{"Service":"omics.amazonaws.com"},"Action":["ecr:GetDownloadUrlForLayer","ecr:BatchGetImage","ecr:BatchCheckLayerAvailability"]}]}' > /dev/null;
         else
         echo "Repository $NAME does not exist, creating...";
         aws ecr create-repository --repository-name $NAME --tags Key=StackPrefix,Value=$STACK_PREFIX > /dev/null;
