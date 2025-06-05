@@ -4,7 +4,8 @@
 # Modifications have been made to work within the aws-samples/drug-discovery-workflows repository
 # Mostly addition of git clone and comment out COPY statements 
 
-FROM nvidia/cuda:11.3.1-cudnn8-devel-ubuntu18.04
+#FROM nvidia/cuda:11.3.1-cudnn8-devel-ubuntu18.04
+FROM nvcr.io/nvidia/cuda:11.3.1-cudnn8-devel-ubuntu18.04
 
 # metainformation
 LABEL org.opencontainers.image.version = "1.0.0"
