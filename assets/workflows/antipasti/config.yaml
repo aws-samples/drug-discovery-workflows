@@ -1,0 +1,40 @@
+name: ANTIPASTI
+description: "ANTIPASTI (ANTIbody Predictor of Affinity from STructural Information) is a Deep Learning model that predicts the binding affinity of antibodies from their three-dimensional structure."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_pdb:
+    description: "Input PDB structure file, an antibody in complex with an antigen"
+    optional: false
+  renew_maps:
+    description: "Compute all the normal mode correlation maps."
+    optional: true
+  renew_residues:
+    description: "Retrieve the lists of residues for each entry."
+    optional: true
+  n_filters:
+    description: "Number of filters to use in the convolutional layers. Supports values: 0, 4"
+    optional: true
+  filter_size:
+    description: "Size of the filters to use in the convolutional layers. Supports values: 0, 4"
+    optional: true
+  pooling_size:
+    description: "Size of the pooling layers. Supports values: 0, 1, 2"
+    optional: true
+  n_max_epochs:
+    description: "Number of epochs that trained the model. Supported values: 1044, 1075, 1400, 1490, 771, 769, 935"
+    optional: true
+  modes:
+    description: "Number of modes to use in the normal mode correlation maps. Only supports 'all' for now"
+    optional: true
+  stage:
+    description: "Stage of the workflow to run. 'training' or 'predict'"
+    optional: true
+  # From data stage in S3
+  sabdab_db:
+    description: "SAbDab database"
+    optional: true
+storageCapacity: 1200
+tags:
+  Name: "ANTIPASTI"
+accelerators: GPU
