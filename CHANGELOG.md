@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.20.0] - 2025-06-06
+
+### 2.20.0 Changed
+
+- Archive OpenFold workflow
+
+### 2.20.0 Fixed
+
+- Fix bug related to existing ECR repositories without AWS HealthOmics permission policy
+- Fix bug related to new traced_sdpa_esm2_t36_3B_UR50D_fp16.pt parameter file for Chai-1 model
+
+---
+
 ## [2.19.0] - 2025-03-25
 
 ### 2.19.0 Added
