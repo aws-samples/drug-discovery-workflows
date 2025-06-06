@@ -5,6 +5,6 @@ https://chaiassets.com/chai1-inference-depencencies/models_v2/token_embedder.pt
 https://chaiassets.com/chai1-inference-depencencies/models_v2/trunk.pt
 https://chaiassets.com/chai1-inference-depencencies/models_v2/diffusion_module.pt
 https://chaiassets.com/chai1-inference-depencencies/models_v2/confidence_head.pt
-facebook/esm2_t36_3B_UR50D
+https://chaiassets.com/chai1-inference-depencencies/esm2/traced_sdpa_esm2_t36_3B_UR50D_fp16.pt
 https://raw.githubusercontent.com/chaidiscovery/chai-lab/refs/heads/main/examples/covalent_bonds/8cyo.fasta
 https://raw.githubusercontent.com/chaidiscovery/chai-lab/refs/heads/main/examples/covalent_bonds/8cyo.restraints

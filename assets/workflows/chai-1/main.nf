@@ -84,11 +84,12 @@ process Chai1Task {
 
         # Put parameters in the right spot
         ln -s  $chai1_parameters models_v2
+        ln -s  $chai1_parameters esm
         ln -s  $chai1_parameters/conformers_v1.apkl \$(pwd)
-        ln -s  $chai1_parameters/facebook facebook
 
         export PDB_TEMPLATE_DIR=${pdb}
         export CHAI_DOWNLOADS_DIR=\$(pwd)
+        export DISABLE_PANDERA_IMPORT_WARNING=True
 
         # Parse colab results
         if [[ $run_w_msas -eq 1 ]]; then
