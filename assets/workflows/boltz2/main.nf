@@ -2,29 +2,29 @@
 
 nextflow.enable.dsl = 2
 
-workflow Boltz1 {
+workflow Boltz2 {
     take:
     input_path
-    boltz1_parameters
+    boltz2_parameters
 
     main:
 
     input_channel = Channel.fromPath(input_path)
-    boltz1_parameters = Channel.fromPath(boltz1_parameters)
+    boltz2_parameters = Channel.fromPath(boltz2_parameters)
 
     input_channel.view()
 
-    Boltz1Task(
+    Boltz2Task(
         input_channel,
-        boltz1_parameters
+        boltz2_parameters
         )
 
     emit:
-    Boltz1Task.out
+    Boltz2Task.out
 }
 
-process Boltz1Task {
-    label 'boltz1'
+process Boltz2Task {
+    label 'boltz2'
     cpus 4
     memory '16 GB'
     maxRetries 1
@@ -33,7 +33,7 @@ process Boltz1Task {
 
     input:
     path input_path
-    path boltz1_parameters
+    path boltz2_parameters
 
     output:
     path "output/*", emit: output
@@ -43,7 +43,7 @@ process Boltz1Task {
     set -euxo pipefail
     mkdir output
     /opt/venv/bin/boltz predict \
-    --cache $boltz1_parameters \
+    --cache $boltz2_parameters \
     --out_dir output \
     $input_path
       
@@ -51,8 +51,8 @@ process Boltz1Task {
 }
 
 workflow {
-    Boltz1(
+    Boltz2(
         params.input_path,
-        params.boltz1_parameters
+        params.boltz2_parameters
     )
 }

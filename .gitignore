@@ -11,3 +11,4 @@ tmp/
 stack-outputs.json
 test_data
 build/cloudformation/packaged.yaml
+.amazonq

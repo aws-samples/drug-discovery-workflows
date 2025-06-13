@@ -1,4 +1,4 @@
-name: Boltz1
+name: Boltz2
 description: "State-of-the-art open-source model to predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules."
 engine: NEXTFLOW
 main: main.nf
@@ -6,10 +6,10 @@ parameterTemplate:
   input_path:
     description: "Path to fasta or yaml input file."
     optional: false
-  boltz1_parameters:
-    description: "Path to folder containiner Boltz-1 model parameters."
+  boltz_parameters:
+    description: "Path to folder containing Boltz-2 model parameters."
     optional: true    
 storageCapacity: 1200
 tags:
-  Name: "Boltz1"
+  Name: "Boltz2"
 accelerators: GPU
