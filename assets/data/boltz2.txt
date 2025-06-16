@@ -1,2 +1,0 @@
-boltz-community/boltz-2
-https://huggingface.co/boltz-community/boltz-1/resolve/main/ccd.pkl

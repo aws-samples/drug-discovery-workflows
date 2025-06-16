@@ -5,18 +5,18 @@ nextflow.enable.dsl = 2
 workflow Boltz2 {
     take:
     input_path
-    boltz2_parameters
+    boltz_parameters
 
     main:
 
     input_channel = Channel.fromPath(input_path)
-    boltz2_parameters = Channel.fromPath(boltz2_parameters)
+    boltz_parameters = Channel.fromPath(boltz_parameters)
 
     input_channel.view()
 
     Boltz2Task(
         input_channel,
-        boltz2_parameters
+        boltz_parameters
         )
 
     emit:
@@ -24,7 +24,7 @@ workflow Boltz2 {
 }
 
 process Boltz2Task {
-    label 'boltz2'
+    label 'boltz'
     cpus 4
     memory '16 GB'
     maxRetries 1
@@ -33,7 +33,7 @@ process Boltz2Task {
 
     input:
     path input_path
-    path boltz2_parameters
+    path boltz_parameters
 
     output:
     path "output/*", emit: output
@@ -42,8 +42,12 @@ process Boltz2Task {
     """
     set -euxo pipefail
     mkdir output
+
+    # Extract CCD data
+    /usr/bin/tar -xf $boltz_parameters/mols.tar -C $boltz_parameters
+
     /opt/venv/bin/boltz predict \
-    --cache $boltz2_parameters \
+    --cache $boltz_parameters \
     --out_dir output \
     $input_path
       
@@ -53,6 +57,6 @@ process Boltz2Task {
 workflow {
     Boltz2(
         params.input_path,
-        params.boltz2_parameters
+        params.boltz_parameters
     )
 }
