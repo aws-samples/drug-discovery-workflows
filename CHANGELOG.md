@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.21.0] - 2025-06-16
+
+### 2.20.0 Changed
+
+- Update Boltz workflow to Boltz-2
+
+### 2.20.0 Fixed
+
+- Fix dependabot alert re: protobuf version in AlphaFold container.
+
+---
+
 ## [2.20.0] - 2025-06-06
 
 ### 2.20.0 Changed
