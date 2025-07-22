@@ -6,9 +6,19 @@ AlphaBind is an ESM2 based protein language model to predict protein-protein int
 
 ## Getting Started
 
-### Step 1: Get your NGC API token and Store it in AWS Secret Manager
+### Step 1: Create an S3 bucket in us-east-1
 
-Create a NVIDIA [NGC account](https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html) and [generate an API key](https://org.ngc.nvidia.com/setup/api-key) to download BioNeMo model weights, e.g. ESM2nv
+Create an S3 bucket in the us-east-1 region to store your deployment artifacts:
+
+```bash
+aws s3 mb s3://your-deployment-bucket-name --region us-east-1
+```
+
+### Step 2: Join the NVIDIA Developer Program and Get your NGC API token
+
+1. Join the NVIDIA Developer Program at [https://build.nvidia.com/explore/discover](https://build.nvidia.com/explore/discover)
+2. Create a NVIDIA [NGC account](https://docs.nvidia.com/ngc/gpu-cloud/ngc-user-guide/index.html) 
+3. [Generate an API key](https://org.ngc.nvidia.com/setup/api-key) to download BioNeMo model weights, e.g. ESM2nv
 
 Create an [AWS Secrets Manager Secret](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html), if you use [AWS CLI](https://aws.amazon.com/cli/), you can run the following script:
 
@@ -19,15 +29,39 @@ aws secretsmanager create-secret \
     --secret-string "{\"NGC_CLI_API_KEY\":\"<YourAPIKey>\",\"NGC_CLI_ORG\":\"<YourNGCSignUpOrganization>\"}"
 ```
 
-### Step 2: Deploy the stack to create the container and AWS HealthOmics workflow
+### Step 3: Verify your NGC access and store your API token
 
-You can deploy the stack using the following script:
+1. After joining the NVIDIA Developer Program and creating your NGC account, verify your access by:
+   - Log in to the NGC website with your credentials
+   - Visit [https://catalog.ngc.nvidia.com/orgs/nim/teams/ipd/containers/proteinmpnn/layers](https://catalog.ngc.nvidia.com/orgs/nim/teams/ipd/containers/proteinmpnn/layers)
+   - Confirm you can see the container layers. If you cannot see them, your NGC account may not have the proper permissions.
+
+2. Create an [AWS Secrets Manager Secret](https://docs.aws.amazon.com/secretsmanager/latest/userguide/create_secret.html), if you use [AWS CLI](https://aws.amazon.com/cli/), you can run the following script:
 
 ```bash
-bash scripts/deploy.sh   -b "<DeploymentS3BucketName>"   -n "<CloudFormationStackName>"   -r "<AWS Region>" -s "<YourSecretName>"
+aws secretsmanager create-secret \
+    --name <YourSecretName> \
+    --description "My NVIDIA NGC credentials." \
+    --secret-string "{\"NGC_CLI_API_KEY\":\"<YourAPIKey>\",\"NGC_CLI_ORG\":\"<YourNGCSignUpOrganization>\"}" \
+    --region us-east-1
 ```
 
-### Step 3: Run a workflow
+### Step 4: Deploy the stack to create the container and AWS HealthOmics workflow
+
+You can deploy the stack using the following script. Make sure to deploy to the us-east-1 region:
+
+```bash
+bash scripts/deploy.sh \
+  -b "<DeploymentS3BucketName>" \
+  -n "<CloudFormationStackName>" \
+  -r "us-east-1" \
+  -s "<YourSecretName>" \
+  -w "Y"
+```
+
+The `-w "Y"` parameter ensures CloudFormation waits for the CodeBuild process to complete, which helps with troubleshooting.
+
+### Step 5: Run a workflow
 Create an IAM role to run HealthOmics jobs, and set up value of `$ROLEARN` to this role ARN. Replace `$OUTPUTLOC` with the S3 folder created for output files like `s3://{mybucket}/alphabind/output/`. Also create a new `params.json` to point to the processed binding affinity data to fine tune AlphaBind model, like:
 ```txt
 {
@@ -55,5 +89,19 @@ aws omics start-run --workflow-id $WFID --role-arn $ROLEARN --output-uri $OUTPUT
 ```
 
 Or you can navigate to the AWS console to run the job. All results are written to a location defined within `$OUTPUTLOC` above. To get to the root directory of the ouputs, you can use the `GetRun` API, which provides the path as `runOutputUri`. Alternatively, this location is available in the console as well.
+
+## Troubleshooting
+
+If you encounter issues with the CodeBuild process failing during deployment:
+
+1. **Check CloudWatch Logs**: Look for the CodeBuild logs in CloudWatch under the log group `/aws/codebuild/<StackPrefix>-CodeBuildContainerProject`
+
+2. **Verify NGC Credentials**: Ensure your NGC API key is correctly stored in AWS Secrets Manager and that the secret name is properly passed to the deploy script
+
+3. **NGC Access Verification**: If container builds fail with authentication errors, verify you can access the container layers at [https://catalog.ngc.nvidia.com/orgs/nim/teams/ipd/containers/proteinmpnn/layers](https://catalog.ngc.nvidia.com/orgs/nim/teams/ipd/containers/proteinmpnn/layers) while logged in to NGC
+
+4. **Region Compatibility**: Make sure you're deploying to us-east-1 region, as some resources may be region-specific
+
+5. **Container Build Permissions**: Verify that the CodeBuild role has permissions to access ECR and create repositories
 
 
