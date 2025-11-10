@@ -17,7 +17,7 @@ A collection of AWS HealthOmics workflows to accelerate drug discovery.
 - [AntiFold](https://github.com/oxpig/AntiFold): From Oxford Protein Informatics Group. Antibody inverse folding.
 - [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
 - [BioPhi](https://github.com/Merck/BioPhi): From Merck. Automated humanization and humanness evaluation.
-- [Boltz-1](https://github.com/jwohlwend/boltz): From MIT. Predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules.
+- [Boltz-2](https://github.com/jwohlwend/boltz): From MIT. Predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules.
 - [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
 - [Colabfold-Search](https://github.com/sokrypton/ColabFold): Iterative MSA search algorithm using MMseqs2.
 - [DeepSTABp](https://csb-deepstabp.bio.rptu.de/): From RPTU. Predict protein stability.
