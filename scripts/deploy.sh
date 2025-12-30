@@ -15,7 +15,7 @@
 # -c Should CloudFormation deploy the containers?
 # -o Should CloudFormation deploy the workflows?
 # -d Should CloudFormation deploy the data?
-# -s AWS Secrets Manager secret name for 3rd party download credentialts
+# -s AWS Secrets Manager secret name for 3rd party download credentials
 #
 # Example CMD
 # ./deploy.sh \
