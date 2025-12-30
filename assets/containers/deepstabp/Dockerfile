@@ -38,7 +38,9 @@ WORKDIR /opt/deepstabp
 
 RUN git checkout ${DEEPSTABP_VERSION}
 
-RUN conda create -n "deepstabp" python=${CONDA_PYTHON_VERSION}
+RUN conda config --add channels conda-forge && \
+    conda config --set channel_priority strict && \
+    conda create -n "deepstabp" python=${CONDA_PYTHON_VERSION} -y
 
 # Set default environment
 ENV PATH=/opt/miniconda/envs/deepstabp/bin:$PATH
