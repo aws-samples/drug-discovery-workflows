@@ -19,15 +19,17 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Install Miniconda and Python
-# https://repo.anaconda.com/miniconda/
-RUN curl -O https://repo.anaconda.com/miniconda/${MINICONDA_VERSION}.sh \
-    && bash ${MINICONDA_VERSION}.sh -f -b -p /opt/miniconda \
-    && rm ${MINICONDA_VERSION}.sh
+# Install Miniforge (conda-forge by default)
+# https://github.com/conda-forge/miniforge
+RUN wget -q -P /tmp \
+    https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \
+    && bash /tmp/Miniforge3-Linux-x86_64.sh -f -b -p /opt/miniconda \
+    && rm /tmp/Miniforge3-Linux-x86_64.sh
 
 # Set up environment variables
 ENV PATH=/opt/miniconda/bin:$PATH
 ENV PYTHONPATH=/opt/miniconda/lib/python${PYTHON_VERSION}/site-packages:$PYTHONPATH
+ENV CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes"
 
 WORKDIR /opt
 
