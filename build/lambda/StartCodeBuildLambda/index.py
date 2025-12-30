@@ -5,6 +5,7 @@ import logging
 import cfnresponse
 import boto3
 import os
+import time
 from io import BytesIO
 import zipfile
 
@@ -59,7 +60,7 @@ def start_artifact_build(
     codebuild_client = boto3.client("codebuild")
     source_zip = download_obj_from_s3(source_s3)
     artifacts = get_zipfile_subfolders(source_zip, source_subfolder)
-    for artifact in artifacts:
+    for i, artifact in enumerate(artifacts):
         LOGGER.info(f"Starting CodeBuild run for {artifact}")
         response = codebuild_client.start_build(
             projectName=project_name,
@@ -77,6 +78,9 @@ def start_artifact_build(
             ],
         )
         LOGGER.info(response)
+        # Add delay between API calls to avoid throttling, except after the last one
+        if i < len(artifacts) - 1:
+            time.sleep(2)
     return len(artifacts)
 
 
