@@ -14,9 +14,32 @@ phases:
       - sed -i='' "s/{{\s*\([A-Za-z0-9_-]*:[A-Za-z0-9_-]*\)\s*}}/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com\/\1/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
       - echo Updating S3 BucketName in workflow configs
       - sed -i='' "s/{{S3_BUCKET_NAME}}/$S3_BUCKET_NAME/g" $BUILD_CONTEXT/*.config 2>/dev/null || true
-      - echo Creating workflow $NAME
+      - echo Preparing workflow package
       - zip -r workflow.zip assets/workflows
-      - aws omics create-workflow --cli-input-yaml file://$BUILD_CONTEXT/config.yaml --definition-zip fileb://workflow.zip --main $BUILD_CONTEXT/main.nf --tags StackPrefix=$STACK_PREFIX
+      - echo Extracting workflow name from config.yaml
+      - WORKFLOW_NAME=$(grep -E '^name:' $BUILD_CONTEXT/config.yaml | sed 's/name:[[:space:]]*//' | tr -d '"' | tr -d "'")
+      - echo "Workflow name from config - $WORKFLOW_NAME"
+      - echo Checking if workflow already exists
+      - EXISTING_WORKFLOW_ID=$(aws omics list-workflows --max-results 100 --query "items[?name=='$WORKFLOW_NAME'].[creationTime,id]" --output text | sort -r | head -1 | awk '{print $2}')
+      - |
+        if [ -n "$EXISTING_WORKFLOW_ID" ]; then
+          echo "Workflow $WORKFLOW_NAME already exists with ID $EXISTING_WORKFLOW_ID"
+          echo "Creating new workflow version"
+          VERSION_NAME=$(date +%s)
+          echo "Version name: $VERSION_NAME"
+          aws omics create-workflow-version \
+            --workflow-id $EXISTING_WORKFLOW_ID \
+            --version-name $VERSION_NAME \
+            --definition-zip fileb://workflow.zip \
+            --main $BUILD_CONTEXT/main.nf
+        else
+          echo "Creating new workflow $WORKFLOW_NAME"
+          aws omics create-workflow \
+            --cli-input-yaml file://$BUILD_CONTEXT/config.yaml \
+            --definition-zip fileb://workflow.zip \
+            --main $BUILD_CONTEXT/main.nf \
+            --tags StackPrefix=$STACK_PREFIX
+        fi
   post_build:
     commands:
       - echo Build completed on `date`

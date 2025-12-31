@@ -214,6 +214,10 @@ Resources:
                   - omics:DeleteWorkflow
                   - omics:GetWorkflow
                   - omics:ListWorkflows
+                  - omics:CreateWorkflowVersion
+                  - omics:DeleteWorkflowVersion
+                  - omics:GetWorkflowVersion
+                  - omics:ListWorkflowVersions
                 Resource:
                   - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"
       Tags:
