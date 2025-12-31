@@ -42,7 +42,7 @@ process ESMFoldTask {
     script:
     """
     set -euxo pipefail
-    /opt/conda/bin/python /home/scripts/esmfold_inference.py $fasta_path \
+    /usr/local/bin/python /home/scripts/esmfold_inference.py $fasta_path \
         --output_dir "output" \
         --pretrained_model_name_or_path $esmfold_model_parameters
     cat output/*/*.json >> esmfold_metrics_${task.index}.jsonl
