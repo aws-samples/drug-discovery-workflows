@@ -9,7 +9,7 @@ parameterTemplate:
   max_records_per_partition:
     description: "Number of partitions to shard the input fasta file into"
     optional: true
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "ESMFold"
 accelerators: GPU
