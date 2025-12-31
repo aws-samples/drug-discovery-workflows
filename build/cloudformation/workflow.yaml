@@ -298,15 +298,15 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowLambda"
-      ReservedConcurrentExecutions: 10
+      ReservedConcurrentExecutions: 1
       Code: "../lambda/StartCodeBuildLambda"
       Description: Start CodeBuildWorkflowProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.11
-      Timeout: 300
+      Runtime: python3.14
+      Timeout: 180
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
