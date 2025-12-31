@@ -29,6 +29,33 @@ def list_workflows_with_tags(tags, omics_client=boto3.client("omics")):
     return output
 
 
+def delete_workflow_versions(workflow_id, omics_client):
+    """Delete all versions of a workflow before deleting the workflow itself."""
+    try:
+        LOGGER.info(f"Checking for versions of workflow: {workflow_id}")
+        paginator = omics_client.get_paginator("list_workflow_versions")
+        version_count = 0
+        
+        for page in paginator.paginate(workflowId=workflow_id):
+            for version in page.get("items", []):
+                version_name = version["versionName"]
+                LOGGER.info(f"Deleting workflow version: {workflow_id}/{version_name}")
+                omics_client.delete_workflow_version(
+                    workflowId=workflow_id,
+                    versionName=version_name
+                )
+                version_count += 1
+        
+        if version_count > 0:
+            LOGGER.info(f"Deleted {version_count} version(s) for workflow {workflow_id}")
+        else:
+            LOGGER.info(f"No versions found for workflow {workflow_id}")
+            
+    except Exception as e:
+        LOGGER.warning(f"Error deleting versions for workflow {workflow_id}: {e}")
+        # Continue anyway - the workflow might not have versions
+
+
 def lambda_handler(event, context):
     try:
         LOGGER.info("REQUEST RECEIVED:\n %s", event)
@@ -59,9 +86,13 @@ def lambda_handler(event, context):
             )
 
             for workflow in workflow_list:
+                # First delete all versions of the workflow
+                delete_workflow_versions(workflow, omics)
+                
+                # Then delete the workflow itself
                 LOGGER.info(f"Deleting workflow: {workflow}")
                 response = omics.delete_workflow(id=workflow)
-                LOGGER.info(f"Repo deletion response:\n{response}")
+                LOGGER.info(f"Workflow deletion response:\n{response}")
             cfnresponse.send(
                 event,
                 context,
