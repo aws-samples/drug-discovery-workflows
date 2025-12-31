@@ -30,7 +30,7 @@ process ESMFoldTask {
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
-    each fasta_path
+    path fasta_path
     path esmfold_model_parameters
 
     output:
