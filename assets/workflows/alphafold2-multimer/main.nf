@@ -182,9 +182,12 @@ process CheckAndValidateInputsTask {
 
     ls -alR
 
+    # Copy input to avoid symlink conflicts with output on NFS/dynamic storage
+    cp $fasta_path input_temp.fasta
+
     /opt/venv38-putils/bin/python \
     /opt/venv38-putils/lib/python3.8/site-packages/putils/check_and_validate_inputs.py \
-    --target_id=$fasta_basename --fasta_path=$fasta_path --output_prefix=$fasta_basename
+    --target_id=$fasta_basename --fasta_path=input_temp.fasta --output_prefix=$fasta_basename
 
     ls -alR
 
