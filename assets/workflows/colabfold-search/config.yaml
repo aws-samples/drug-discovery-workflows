@@ -48,7 +48,7 @@ parameterTemplate:
   gpu_server:
     description: "Whether to use GPU server (1) or not (0). Only needed for processing a large number of inputs."
     optional: true            
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "Colabfold-Search"
 accelerators: GPU

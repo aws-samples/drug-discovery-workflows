@@ -12,7 +12,7 @@ parameterTemplate:
   model_type:
     description: "Type of model architecture, can be 'ESM' or 'AMPLIFY'"
     optional: true
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "AMPLIFYPPL"
 accelerators: GPU

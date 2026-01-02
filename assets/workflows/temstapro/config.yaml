@@ -12,7 +12,7 @@ parameterTemplate:
   portion_size:
     description: "Maximum size of input sequence divisions. Set to 0 for no division. Defaults to 1000."
     optional: true      
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "TemStaPro"
 accelerators: GPU

@@ -6,6 +6,6 @@ parameterTemplate:
   fasta_path: 
     description: "Input file in multi-FASTA format."
     optional: false
-storageCapacity: 4800
+storageType: "DYNAMIC"
 tags:
   Name: "AlphaFold2Multimer"

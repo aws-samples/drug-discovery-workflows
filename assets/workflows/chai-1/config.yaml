@@ -39,8 +39,7 @@ parameterTemplate:
   seed:
     description: "Seed value. Defaults to none."
     optional: true
-
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "Chai1"
 accelerators: GPU

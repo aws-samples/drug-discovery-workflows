@@ -9,7 +9,7 @@ parameterTemplate:
   boltz_parameters:
     description: "Path to folder containing Boltz model parameters."
     optional: true    
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "Boltz"
 accelerators: GPU

@@ -12,7 +12,7 @@ parameterTemplate:
   model_parameters:
     description: "S3 URI for the model parameter file."
     optional: true
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "PLM Embeddings"
 accelerators: GPU
