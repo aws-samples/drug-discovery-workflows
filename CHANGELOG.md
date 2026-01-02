@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.22.0] - 2026-01-02
+
+### 2.22.0 Added
+
+- Added support for workflow versions
+- Added example inputs to workflows
+
+### 2.22.0 Changed
+
+- Reorganized workflow directory structure
+- Updated default storage type to dynamic
+- Updated ESMFold dependencies and workflow
+- Updated Sapiens version for BioPhi
+- Tuned deployment Lambda timeouts and configurations
+- Updated Boltz requirements
+- Updated to Ubuntu 22 base image for containers
+- Aligned deepstabp Dockerfile with batchfold
+
+### 2.22.0 Fixed
+
+- Fixed TemStaPro workflow issues
+- Fixed AMPLIFY Pseudo Perplexity workflow
+- Fixed pLM Embeddings workflow
+- Reset AlphaFold UniRef30 database configuration
+- Removed failing AlphaFold2-Multimer NIM data
+- Updated conda channel configurations for deepstabp build
+- Removed conda default channel to avoid conflicts
+- Updated rosettacommons conda channel timeout
+- Added delay to custom Lambda resource to avoid API throttling
+
+---
+
 ## [2.21.0] - 2025-06-16
 
 ### 2.20.0 Changed
