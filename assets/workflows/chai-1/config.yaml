@@ -5,7 +5,7 @@ main: main.nf
 parameterTemplate:
   fasta_file:
     description: "Path to .fasta containing input sequences"
-    optional: false
+    optional: true
   msa_directory:
     description: "Optional path to folder containing .a3m files of MSA hits"
     optional: true

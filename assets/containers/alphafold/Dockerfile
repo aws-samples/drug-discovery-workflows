@@ -175,7 +175,7 @@ RUN patch -p0 < /app/alphafold${ALPHAFOLD2_VERSION}/docker/openmm.patch
 WORKDIR /app/alphafold${ALPHAFOLD2_VERSION}
 COPY predict.py /app/alphafold${ALPHAFOLD2_VERSION}/
 
-COPY examples /app/alphafold${ALPHAFOLD2_VERSION}/examples
+COPY examples /home/examples
 
 ENTRYPOINT ["bash"]
 

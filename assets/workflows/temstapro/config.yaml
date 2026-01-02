@@ -5,7 +5,7 @@ main: main.nf
 parameterTemplate:
   fasta_path:
     description: "Input file in FASTA format."
-    optional: false
+    optional: true
   window_size_predictions:
     description: "set the window size for average smoothing of per residue predictions for plotting. Defaults to 81."
     optional: true    

@@ -5,7 +5,7 @@ main: main.nf
 parameterTemplate:
   query:
     description: "Path to S3 object or folder containing query sequences."
-    optional: false
+    optional: true
   uniref30_db_path:
     description: "Path to S3 folder containing indexed uniref (e.g. uniref30_2302_db) data."
     optional: true

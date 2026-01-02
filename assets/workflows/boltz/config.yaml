@@ -5,7 +5,7 @@ main: main.nf
 parameterTemplate:
   input_path:
     description: "Path to fasta or yaml input file."
-    optional: false
+    optional: true
   boltz_parameters:
     description: "Path to folder containing Boltz model parameters."
     optional: true    

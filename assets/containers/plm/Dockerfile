@@ -26,6 +26,6 @@ WORKDIR /home/scripts
 
 ENV TMPDIR="/tmp"
 
-COPY examples /home/scripts/examples
+COPY examples /home/examples
 
 ENTRYPOINT []
