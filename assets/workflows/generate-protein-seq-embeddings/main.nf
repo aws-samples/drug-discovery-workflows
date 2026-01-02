@@ -5,19 +5,12 @@ nextflow.enable.dsl = 2
 workflow GenerateEmbeddings {
     Channel
         .fromPath(params.fasta_path)
-        .splitFasta(
-            by: params.max_records_per_partition,
-            file: true
-            )
         .set { fasta_ch }
 
-    fasta_ch.view(part -> "Created FASTA partition $part ")
     GenerateEmbeddingsTask(fasta_ch, file(params.model_parameters))
 
-    GenerateEmbeddingsTask.out.embeddings.collect().set { embeddings_ch }
-
     emit:
-    embeddings = embeddings_ch
+    embeddings = GenerateEmbeddingsTask.out.embeddings
 }
 
 process GenerateEmbeddingsTask {
