@@ -30,4 +30,6 @@ RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
 ENV TMPDIR="/tmp"
 ENV PYTHONPATH="/home/TemStaPro:${PYTHONPATH}"
 
+COPY examples /home/TemStaPro/examples
+
 ENTRYPOINT []

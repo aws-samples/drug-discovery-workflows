@@ -64,4 +64,6 @@ RUN touch /opt/scripts/NO_MSA /opt/scripts/NO_TEMPLATE /opt/scripts/NO_PDB /opt/
 # https://pytorch.org/docs/stable/notes/cuda.html#environment-variables
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
+COPY examples /opt/scripts/examples
+
 ENTRYPOINT []

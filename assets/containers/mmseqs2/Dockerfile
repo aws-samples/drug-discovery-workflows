@@ -14,4 +14,6 @@ RUN curl -O https://mmseqs.com/latest/mmseqs-linux-gpu.tar.gz \
 
 COPY setup_msa_databases.sh msa.sh pair.sh clean_fasta.sh /home/
 
+COPY examples /home/examples
+
 ENTRYPOINT []

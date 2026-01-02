@@ -22,4 +22,6 @@ RUN dnf install -y tar gzip gcc ${PYTHON}-devel \
     && /root/.local/bin/uv venv $VIRTUAL_ENV \
     && /root/.local/bin/uv pip install --no-cache-dir -r requirements.txt
 
+COPY examples /home/examples
+
 ENTRYPOINT []
