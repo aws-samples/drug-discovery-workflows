@@ -39,10 +39,9 @@ process GenerateEmbeddingsTask {
     """
     set -euxo pipefail
     mkdir model output
-    tar -xvf $model_parameters -C model
-    /opt/conda/bin/python /home/scripts/generate_protein_seq_embeddings.py $fasta_file \
+    /usr/local/bin/python /home/scripts/generate_protein_seq_embeddings.py $fasta_file \
         --output_file=output/embeddings.npy \
-        --pretrained_model_name_or_path model
+        --pretrained_model_name_or_path $model_parameters
     """
 }
 
