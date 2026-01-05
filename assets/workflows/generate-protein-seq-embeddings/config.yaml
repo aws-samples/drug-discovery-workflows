@@ -5,14 +5,14 @@ main: main.nf
 parameterTemplate:
   fasta_path:
     description: "Input file in FASTA format. Only single-chain inputs are supported at this time."
-    optional: false
+    optional: true
   max_records_per_partition:
     description: "Number of partitions to shard the input fasta file into"
     optional: true
   model_parameters:
     description: "S3 URI for the model parameter file."
     optional: true
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "PLM Embeddings"
 accelerators: GPU

@@ -130,9 +130,14 @@ RUN sh cuda_11.6.0_510.39.01_linux.run --silent --toolkit
 
 # Install Miniconda package manager.
 RUN wget -q -P /tmp \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \ 
-  && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
-  && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+    https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \ 
+  && bash /tmp/Miniforge3-Linux-x86_64.sh -b -p /opt/conda \
+  && rm /tmp/Miniforge3-Linux-x86_64.sh
+
+# Set environment to auto-accept TOS and use conda-forge
+ENV PATH="/opt/conda/bin:$PATH"
+ENV LD_LIBRARY_PATH="/opt/conda/lib:$LD_LIBRARY_PATH"
+ENV CONDA_PLUGINS_AUTO_ACCEPT_TOS="yes"
 
 RUN /opt/conda/bin/conda install -y -c conda-forge \
   openmm=7.5.1 \
@@ -169,6 +174,8 @@ RUN patch -p0 < /app/alphafold${ALPHAFOLD2_VERSION}/docker/openmm.patch
 
 WORKDIR /app/alphafold${ALPHAFOLD2_VERSION}
 COPY predict.py /app/alphafold${ALPHAFOLD2_VERSION}/
+
+COPY examples /home/examples
 
 ENTRYPOINT ["bash"]
 

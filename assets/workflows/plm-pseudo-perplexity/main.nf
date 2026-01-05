@@ -35,7 +35,7 @@ process PPLTask {
     script:
     """
     set -euxo pipefail
-    /opt/conda/bin/python /home/scripts/calculate_ppl.py $fasta_path \
+    /usr/local/bin/python /home/scripts/calculate_ppl.py $fasta_path \
         --output_dir "." \
         --pretrained_model_name_or_path $model_parameters \
         --model_type $model_type

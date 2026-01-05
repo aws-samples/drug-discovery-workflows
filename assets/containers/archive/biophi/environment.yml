@@ -14,7 +14,7 @@ dependencies:
     - tqdm
     - xlsxwriter
     - humanize
-    - sapiens >= 1.0.4
+    - sapiens == 1.0.4
   - abnumber == 0.3.2
   - anarci == 2020.04.23
   - hmmer >= 3.1

@@ -44,7 +44,7 @@ process TemStaProTask {
     """
     set -euxo pipefail
     mkdir output
-    /opt/conda/bin/python /home/TemStaPro/temstapro \
+    /usr/local/bin/python /home/TemStaPro/temstapro \
         --input-fasta $fasta_path \
         --PT-directory $prot_t5_params \
         --temstapro-directory '/home/TemStaPro' \

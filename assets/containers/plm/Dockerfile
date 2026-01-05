@@ -3,7 +3,7 @@
 
 ARG AWS_DEFAULT_REGION=us-east-1
 
-FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.4.0-gpu-py311-cu124-ubuntu22.04-ec2
+FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.6.0-gpu-py312-cu124-ubuntu22.04-ec2
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -25,5 +25,7 @@ COPY scripts/ /home/scripts/
 WORKDIR /home/scripts
 
 ENV TMPDIR="/tmp"
+
+COPY examples /home/examples
 
 ENTRYPOINT []

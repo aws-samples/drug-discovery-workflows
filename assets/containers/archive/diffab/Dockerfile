@@ -39,14 +39,16 @@ WORKDIR /opt/diffab
 
 RUN git checkout ${DIFFAB_VERSION}
 
-RUN conda config --add channels https://conda.rosettacommons.org && \
+RUN conda config --set remote_read_timeout_secs 120 && \
+    conda config --add channels https://conda.rosettacommons.org && \
     conda config --add channels conda-forge && \
     conda env create -f env.yaml -n diffab
 
 # Set default environment
 ENV PATH=/opt/miniconda/envs/diffab/bin:$PATH
 
-RUN conda install -y pyrosetta=${PYROSETTA_VERSION}
+RUN conda config --set remote_read_timeout_secs 120 && \
+    conda install -y pyrosetta=${PYROSETTA_VERSION}
 
 RUN pip install -U ray==${RAY_VERSION}
 

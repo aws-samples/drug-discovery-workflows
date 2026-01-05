@@ -5,14 +5,14 @@ main: main.nf
 parameterTemplate:
   fasta_path:
     description: "Input file in FASTA format."
-    optional: false
+    optional: true
   window_size_predictions:
     description: "set the window size for average smoothing of per residue predictions for plotting. Defaults to 81."
     optional: true    
   portion_size:
     description: "Maximum size of input sequence divisions. Set to 0 for no division. Defaults to 1000."
     optional: true      
-storageCapacity: 1200
+storageType: "DYNAMIC"
 tags:
   Name: "TemStaPro"
 accelerators: GPU

@@ -214,6 +214,10 @@ Resources:
                   - omics:DeleteWorkflow
                   - omics:GetWorkflow
                   - omics:ListWorkflows
+                  - omics:CreateWorkflowVersion
+                  - omics:DeleteWorkflowVersion
+                  - omics:GetWorkflowVersion
+                  - omics:ListWorkflowVersions
                 Resource:
                   - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"
       Tags:
@@ -290,7 +294,7 @@ Resources:
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/"                  
+                  - !Sub "arn:${AWS::Partition}:s3:::${S3BucketName}/"
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
@@ -298,15 +302,15 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub "${StackPrefix}-StartCodeBuildWorkflowLambda"
-      ReservedConcurrentExecutions: 10
+      ReservedConcurrentExecutions: 1
       Code: "../lambda/StartCodeBuildLambda"
       Description: Start CodeBuildWorkflowProject
       Handler: index.lambda_handler
       MemorySize: 512
       Role:
         Fn::GetAtt: CodeBuildWorkflowLambdaExecutionRole.Arn
-      Runtime: python3.11
-      Timeout: 30
+      Runtime: python3.14
+      Timeout: 180
       Tags:
         - Key: Application
           Value: !Ref ApplicationName
@@ -348,6 +352,9 @@ Resources:
                   - omics:DeleteWorkflow
                   - omics:GetWorkflow
                   - omics:ListWorkflows
+                  - omics:DeleteWorkflowVersion
+                  - omics:GetWorkflowVersion
+                  - omics:ListWorkflowVersions
                   - omics:ListTagsForResource
                 Resource:
                   - !Sub "arn:${AWS::Partition}:omics:${AWS::Region}:${AWS::AccountId}:workflow/*"

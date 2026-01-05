@@ -3,7 +3,8 @@
 
 ARG AWS_DEFAULT_REGION=us-east-1
 
-FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.2.0-gpu-py310-cu118-ubuntu20.04-ec2
+FROM 763104351884.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/pytorch-inference:2.6.0-gpu-py312-cu124-ubuntu22.04-ec2
+
 ARG COMMIT=db001d2b2479131bad2d0ee170b75001e9fad076
 
 RUN apt-get update \
@@ -28,5 +29,7 @@ RUN pip install --no-cache-dir -U -r /tmp/requirements.txt \
 
 ENV TMPDIR="/tmp"
 ENV PYTHONPATH="/home/TemStaPro:${PYTHONPATH}"
+
+COPY examples /home/examples
 
 ENTRYPOINT []
