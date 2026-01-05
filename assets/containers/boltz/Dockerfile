@@ -24,5 +24,6 @@ RUN dnf install -y tar gzip gcc ${PYTHON}-devel \
 
 COPY examples /home/examples
 COPY extract_proteins.py /opt/extract_proteins.py
+COPY update_yaml_with_msa.py /opt/update_yaml_with_msa.py
 
 ENTRYPOINT []

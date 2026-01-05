@@ -62,6 +62,40 @@ process ExtractProteins {
     """
 }
 
+process UpdateYamlWithMsa {
+    label 'boltz'
+    cpus 2
+    memory '4 GB'
+    errorStrategy 'retry'
+    maxRetries 2
+    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+
+    input:
+    path input_yaml
+    path protein_map
+    path msa_dir
+
+    output:
+    path "updated_input.yaml", emit: updated_yaml
+
+    script:
+    """
+    set -euxo pipefail
+
+    # Run the YAML update script
+    python3 /opt/update_yaml_with_msa.py \\
+        ${input_yaml} \\
+        ${protein_map} \\
+        ${msa_dir} \\
+        --output updated_input.yaml
+
+    # Display results for debugging
+    echo "YAML update complete"
+    echo "Updated YAML content:"
+    cat updated_input.yaml
+    """
+}
+
 workflow {
     BoltzMsa(
         params.input_path,
