@@ -106,12 +106,14 @@ process ExtractProteins {
     errorStrategy 'retry'
     maxRetries 2
     time '30m'
-    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+    publishDir "/mnt/workflow/pubdir/input", mode: 'copy', pattern: "*.yaml"
+    publishDir "/mnt/workflow/pubdir/intermediate", mode: 'copy', pattern: "*.{fasta,json,txt}"
 
     input:
     path input_yaml
 
     output:
+    path input_yaml, emit: original_yaml
     path "proteins.fasta", emit: fasta
     path "protein_map.json", emit: protein_map
     path "has_proteins.txt", emit: has_proteins
@@ -145,7 +147,7 @@ process UpdateYamlWithMsa {
     errorStrategy 'retry'
     maxRetries 2
     time '30m'
-    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+    publishDir "/mnt/workflow/pubdir/updated_yaml", mode: 'copy'
 
     input:
     path input_yaml
@@ -181,7 +183,8 @@ process ColabfoldSearchTask {
     maxRetries 2
     time '6h'
     accelerator 1, type: 'nvidia-l40s'
-    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+    publishDir "/mnt/workflow/pubdir/msa", mode: 'copy', pattern: "*.a3m"
+    publishDir "/mnt/workflow/pubdir/templates", mode: 'copy', pattern: "*.m8"
 
     input:
     path query
@@ -230,14 +233,14 @@ process Boltz2Task {
     maxRetries 2
     time '4h'
     accelerator 1, type: 'nvidia-tesla-a10g'
-    publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
+    publishDir "/mnt/workflow/pubdir/boltz_predictions", mode: 'copy', saveAs: { filename -> filename.replaceFirst(/^output\//, '') }
 
     input:
     path input_path
     path boltz_parameters
 
     output:
-    path "output/*", emit: output
+    path "output/**", emit: output
 
     script:
     """
