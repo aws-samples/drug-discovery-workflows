@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 2.22.0 Changed
 
-- Reorganized workflow directory structure
+- Reorganized workflow directory structure and archived unsupported workflow examples
 - Updated default storage type to dynamic
 - Updated ESMFold dependencies and workflow
 - Updated Sapiens version for BioPhi
