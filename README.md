@@ -20,7 +20,7 @@ A collection of AWS HealthOmics workflow examples to accelerate drug discovery.
 
 ### Archived Workflows
 
-The following workflows are provided for reference but are no longer maintained.
+The following workflows are provided in `assets/workflows/archive` for reference but are no longer maintained.
 
 - [ABodyBuilder3](https://github.com/Exscientia/abodybuilder3): From Exscientia. Predict the 3D structure of antibody heavy and light chains.
 - [Aggrescan3D](https://academic.oup.com/nar/article/47/W1/W300/5485072): From University of Warsaw and Biologia Molecular Universitat Autònoma de Barcelona. Predict protein stability.

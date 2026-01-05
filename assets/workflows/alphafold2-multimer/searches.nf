@@ -208,8 +208,11 @@ process CombineSearchResults {
     echo $template_hits
     echo "<<<<<<<<<<<<<<<<<<<"
 
-    # Copy input FASTA to work directory so it's available as output
-    cp $fasta_path ${fasta_basename}.fasta
+    # Ensure FASTA file is available with the expected name
+    # Only copy if source and destination are different
+    if [ "$fasta_path" != "${fasta_basename}.fasta" ]; then
+        cp $fasta_path ${fasta_basename}.fasta
+    fi
 
     mkdir -p msa
     /opt/venv39-afdata/bin/python /opt/update_locations.py msa _uniref90_hits.sto $uniref90_msas
