@@ -105,6 +105,7 @@ process ExtractProteins {
     memory '4 GB'
     errorStrategy 'retry'
     maxRetries 2
+    time '30m'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
@@ -143,6 +144,7 @@ process UpdateYamlWithMsa {
     memory '4 GB'
     errorStrategy 'retry'
     maxRetries 2
+    time '30m'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
 
     input:
