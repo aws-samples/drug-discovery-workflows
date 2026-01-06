@@ -51,25 +51,25 @@ workflow BoltzMsa {
         is_complex
     )
 
-    // Collect MSA files into a directory structure
-    msa_dir = ColabfoldSearchTask.out.msa.collect().ifEmpty([])
+    // Collect MSA files into a list and wrap in a tuple to prevent unpacking
+    msa_dir = ColabfoldSearchTask.out.msa.collect().ifEmpty([]).map { files -> tuple(files) }
 
     // Combine inputs for UpdateYamlWithMsa
     yaml_update_inputs = input_channel
         .combine(ExtractProteins.out.protein_map)
-        .combine(msa_dir)
         .combine(has_proteins_channel)
+        .combine(msa_dir)
 
     // Only update YAML if proteins exist
     yaml_to_update = yaml_update_inputs
-        .filter { yaml, protein_map, msa, has_proteins -> has_proteins }
-        .map { yaml, protein_map, msa, has_proteins -> tuple(yaml, protein_map, msa) }
+        .filter { yaml, protein_map, has_proteins, msa_list -> has_proteins }
+        .map { yaml, protein_map, has_proteins, msa_list -> tuple(yaml, protein_map, msa_list) }
 
     // Update YAML with MSA paths (only if proteins exist)
     UpdateYamlWithMsa(
-        yaml_to_update.map { it[0] },
-        yaml_to_update.map { it[1] },
-        yaml_to_update.map { it[2] }
+        yaml_to_update.map { yaml, protein_map, msa_list -> yaml },
+        yaml_to_update.map { yaml, protein_map, msa_list -> protein_map },
+        yaml_to_update.map { yaml, protein_map, msa_list -> msa_list[0] }  // Unwrap the tuple
     )
 
     // Prepare Boltz parameters channel
@@ -80,8 +80,8 @@ workflow BoltzMsa {
     yaml_for_boltz = UpdateYamlWithMsa.out.updated_yaml
         .mix(
             yaml_update_inputs
-                .filter { yaml, protein_map, msa, has_proteins -> !has_proteins }
-                .map { yaml, protein_map, msa, has_proteins -> yaml }
+                .filter { yaml, protein_map, has_proteins, msa_list -> !has_proteins }
+                .map { yaml, protein_map, has_proteins, msa_list -> yaml }
         )
 
     // Run Boltz prediction
@@ -152,7 +152,7 @@ process UpdateYamlWithMsa {
     input:
     path input_yaml
     path protein_map
-    path msa_dir
+    path msa_files
 
     output:
     path "updated_input.yaml", emit: updated_yaml
@@ -161,11 +161,17 @@ process UpdateYamlWithMsa {
     """
     set -euxo pipefail
 
+    # Create MSA directory if files exist
+    mkdir -p msa_dir
+    if [ -n "\$(ls -A ${msa_files} 2>/dev/null)" ]; then
+        cp ${msa_files} msa_dir/ 2>/dev/null || true
+    fi
+
     # Run the YAML update script
     python3 /opt/update_yaml_with_msa.py \\
         ${input_yaml} \\
         ${protein_map} \\
-        ${msa_dir} \\
+        msa_dir \\
         --output updated_input.yaml
 
     # Display results for debugging
