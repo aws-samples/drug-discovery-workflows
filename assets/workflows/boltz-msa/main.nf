@@ -183,8 +183,8 @@ process UpdateYamlWithMsa {
 
 process ColabfoldSearchTask {
     label 'mmseqs2'
-    cpus 64
-    memory '486 GB'
+    cpus 16
+    memory '128 GB'
     errorStrategy 'retry'
     maxRetries 2
     time '6h'
@@ -238,7 +238,7 @@ process Boltz2Task {
     errorStrategy 'retry'
     maxRetries 2
     time '4h'
-    accelerator 1, type: 'nvidia-tesla-a10g'
+    accelerator 1, type: 'nvidia-l4-a10g'
     publishDir "/mnt/workflow/pubdir/boltz_predictions", mode: 'copy', saveAs: { filename -> filename.replaceFirst(/^output\//, '') }
 
     input:
