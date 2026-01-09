@@ -352,10 +352,16 @@ def split_msa_files_by_chain(msa_dir: str) -> Dict[str, list]:
             # Filter out empty sections
             sections_bytes = [s for s in sections_bytes if s.strip()]
             
-            if len(sections_bytes) <= 1:
-                # Only one section, no need to split
-                print(f"File {a3m_file.name} contains only one section, no splitting needed")
+            if len(sections_bytes) == 0:
+                # Empty file, skip
+                print(f"File {a3m_file.name} is empty, skipping")
                 continue
+            
+            if len(sections_bytes) == 1:
+                # Single chain file - extract chain ID and process it
+                print(f"File {a3m_file.name} contains only one section, processing as single-chain")
+                # Process this single section
+                sections_bytes = [sections_bytes[0]]
 
             # Process each section
             for section_bytes in sections_bytes:
@@ -441,10 +447,10 @@ Examples:
 
         # Split .a3m files by chains
         chain_to_files = split_msa_files_by_chain(args.msa_dir)
-        
+        print(chain_to_files)
         # Combine split MSA files into chain-specific CSV files
         chain_to_csv = write_msa_csvs(chain_to_files, args.msa_dir)
-
+        print(chain_to_csv)
         # Build hash to MSA CSV mapping
         hash_to_msa = build_hash_to_msa_mapping(protein_map, args.msa_dir, chain_to_csv)
         print(f"Found MSA CSV files for {len(hash_to_msa)} unique sequence(s)")
