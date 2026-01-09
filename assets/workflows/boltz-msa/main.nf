@@ -151,7 +151,8 @@ process UpdateYamlWithMsa {
     errorStrategy 'retry'
     maxRetries 2
     time '30m'
-    publishDir '/mnt/workflow/pubdir/intermediate', mode: 'copy', pattern: '*.{yaml,csv}'
+    publishDir '/mnt/workflow/pubdir/intermediate', mode: 'copy', pattern: '*.yaml'
+    publishDir '/mnt/workflow/pubdir/intermediate', mode: 'copy', pattern: 'msa/*.{csv,a3m}'
 
     input:
     path input_yaml
