@@ -1,0 +1,18 @@
+name: BoltzGen
+description: "All-atom generative model for designing proteins and peptides across all modalities to bind a wide range of biomolecular targets."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_dir:
+    description: "Directory containing configuration and any supporting files"
+    optional: false
+  config_file_name:
+    description: "File name of configuration yaml"
+    optional: true
+  boltzgen_parameters:
+    description: "Path to folder containing BoltzGen model parameters."
+    optional: true
+storageType: "DYNAMIC"
+tags:
+  Name: "BoltzGen"
+accelerators: GPU
