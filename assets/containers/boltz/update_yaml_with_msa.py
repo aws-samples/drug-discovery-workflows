@@ -76,6 +76,15 @@ def build_hash_to_msa_mapping(
     # Build reverse mapping: hash -> first chain_id with that hash
     hash_to_first_chain = {}
     for chain_id, seq_hash in protein_map.items():
+        # Ensure chain_id is a string (should always be from extract_proteins.py)
+        if not isinstance(chain_id, str):
+            print(
+                f"Warning: chain_id is not a string: {chain_id} (type: {type(chain_id)})",
+                file=sys.stderr,
+            )
+            # Convert to string if it's something else
+            chain_id = str(chain_id) if not isinstance(chain_id, list) else str(chain_id[0])
+        
         if seq_hash not in hash_to_first_chain:
             hash_to_first_chain[seq_hash] = chain_id
 
@@ -172,9 +181,9 @@ def update_yaml_with_msa(
             if not chain_id:
                 print("Warning: Empty chain ID list", file=sys.stderr)
                 continue
-            representative_chain = chain_id[0]
+            representative_chain = str(chain_id[0])
         else:
-            representative_chain = chain_id
+            representative_chain = str(chain_id)
 
         # Get sequence hash for this chain
         if representative_chain not in protein_map:
@@ -205,14 +214,30 @@ def update_yaml_with_msa(
 
 def write_yaml(data: dict, output_path: str) -> None:
     """
-    Write updated YAML data to file.
+    Write updated YAML data to file, preserving flow style for short id lists.
 
     Args:
         data: YAML data structure
         output_path: Path to output YAML file
     """
+    # Use a custom Dumper that formats short lists in flow style
+    class SmartFlowStyleDumper(yaml.SafeDumper):
+        pass
+    
+    def represent_list(dumper, data):
+        # Only use flow style for very short lists (likely chain IDs)
+        # Use block style for longer lists (like sequences list)
+        if len(data) <= 6 and all(isinstance(item, str) and len(str(item)) <= 10 for item in data):
+            # Short list of strings (like [A, B] or [C, D]) - use flow style
+            return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=True)
+        else:
+            # Longer lists or lists of dicts - use block style
+            return dumper.represent_sequence('tag:yaml.org,2002:seq', data, flow_style=False)
+    
+    SmartFlowStyleDumper.add_representer(list, represent_list)
+    
     with open(output_path, "w") as f:
-        yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+        yaml.dump(data, f, Dumper=SmartFlowStyleDumper, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
 
 def write_msa_csvs(chain_to_files: Dict[str, list], msa_dir: str) -> Dict[str, str]:
@@ -480,8 +505,15 @@ Examples:
     except (yaml.YAMLError, ValueError, json.JSONDecodeError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
+    except TypeError as e:
+        print(f"Type error: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        return 1
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
         return 1
 
 
