@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.0] - 2026-01-09
+
+### 2.23.0 Added
+
+- Added support for ColabFold Search + Boltz-2 structure prediction
+- Added basic support for BoltzGen
+
+---
+
 ## [2.22.0] - 2026-01-02
 
 ### 2.22.0 Added

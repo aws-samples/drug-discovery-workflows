@@ -23,5 +23,7 @@ RUN dnf install -y tar gzip gcc ${PYTHON}-devel \
     && /root/.local/bin/uv pip install --no-cache-dir -r requirements.txt
 
 COPY examples /home/examples
+COPY extract_proteins.py /opt/extract_proteins.py
+COPY update_yaml_with_msa.py /opt/update_yaml_with_msa.py
 
 ENTRYPOINT []

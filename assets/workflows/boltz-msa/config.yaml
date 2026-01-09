@@ -1,0 +1,27 @@
+name: Boltz-MSA
+description: "Combined workflow that generates MSA files using ColabFold search and runs Boltz-2 structure prediction with the generated MSAs for improved accuracy."
+engine: NEXTFLOW
+main: main.nf
+parameterTemplate:
+  input_path:
+    description: "Path to Boltz YAML input file."
+    optional: false
+  boltz_parameters:
+    description: "Path to folder containing Boltz model parameters."
+    optional: true
+  uniref30_db_path:
+    description: "Path to S3 folder containing indexed uniref30 database."
+    optional: true
+  envdb_db_path:
+    description: "Path to S3 folder containing indexed environment database."
+    optional: true
+  pdb100_db_path:
+    description: "Path to S3 folder containing indexed pdb100 database."
+    optional: true
+  is_complex:
+    description: "Whether to generate paired MSAs for complexes (1) or single chains (0)."
+    optional: true
+storageType: "DYNAMIC"
+tags:
+  Name: "Boltz-MSA"
+accelerators: GPU

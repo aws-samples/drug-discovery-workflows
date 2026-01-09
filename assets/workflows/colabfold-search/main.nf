@@ -66,8 +66,8 @@ workflow ColabfoldSearch {
 
 process ColabfoldSearchTask {
     label 'colabfold_search'
-    cpus 64
-    memory '486 GB'
+    cpus 16
+    memory '128 GB'
     maxRetries 1
     accelerator 1, type: 'nvidia-l40s'
     publishDir "/mnt/workflow/pubdir/${workflow.sessionId}/${task.process.replace(':', '/')}/${task.index}/${task.attempt}"
@@ -84,33 +84,30 @@ process ColabfoldSearchTask {
     script:
     """
     set -euxo pipefail
-    # mkdir output
 
     # Remove any model-specific content in the description
-
     # Produces a new, "clean.fasta" file
-    bash /home/clean_fasta.sh ${query} 
+    bash /home/clean_fasta.sh ${query}
 
-    bash /home/msa.sh \
-      /usr/local/bin/mmseqs \
-      clean.fasta \
-      . \
-      db/uniref30_2302_db \
-      db/pdb100_230517 \
-      db/colabfold_envdb_202108_db \
+    bash /home/msa.sh \\
+      /usr/local/bin/mmseqs \\
+      clean.fasta \\
+      . \\
+      db/uniref30_2302_db \\
+      db/pdb100_230517 \\
+      db/colabfold_envdb_202108_db \\
       1 1 1 0 0 1
 
     if [[ ${is_complex} -eq 1 ]]; then
-      bash /home/pair.sh \
-        /usr/local/bin/mmseqs \
-        clean.fasta \
-        . \
-        db/uniref30_2302_db \
+      bash /home/pair.sh \\
+        /usr/local/bin/mmseqs \\
+        clean.fasta \\
+        . \\
+        db/uniref30_2302_db \\
         "" 0 1 0 1
     fi
 
     rm clean.fasta
-
     """
 }
 

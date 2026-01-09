@@ -11,7 +11,8 @@ A collection of AWS HealthOmics workflow examples to accelerate drug discovery.
 - [Alphafold2-Monomer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-monomer): From Google DeepMind. Predict the 3D structure of one or more single-chain proteins
 - [Alphafold2-Multimer](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/alphafold2-multimer): From Google DeepMind. Predict the 3D structure of multi-chain protein complexes.
 - [AMPLIFY Pseudo Perplexity](https://github.com/chandar-lab/AMPLIFY): From Amgen and Mila. Calculate the pseudoperplexity of an amino acid sequence using a protein language model.
-- [Boltz-2](https://github.com/jwohlwend/boltz): From MIT. Predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules.
+- [Boltz-2](https://github.com/jwohlwend/boltz): From MIT. Predict biomolecular structures containing combinations of proteins, RNA, DNA, and other molecules. Now supports MSA inference, including with paired alignments for protein complexes!
+- [BoltzGen](https://github.com/HannesStark/boltzgen): From MIT. All-atom generative model for designing proteins and peptides across all modalities to bind a wide range of biomolecular targets.
 - [Chai-1](https://github.com/chaidiscovery/chai-lab): From Chai Discovery. Predict the structure of biomolecule complexes including proteins, amino acids, and/or ligands.
 - [Colabfold-Search](https://github.com/sokrypton/ColabFold): Iterative MSA search algorithm using MMseqs2.
 - [ESMfold](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/esmfold): From Meta. Rapidly predict protein structures using embeddings geneted by the ESM2 protein language model.
@@ -83,8 +84,8 @@ aws secretsmanager create-secret \
     --secret-string "{\"API_KEY\":\"MyFakeKey\",\"ORG\":\"myfakeorg\"}"
 ```
 
-3. Add your data uri to a new file in the `assets/data` folder.
-4. Run the deploy.sh script with the `-s` option and pass in your secret name (not the key or value) from step 1. CodeBuild will save these secret values as environment variables in the data download job.
+1. Add your data uri to a new file in the `assets/data` folder.
+2. Run the deploy.sh script with the `-s` option and pass in your secret name (not the key or value) from step 1. CodeBuild will save these secret values as environment variables in the data download job.
 
 ### Infrastructure Diagram
 
