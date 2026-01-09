@@ -53,18 +53,15 @@ workflow BoltzMsa {
 
     // Collect MSA files into a list
     msa_dir = ColabfoldSearchTask.out.msa.collect().ifEmpty([])
-
     // Combine inputs for UpdateYamlWithMsa
     yaml_update_inputs = input_channel
         .combine(ExtractProteins.out.protein_map)
         .combine(has_proteins_channel)
         .combine(msa_dir)
-
     // Only update YAML if proteins exist
     yaml_to_update = yaml_update_inputs
         .filter { it[2] }  // has_proteins is at index 2
         .map { tuple(it[0], it[1], it[3..-1]) }  // yaml, protein_map, msa_list...
-
     // Update YAML with MSA paths (only if proteins exist)
     UpdateYamlWithMsa(
         yaml_to_update.map { it[0] },  // yaml
@@ -218,6 +215,15 @@ process ColabfoldSearchTask {
     # Produces a new, "clean.fasta" file
     bash /home/clean_fasta.sh ${query}
 
+    # Check number of sequences in clean.fasta
+    # Override is_complex to 0 if only a single sequence is present
+    num_sequences=\$(grep -c "^>" clean.fasta || true)
+    effective_is_complex=${is_complex}
+    if [[ \$num_sequences -le 1 ]]; then
+        echo "Only \$num_sequences sequence(s) found. Setting is_complex to 0."
+        effective_is_complex=0
+    fi
+
     bash /home/msa.sh \\
       /usr/local/bin/mmseqs \\
       clean.fasta \\
@@ -227,7 +233,7 @@ process ColabfoldSearchTask {
       db/colabfold_envdb_202108_db \\
       1 1 1 0 0 1
 
-    if [[ ${is_complex} -eq 1 ]]; then
+    if [[ \$effective_is_complex -eq 1 ]]; then
       bash /home/pair.sh \\
         /usr/local/bin/mmseqs \\
         clean.fasta \\
