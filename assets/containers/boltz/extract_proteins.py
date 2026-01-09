@@ -98,28 +98,36 @@ def extract_proteins(yaml_path: str) -> Tuple[Dict[str, str], Dict[str, str]]:
             raise ValueError("Invalid protein entry: Missing 'id' field")
 
         if "sequence" not in protein:
+            chain_ref = protein['id'] if isinstance(protein['id'], str) else protein['id'][0] if isinstance(protein['id'], list) and protein['id'] else "unknown"
             raise ValueError(
-                f"Invalid protein entry for chain {protein['id']}: Missing 'sequence' field"
+                f"Invalid protein entry for chain {chain_ref}: Missing 'sequence' field"
             )
 
         chain_id = protein["id"]
         sequence = protein["sequence"]
+        
+        # Handle chain_id as either string or list
+        if isinstance(chain_id, list):
+            chain_ids = chain_id
+        else:
+            chain_ids = [chain_id]
 
         # Validate sequence
         if not sequence or not isinstance(sequence, str):
             raise ValueError(
-                f"Invalid sequence for chain {chain_id}: Sequence must be a non-empty string"
+                f"Invalid sequence for chain {chain_ids}: Sequence must be a non-empty string"
             )
 
         # Generate hash for this sequence
         seq_hash = hash_sequence(sequence)
 
-        # Store mapping from chain to hash
-        chain_to_hash[chain_id] = seq_hash
+        # Store mapping from each chain to hash
+        for cid in chain_ids:
+            chain_to_hash[cid] = seq_hash
 
-        # Store unique sequences (keep first occurrence)
+        # Store unique sequences (keep first occurrence with first chain ID)
         if seq_hash not in unique_proteins:
-            unique_proteins[seq_hash] = (chain_id, sequence)
+            unique_proteins[seq_hash] = (chain_ids[0], sequence)
 
     return unique_proteins, chain_to_hash
 

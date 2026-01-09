@@ -165,21 +165,31 @@ def update_yaml_with_msa(
             continue
 
         chain_id = protein["id"]
+        
+        # Handle chain_id as either string or list (for homodimers/homomultimers)
+        # For lists like [A, B], use the first chain as the representative
+        if isinstance(chain_id, list):
+            if not chain_id:
+                print("Warning: Empty chain ID list", file=sys.stderr)
+                continue
+            representative_chain = chain_id[0]
+        else:
+            representative_chain = chain_id
 
         # Get sequence hash for this chain
-        if chain_id not in protein_map:
+        if representative_chain not in protein_map:
             print(
-                f"Warning: Chain {chain_id} not found in protein map",
+                f"Warning: Chain {representative_chain} not found in protein map",
                 file=sys.stderr,
             )
             continue
 
-        seq_hash = protein_map[chain_id]
+        seq_hash = protein_map[representative_chain]
 
         # Get MSA path for this sequence hash
         if seq_hash not in hash_to_msa:
             print(
-                f"Warning: No MSA file found for chain {chain_id} (hash {seq_hash})",
+                f"Warning: No MSA file found for chain {representative_chain} (hash {seq_hash})",
                 file=sys.stderr,
             )
             continue
