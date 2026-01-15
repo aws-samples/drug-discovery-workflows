@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.1] - 2026-01-15
+
+### 2.23.1 Fixed
+
+- Fixed issue with missing Boltzgen parameters
+
+---
+
 ## [2.23.0] - 2026-01-09
 
 ### 2.23.0 Added
