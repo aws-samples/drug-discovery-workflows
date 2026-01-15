@@ -9,8 +9,8 @@ parameterTemplate:
   config_file_name:
     description: "File name of configuration yaml"
     optional: true
-  boltzgen_parameters:
-    description: "Path to folder containing BoltzGen model parameters."
+  protocol_name:
+    description: "Protocol name (e.g., protein-anything, protein-protein, etc.)"
     optional: true
 storageType: "DYNAMIC"
 tags:

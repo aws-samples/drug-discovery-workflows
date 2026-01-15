@@ -42,7 +42,8 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir -e /app
 
-ARG DOWNLOAD_WEIGHTS=false
+# ARG DOWNLOAD_WEIGHTS=false
+ARG DOWNLOAD_WEIGHTS=true
 RUN mkdir -p "${HF_HOME}" && \
     if [ "${DOWNLOAD_WEIGHTS}" = "true" ]; then \
         boltzgen download all --cache "${HF_HOME}" --force_download; \

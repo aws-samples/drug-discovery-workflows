@@ -1,2 +1,0 @@
-boltzgen/boltzgen-1
-https://huggingface.co/datasets/boltzgen/inference-data/resolve/main/mols.zip
