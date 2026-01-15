@@ -47,12 +47,24 @@ process BoltzGenTask {
     script:
     """
     set -euxo pipefail
+    
+    # Set HF_HOME to use the staged cache directory
+    export HF_HOME=\${PWD}/boltz_cache
+    export TRANSFORMERS_OFFLINE=1
+    export HF_DATASETS_OFFLINE=1
+    
     mkdir output
     cp -r input_data/* .
     ls -la
+    
+    # Check if cache directory exists and has content
+    echo "Checking cache directory..."
+    ls -la boltz_cache/ || echo "Cache directory is empty or missing"
+    
     /usr/local/bin/boltzgen run ${config_file_name} \\
         --output output \\
-        --protocol ${protocol_name}
+        --protocol ${protocol_name} \\
+        --cache \${HF_HOME}
 
     """
 }
