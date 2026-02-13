@@ -154,12 +154,26 @@ RUN wget -q -P /app/alphafold${ALPHAFOLD2_VERSION}/alphafold/common/ \
     https://git.scicore.unibas.ch/schwede/openstructure/-/raw/7102c63615b64735c4941278d92b554ec94415f8/modules/mol/alg/src/stereo_chemical_props.txt
 
 # Install pip packages.
+# Note: Install jax/jaxlib FIRST with explicit versions to prevent pip from
+# backtracking through incompatible jaxlib versions when resolving requirements.txt
 RUN /opt/conda/bin/pip3 install --upgrade pip --no-cache-dir \
-  && /opt/conda/bin/pip3 install -r /app/alphafold${ALPHAFOLD2_VERSION}/requirements.txt --no-cache-dir \
-  && /opt/conda/bin/pip3 install --upgrade --no-cache-dir \
+  && /opt/conda/bin/pip3 install --no-cache-dir \
     jax==0.3.25 \
     jaxlib==0.3.25+cuda11.cudnn805 \
-    -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+    -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html \
+  && /opt/conda/bin/pip3 install -r /app/alphafold${ALPHAFOLD2_VERSION}/requirements.txt --no-cache-dir --no-deps \
+  && /opt/conda/bin/pip3 install --no-cache-dir \
+    absl-py==1.0.0 \
+    biopython==1.79 \
+    chex==0.0.7 \
+    dm-haiku==0.0.9 \
+    dm-tree==0.1.6 \
+    docker==5.0.0 \
+    immutabledict==2.0.0 \
+    ml-collections==0.1.0 \
+    pandas==1.3.4 \
+    scipy==1.7.0 \
+    tensorflow-cpu==2.11.0
 
 RUN /opt/conda/bin/pip3 install --upgrade --no-cache-dir \
   matplotlib==3.6.3 \
