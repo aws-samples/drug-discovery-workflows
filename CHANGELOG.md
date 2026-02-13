@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.2] - 2026-02-13
+
+### 2.23.2 Fixed
+
+- Fixed dependency conflict in AlphaFold2 container
+
+---
+
 ## [2.23.1] - 2026-01-15
 
 ### 2.23.1 Fixed
