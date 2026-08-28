@@ -34,16 +34,20 @@ RUN git clone --branch v3.3.0 https://github.com/soedinglab/hh-suite.git /tmp/hh
   && popd \
   && rm -rf /tmp/hh-suite
 
-# Compile kalign2 from source
+# Compile kalign from source. The kalign2 tarball previously used here
+# (msa.sbc.su.se) is no longer published. kalign 3.x accepts the same
+# `-i / -o / -format fasta` invocation AlphaFold makes, because it parses
+# arguments with getopt_long_only.
+ARG KALIGN_VERSION=3.4.0
 RUN pushd /tmp && \
-  wget http://msa.sbc.su.se/downloads/kalign/current.tar.gz --no-check-certificate \
-  && mkdir -p /tmp/kalign2/build \
-  && tar -xvzf current.tar.gz -C /tmp/kalign2 \
-  && pushd /tmp/kalign2 \
-  && ./configure \
-  && make && make install \
+  wget -O kalign.tar.gz https://github.com/TimoLassmann/kalign/archive/refs/tags/v${KALIGN_VERSION}.tar.gz \
+  && tar -xvzf kalign.tar.gz -C /tmp \
+  && mkdir -p /tmp/kalign-${KALIGN_VERSION}/build \
+  && pushd /tmp/kalign-${KALIGN_VERSION}/build \
+  && cmake -DBUILD_SHARED_LIBS=OFF .. \
+  && make -j 4 && make install \
   && popd \
-  && rm -rf /tmp/kalign2 && \
+  && rm -rf /tmp/kalign-${KALIGN_VERSION} /tmp/kalign.tar.gz && \
   popd
 
 # ADD hmmer.tar.gz /tmp/hmmer
