@@ -1,2 +1,0 @@
-transformers[torch]>=4.48.0
-pandas

@@ -19,32 +19,6 @@ A collection of AWS HealthOmics workflow examples to accelerate drug discovery.
 - [Generate Protein Sequence Embeddings](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/generate-protein-seq-embeddings):  From Meta. Generate ESM-2 vector embeddings for one or more protein amino acid sequences.
 - [TemStaPro](https://github.com/ievapudz/TemStaPro): From Institute of Biotechnology, Life Sciences Center, Vilnius University. Predict protein thermostability using sequence representations from a protein language model.
 
-### Archived Workflows
-
-The following workflows are provided in `assets/workflows/archive` for reference but are no longer maintained.
-
-- [ABodyBuilder3](https://github.com/Exscientia/abodybuilder3): From Exscientia. Predict the 3D structure of antibody heavy and light chains.
-- [Aggrescan3D](https://academic.oup.com/nar/article/47/W1/W300/5485072): From University of Warsaw and Biologia Molecular Universitat Autònoma de Barcelona. Predict protein stability.
-- [AlphaBind](https://github.com/A-Alpha-Bio/alphabind): From A-Alpha Bio. Predict and optimize antibodu-antigen binding affinity.
-- [AntiFold](https://github.com/oxpig/AntiFold): From Oxford Protein Informatics Group. Antibody inverse folding.
-- [BioNeMo NiM Protein Design](https://docs.nvidia.com/nim/#bionemo) Use BioNeMo NiM containers to design proteins using RFDifusion, ProteinMPNN, and AlphaFold-Multimer.
-- [BioPhi](https://github.com/Merck/BioPhi): From Merck. Automated humanization and humanness evaluation.
-- [DeepSTABp](https://csb-deepstabp.bio.rptu.de/): From RPTU. Predict protein stability.
-
-- [Design Nanobodies](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/design-nanobodies): Generate de novo nanobody candidates against a given target protein structure and epitope using RFDiffusion, ProteinMPNN, ESMFold, AMPLIFY, and NanobodyBuilder2.
-- [DiffAb](https://github.com/luost26/diffab): From Helixon. Antigen-specific protein design.
-- [Efficient Evolution](https://github.com/brianhie/efficient-evolution): From Stanford University. Rapid protein evolution
-- [EvoProtGrad](https://github.com/NREL/EvoProtGrad): From NREL. Directed evolution on a protein sequence with gradient-based discrete Markov chain monte carlo (MCMC).
-- [EquiFold](https://github.com/Genentech/equifold): From Prescient Design, a Genentech accelerator. Predict protein structures with an novel coarse-grained structure representation.
-- [Humatch](https://github.com/oxpig/Humatch):  From Oxford Protein Informatics Group. Humanize antibodies.
-- [MMseqs2](https://github.com/soedinglab/MMseqs2): From Max Planck Institute. Ultra fast and sensitive sequence search and clustering suite.
-- [NanobodyBuilder2](https://github.com/oxpig/ImmuneBuilder): From Oxford Protein Informatics Group. Predict the 3D structure of single-chain nanobodies.
-- [OpenFold2](https://github.com/aqlaboratory/openfold): From Columbia University. Trainable, memory-efficient, and GPU-friendly PyTorch reproduction of AlphaFold 2.
-- [PEP-Patch](https://pubs.acs.org/doi/10.1021/acs.jcim.3c01490): From University of Innsbruck. Predict protein electrostatics.
-- [ProteinMPNN-ddG](https://www.tamarind.bio/tools/proteinmpnn-ddg): From Pepton. Inverse folding model of protein stability.
-- [RFDiffusion-ProteinMPNN](https://github.com/aws-samples/drug-discovery-workflows/tree/main/assets/workflows/rfdiffusion-proteinmpnn): From the Institute for Protein Design at the University of Washington. Generate protein backbone structures and sequences given a binding target or other structural context.
-- [ThermoMPNN](https://github.com/Kuhlman-Lab/ThermoMPNN): From the University of North Carolina School of Medicine. Predict changes in thermodynamic stability for protein point mutants.
-
 ## Deployment
 
 This repository contains Amazon CloudFormation templates and supporting resources to automatically deploy AWS HealthOmics private workflows into your AWS account. You are responsible for all costs associated with the deployed resources.
