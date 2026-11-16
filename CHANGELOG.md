@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.3] - 2026-11-16
+
+### 2.23.3 Changed
+
+- Remove archived content
+- Compile kalign from source. The kalign2 tarball previously used here (msa.sbc.su.se) is no longer published. kalign 3.x accepts the same `-i / -o / -format fasta` invocation AlphaFold makes, because it parses arguments with getopt_long_only.
+
+---
+
 ## [2.23.2] - 2026-02-13
 
 ### 2.23.2 Fixed
