@@ -1,2 +1,2 @@
-transformers==4.57.3
+transformers==5.10.1
 sentencepiece==0.2.1
